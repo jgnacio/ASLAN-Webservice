@@ -1,7 +1,7 @@
 // import { getTokenDev } from "@/adapters/Auth/token(remove-on-prod)";
 
 const getTokenDev = {
-  token: process.env.NEXT_PUBLIC_API_UNICOM_TOKEN,
+  token: process.env.API_UNICOM_TOKEN,
 };
 
 export interface ProductAdapter {
