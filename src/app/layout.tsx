@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
 import {
   ClerkProvider,
   SignInButton,
@@ -9,7 +8,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
-
+import NextTopLoader from "nextjs-toploader";
 import { Providers } from "./Providers/Providers";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -34,9 +33,11 @@ export default function RootLayout({
     >
       <html lang="en" className={`${inter.className}`}>
         <body>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          <NextTopLoader />
+          <header className="flex justify-end p-4">
+            <UserButton showName />
+          </header>
+
           <Providers>{children}</Providers>
         </body>
       </html>

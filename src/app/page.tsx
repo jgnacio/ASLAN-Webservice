@@ -1,22 +1,33 @@
+import { auth } from "@clerk/nextjs/server";
 import { Button } from "@nextui-org/button";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function Home() {
+  const { userId } = auth();
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="w-full h-40">
+    <main className="flex min-h-[80vh] flex-col items-center justify-between p-24">
+      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
         <img
           src="https://i0.wp.com/www.aslanstoreuy.com/wp-content/uploads/2020/07/Logo-ASLAN-b.png"
           alt="Aslan Logo"
           width={200}
         />
-      </div>
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
         <h1>Next.js / Clerk / Chadcn / NextUI </h1>
-        <Link href="/sign-in">
-          <Button>Iniciar Session</Button>
-        </Link>
+        <div className="space-x-4">
+          {userId ? (
+            <Link href="/Dashboard">
+              <Button color="primary">Dashboard</Button>
+            </Link>
+          ) : (
+            <Link href="/sign-in">
+              <Button color="secondary">Iniciar Session</Button>
+            </Link>
+          )}
+        </div>
       </div>
+      <div className="w-full h-40"></div>
     </main>
   );
 }
