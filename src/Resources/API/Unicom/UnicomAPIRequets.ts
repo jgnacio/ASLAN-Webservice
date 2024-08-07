@@ -20,7 +20,17 @@ export const defaultUnicomAPIProductRequest: UnicomAPIProductRequest = {
   codigo_grupo: "",
   codigo_marca: "",
   rango_articulos_informe: {
-    desde_articulo_nro: 1,
-    hasta_articulo_nro: 10,
+    hasta_articulo_nro: 200,
+    desde_articulo_nro: 0,
   },
+};
+
+export interface UnicomAPICategoryRequest {
+  codigo_grupo: string;
+  formato: "arbol" | "plano";
+}
+
+export const defaultUnicomAPICategoryRequest: UnicomAPICategoryRequest = {
+  codigo_grupo: "",
+  formato: "arbol",
 };

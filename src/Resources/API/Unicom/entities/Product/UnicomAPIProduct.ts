@@ -1,7 +1,7 @@
 /**
  * TArticulo_completo, Schema for type Model.UserData.TArticulo_completo
  */
-export interface Product {
+export interface UnicomAPIProduct {
   /**
    * artículos que tenemos relacionados. En los datos de relación está el campo que los
    * relaciona (memoria, color, etc)
@@ -142,7 +142,7 @@ export interface DatosMercadoLibre {
   /**
    * ID de la categoría de MELI
    */
-  categoryId: string;
+  categoryid: string;
   descripcion: string;
   nombre: string;
   [property: string]: any;

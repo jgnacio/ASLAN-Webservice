@@ -1,10 +1,14 @@
 "use server";
-import { Product } from "@/domain/product/Product";
-import { getProductsByPage } from "./_actions/get-product-by-page";
+import { Product } from "@/domain/product/entities/Product";
+import {
+  getFeaturedProductsByPage,
+  getOffersProductsByPage,
+  getProductsByPage,
+} from "../_actions/get-product-by-page";
 
 export default async function ProductList() {
-  const productsList = await getProductsByPage({ page: 0 });
-  console.log(productsList);
+  const productsList = await getProductsByPage({ page: 3 });
+  // console.log(productsList);
   return (
     <div>
       <h2>ProductList</h2>
@@ -17,10 +21,8 @@ export default async function ProductList() {
             <h3>Producto:{product.title}</h3>
             <p>Precio:{product.getPrice()}</p>
             <p>Stock:{product.stock}</p>
-            {/* <p>Disponibilidad:{product.disponibilidad}</p> */}
-            {/* <p>En Remate:{product.estaEnRemate || "no"}</p> */}
-            {/* <p>Marca:{product.marca?.marca}</p> */}
-            {/* <p>Arribo:{product.fechaEstimadaLlegada}</p> */}
+            <p>Marca:{product.marca}</p>
+            <p>{product.category.name}</p>
             <p>Codigo:{product.getSku()}</p>
           </div>
         ))}
