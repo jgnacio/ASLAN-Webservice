@@ -1,29 +1,15 @@
 "use server";
-import getProduct from "@/Resources/UNICOM/APIConnection";
-import { Product } from "@/Types/ProductTypes";
+import { UnicomAPIProductAdapter } from "@/Resources/API/Unicom/UnicomAPIAdapters";
+import { Product } from "@/domain/product/Product";
 
-export const getProductsByPage = async ({ page }: { page: number }) => {
-  // TODO Implementar una forma de paginar los productos
-  const request = {
-    rango_articulos_informe: {
-      desde_articulo_nro: page,
-      hasta_articulo_nro: page + 1,
-    },
-  };
-  const products = new ProductsList(await getProduct(request));
-  products.validate();
-  return products.products;
+export const getProductsByPage = async ({
+  page,
+}: {
+  page: number;
+}): Promise<Product[]> => {
+  const unicomAPIAdapter = new UnicomAPIProductAdapter();
+
+  const products = unicomAPIAdapter.getAll();
+  console.log(products);
+  return products;
 };
-
-class ProductsList {
-  products: Product;
-  constructor(products: any) {
-    this.products = products;
-  }
-
-  validate() {
-    if (!this.products) {
-      throw new Error("No products found");
-    }
-  }
-}
