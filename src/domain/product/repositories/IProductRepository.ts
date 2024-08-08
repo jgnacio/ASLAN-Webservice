@@ -1,4 +1,4 @@
-import { Product } from "../entities/Product";
+import { Product, ProductType } from "../entities/Product";
 import { UnicomAPIProductRequest } from "@/Resources/API/Unicom/UnicomAPIRequets";
 
 export interface IProductRepository {

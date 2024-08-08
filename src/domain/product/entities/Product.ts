@@ -1,8 +1,13 @@
+import {
+  ProductClassToObj,
+  ProductObjToClass,
+} from "@/lib/Utils/Functions/ClassToObject";
+import { v4 as uuid } from "uuid";
 /**
  * Representa una entidad de producto en el dominio de la aplicación.
  */
 export class Product {
-  private readonly id: string;
+  public readonly id: string;
   private readonly sku: string;
   public readonly price: number;
   public title: string;
@@ -17,7 +22,6 @@ export class Product {
   public guaranteeDays?: number;
   public estimatedArrivalDate?: Date | null;
   constructor({
-    id,
     sku,
     price,
     title,
@@ -32,7 +36,6 @@ export class Product {
     guaranteeDays,
     estimatedArrivalDate,
   }: {
-    id: string;
     sku: string;
     price: number;
     title: string;
@@ -47,7 +50,7 @@ export class Product {
     guaranteeDays?: number;
     estimatedArrivalDate?: Date | null;
   }) {
-    this.id = id;
+    this.id = uuid();
     this.sku = sku;
     this.price = price;
     this.title = title;
@@ -104,6 +107,10 @@ export class Product {
     this.submitDate = newDate;
   }
 
+  public toPlainObject(): ProductType {
+    return ProductClassToObj(this);
+  }
+
   private validate() {
     if (!this.id) {
       throw new Error("No id found");
@@ -135,6 +142,23 @@ export class Product {
     }
   }
 }
+
+export type ProductType = {
+  id: string;
+  sku: string;
+  price: number;
+  title: string;
+  description: string;
+  images: string[];
+  category: ProductCategory;
+  marca: string;
+  stock: number;
+  submitDate: Date;
+  favorite?: boolean;
+  onSale?: boolean;
+  guaranteeDays?: number;
+  estimatedArrivalDate?: Date | null;
+};
 
 export type ProductCategory = {
   id: string;

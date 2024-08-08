@@ -10,6 +10,8 @@ import {
 } from "@clerk/nextjs";
 import NextTopLoader from "nextjs-toploader";
 import { Providers } from "./Providers/Providers";
+import { RiShoppingCartFill } from "react-icons/ri";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,7 +37,12 @@ export default function RootLayout({
         <body>
           <NextTopLoader />
           <header className="flex justify-end p-4">
-            <UserButton showName />
+            <SignedIn>
+              <Link href="/Cart">
+                <RiShoppingCartFill />
+              </Link>
+              <UserButton showName />
+            </SignedIn>
           </header>
 
           <Providers>{children}</Providers>

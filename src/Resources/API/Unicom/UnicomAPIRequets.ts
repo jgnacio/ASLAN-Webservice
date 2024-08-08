@@ -34,3 +34,23 @@ export const defaultUnicomAPICategoryRequest: UnicomAPICategoryRequest = {
   codigo_grupo: "",
   formato: "arbol",
 };
+
+export const defaultUnicomAPIRelevantCategories = [
+  {
+    name: "computers",
+    code: "08",
+  },
+  {
+    name: "gadgets",
+    code: "00",
+  },
+
+  {
+    name: "monitors",
+    code: "02",
+  },
+  {
+    name: "smartphones",
+    code: "50",
+  },
+];

@@ -1,18 +1,23 @@
 // import { getTokenDev } from "@/adapters/Auth/token(remove-on-prod)";
 
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
-import { Product, ProductCategory } from "@/domain/product/entities/Product";
+import {
+  Product,
+  ProductCategory,
+  ProductType,
+} from "@/domain/product/entities/Product";
 import {
   defaultUnicomAPIProductRequest,
   UnicomAPIProductRequest,
-} from "./UnicomAPIRequets";
-import { v4 as uuidv4 } from "uuid";
-import { UnicomAPIOfferCombo } from "./entities/Product/UnicomAPIOfferCombo";
-import { UnicomAPIProduct } from "./entities/Product/UnicomAPIProduct";
-import { UnicomAPIOfferProduct } from "./entities/Product/UnicomAPIOfferProduct";
-import { UnicomAPIPreAssembledPC } from "./entities/Product/UnicomAPIPreAssembledPC";
-import { IProductCategoryRepository } from "@/domain/product/repositories/IProductCategoryRepository";
-import { UnicomAPICategory } from "./entities/Category/UnicomAPICategory";
+} from "../UnicomAPIRequets";
+import { UnicomAPIOfferCombo } from "../entities/Product/UnicomAPIOfferCombo";
+import { UnicomAPIProduct } from "../entities/Product/UnicomAPIProduct";
+import { UnicomAPIOfferProduct } from "../entities/Product/UnicomAPIOfferProduct";
+import { UnicomAPIPreAssembledPC } from "../entities/Product/UnicomAPIPreAssembledPC";
+import {
+  ProductClassToObj,
+  ProductObjToClass,
+} from "@/lib/Utils/Functions/ClassToObject";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
@@ -66,7 +71,6 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       ) => {
         try {
           return new Product({
-            id: uuidv4(),
             sku: item.codigo,
             price: item.precio,
             title: item.producto,
@@ -211,96 +215,5 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       (key) => formattedData[key] === "" && delete formattedData[key]
     );
     return formattedData;
-  }
-}
-
-export class UnicomAPIProductCategoryAdapter
-  implements IProductCategoryRepository
-{
-  private readonly baseUrl = API_UNICOM_URL;
-  private readonly token = API_UNICOM_TOKEN;
-
-  async fetchCategories({
-    body,
-    route,
-    method = "GET",
-  }: {
-    route: string;
-    body?: UnicomAPIProductRequest;
-    method?: string;
-  }): Promise<UnicomAPICategory[]> {
-    const response: UnicomAPICategory[] = await fetch(this.baseUrl + route, {
-      method,
-      headers: {
-        "content-type": "application/json",
-        authorization: "Bearer " + this.token,
-      },
-      body: JSON.stringify(body),
-    })
-      .then((res) => {
-        console.log("res", res);
-        return res.json();
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-
-    if (!response) {
-      return [];
-    }
-    console.log("Categories", response);
-
-    return response;
-  }
-
-  async getById(id: string): Promise<ProductCategory> {
-    return {} as ProductCategory;
-  }
-
-  async getAll(): Promise<ProductCategory[]> {
-    const defaultCategoryRequest = defaultUnicomAPIProductRequest;
-
-    const categories = await this.fetchCategories({
-      method: "GET",
-      route: "/articulos/grupos_articulos",
-      // body: defaultCategoryRequest,
-    });
-    // console.log("Categories", categories);
-
-    if (!categories) {
-      return [];
-    }
-
-    const mappedCategories = this.UnicomMapCategories(categories);
-    // console.log("Mapped categories", mappedCategories);
-
-    return mappedCategories;
-  }
-
-  private UnicomMapSubCategory(
-    category: UnicomAPICategory
-  ): ProductCategory | null {
-    if (!category.codigo_grupo || !category.descripcion) {
-      return null;
-    }
-    return {
-      id: category.codigo_grupo,
-      name: category.descripcion,
-      subCategories:
-        category.gruposHijos
-          ?.map(this.UnicomMapSubCategory.bind(this))
-          .filter(
-            (subCategory): subCategory is ProductCategory =>
-              subCategory !== null
-          ) || [],
-    };
-  }
-  private UnicomMapCategories(
-    categories: UnicomAPICategory[]
-  ): ProductCategory[] {
-    const mappedCategories: ProductCategory[] = categories
-      .map((category: UnicomAPICategory) => this.UnicomMapSubCategory(category))
-      .filter((category): category is ProductCategory => category !== null);
-    return mappedCategories;
   }
 }

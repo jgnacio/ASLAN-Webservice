@@ -1,5 +1,5 @@
 import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
-import { UnicomAPIProductCategoryAdapter } from "@/Resources/API/Unicom/UnicomAPIAdapters";
+import { UnicomAPIProductCategoryAdapter } from "@/Resources/API/Unicom/adapters/UnicomAPIProductCategoryAdsapter";
 
 export const getAllCategories = async (): Promise<UnicomAPICategory[]> => {
   const unicomAPICategoryAdapter = new UnicomAPIProductCategoryAdapter();

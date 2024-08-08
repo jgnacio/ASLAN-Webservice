@@ -17,6 +17,8 @@ export default async function Dashboard() {
       <h1 className="text-xl font-bold">Dashboard</h1>
       <Suspense fallback={<div>Loading...</div>}>
         <CategoryList />
+      </Suspense>
+      <Suspense fallback={<div>Loading...</div>}>
         <ProductList />
       </Suspense>
     </div>
