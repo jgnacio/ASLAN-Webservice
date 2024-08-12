@@ -54,3 +54,8 @@ export const defaultUnicomAPIRelevantCategories = [
     code: "50",
   },
 ];
+
+export interface UnicomAPICartRequest {
+  codigo_articulo: string;
+  cantidad?: number;
+}

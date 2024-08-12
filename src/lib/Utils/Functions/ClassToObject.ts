@@ -28,7 +28,7 @@ export function ProductClassToObj(product: Product): ProductType {
     category: product.category,
     marca: product.marca,
     stock: product.stock,
-    submitDate: new Date(product.submitDate),
+    submitDate: product.submitDate,
     favorite: product.favorite,
     onSale: product.onSale,
     guaranteeDays: product.guaranteeDays,

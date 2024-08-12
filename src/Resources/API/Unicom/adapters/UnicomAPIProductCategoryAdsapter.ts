@@ -23,7 +23,7 @@ export class UnicomAPIProductCategoryAdapter
     route: string;
     body?: UnicomAPIProductRequest;
     method?: string;
-  }): Promise<UnicomAPICategory[]> {
+  }): Promise<UnicomAPICategory[] | null> {
     const response: UnicomAPICategory[] = await fetch(this.baseUrl + route, {
       method,
       headers: {
@@ -34,14 +34,18 @@ export class UnicomAPIProductCategoryAdapter
     })
       .then((res) => {
         console.log("res", res);
+        if (!res.ok) {
+          return null;
+        }
         return res.json();
       })
       .catch((error) => {
         console.error("Error:", error);
+        return null;
       });
 
     if (!response) {
-      return [];
+      return null;
     }
     console.log("Categories", response);
 
@@ -63,6 +67,7 @@ export class UnicomAPIProductCategoryAdapter
     // console.log("Categories", categories);
 
     if (!categories) {
+      console.error("Error fetching categories");
       return [];
     }
 

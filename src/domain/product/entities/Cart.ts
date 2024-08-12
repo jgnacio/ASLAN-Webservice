@@ -1,4 +1,4 @@
-import { Product } from "./Product";
+import { Product, ProductType } from "./Product";
 import { v4 as uuid } from "uuid";
 export class Cart {
   public readonly id: string;
@@ -27,6 +27,17 @@ export class Cart {
       this.total -= 1;
     }
   }
+
+  // public toPlainObject(): CartState {
+  //   const products = this.products.map((product) => product.toPlainObject());
+  //   return {
+  //     id: this.id,
+  //     userId: this.userId,
+  //     lastUpdate: this.lastUpdate.toISOString(),
+  //     total: this.total,
+  //     products,
+  //   };
+  // }
 
   public clear() {
     this.products = [];
@@ -63,6 +74,11 @@ export class Cart {
 
   public setProducts(products: Product[]) {
     this.products = products;
+    this.total = products.length;
+  }
+
+  public setPlainProducts(products: ProductType[]) {
+    this.products = products.map((product) => new Product(product));
     this.total = products.length;
   }
 
@@ -148,4 +164,21 @@ export class CartControler {
   public getUserId() {
     return this.userId;
   }
+}
+
+export interface ICartProduct extends ProductType {
+  available?: string;
+  tax?: number;
+  quantity?: number;
+}
+
+export interface ICart {
+  id: string;
+  userId: string;
+  lastUpdate: string;
+  total: number;
+  products: ICartProduct[];
+  delivery_options: [];
+  payment_options: [];
+  total_including_tax: number;
 }

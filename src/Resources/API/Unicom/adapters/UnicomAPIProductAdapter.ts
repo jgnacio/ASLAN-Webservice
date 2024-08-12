@@ -36,12 +36,18 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     route: string;
     body?: UnicomAPIProductRequest;
     method?: string;
-  }): Promise<Product[]> {
+  }): Promise<
+    | UnicomAPIProduct[]
+    | UnicomAPIOfferCombo[]
+    | UnicomAPIOfferProduct[]
+    | UnicomAPIPreAssembledPC[]
+    | null
+  > {
     const response:
-      | UnicomAPIProduct
-      | UnicomAPIOfferCombo
-      | UnicomAPIOfferProduct
-      | UnicomAPIPreAssembledPC = await fetch(this.baseUrl + route, {
+      | UnicomAPIProduct[]
+      | UnicomAPIOfferCombo[]
+      | UnicomAPIOfferProduct[]
+      | UnicomAPIPreAssembledPC[] = await fetch(this.baseUrl + route, {
       method,
       headers: {
         "content-type": "application/json",
@@ -51,59 +57,21 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     })
       .then((res) => {
         // console.log("res", res);
+        if (!res.ok) {
+          return null;
+        }
         return res.json();
       })
       .catch((error) => {
         console.error("Error:", error);
+        return null;
       });
 
     if (!response) {
-      return [];
+      return null;
     }
 
-    const products = response.map(
-      (
-        item:
-          | UnicomAPIProduct
-          | UnicomAPIOfferCombo
-          | UnicomAPIOfferProduct
-          | UnicomAPIPreAssembledPC
-      ) => {
-        try {
-          return new Product({
-            sku: item.codigo,
-            price: item.precio,
-            title: item.producto,
-            description: item.descripcion,
-            images: item.fotos,
-            category: item.grupo_articulo.descripcion,
-            marca: item.marca.marca,
-            stock: item.inventario,
-            submitDate: new Date(),
-            estimatedArrivalDate: item.fecha_estimada_llegada
-              ? new Date(item.fecha_estimada_llegada)
-              : null,
-            guaranteeDays: item.garantia_dias,
-          });
-        } catch {
-          return null;
-        }
-      }
-    );
-
-    // Clean all null values
-    const productsFiltered = products.filter(
-      (
-        product:
-          | UnicomAPIOfferCombo
-          | UnicomAPIOfferProduct
-          | UnicomAPIProduct
-          | UnicomAPIPreAssembledPC
-          | null
-      ) => product !== null
-    );
-
-    return productsFiltered;
+    return response;
   }
 
   async getById(id: number): Promise<Product | null> {
@@ -130,12 +98,19 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       defaultRequest.codigo_grupo = category;
     }
     const UnicomProductRequest = this.mapToUnicomRequest(defaultRequest);
-    const response = this.fetchProducts({
+    const response = await this.fetchProducts({
       method: "PUT",
       body: UnicomProductRequest,
       route: "/articulos",
     });
-    return response;
+
+    if (!response) {
+      return [];
+    }
+
+    const products = this.mapUnicomProduct(response);
+
+    return products;
   }
 
   async getFeatured(request?: UnicomAPIProductRequest): Promise<Product[]> {
@@ -143,12 +118,19 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     // Only featured
     defaultRequest.solo_articulos_destacados = true;
     const UnicomProductRequest = this.mapToUnicomRequest(defaultRequest);
-    const response = this.fetchProducts({
+    const response = await this.fetchProducts({
       method: "PUT",
       body: UnicomProductRequest,
       route: "/articulos",
     });
-    return response;
+
+    if (!response) {
+      return [];
+    }
+
+    const products = this.mapUnicomProduct(response);
+
+    return products;
   }
 
   async getOffers(request?: UnicomAPIProductRequest): Promise<Product[]> {
@@ -178,8 +160,11 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     if (!response) {
       return [];
     }
+    const flatResponse = response.flat();
 
-    return response.flat();
+    const products = this.mapUnicomProduct(flatResponse as Product[]);
+
+    return products;
   }
 
   async save(product: Product): Promise<void> {
@@ -215,5 +200,54 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       (key) => formattedData[key] === "" && delete formattedData[key]
     );
     return formattedData;
+  }
+
+  private mapUnicomProduct(
+    productsResponse:
+      | UnicomAPIProduct[]
+      | UnicomAPIOfferCombo[]
+      | UnicomAPIOfferProduct[]
+      | UnicomAPIPreAssembledPC[]
+      | null
+  ): Product[] {
+    if (!productsResponse) {
+      return [];
+    }
+    const products = productsResponse.map(
+      (
+        item:
+          | UnicomAPIProduct
+          | UnicomAPIOfferCombo
+          | UnicomAPIOfferProduct
+          | UnicomAPIPreAssembledPC
+      ) => {
+        try {
+          return new Product({
+            sku: item.codigo,
+            price: item.precio,
+            title: item.producto,
+            description: item.descripcion,
+            images: item.fotos,
+            category: item.grupo_articulo.descripcion,
+            marca: item.marca.marca,
+            stock: item.inventario,
+            submitDate: new Date(),
+            estimatedArrivalDate: item.fecha_estimada_llegada
+              ? new Date(item.fecha_estimada_llegada)
+              : null,
+            guaranteeDays: item.garantia_dias,
+          });
+        } catch {
+          return null;
+        }
+      }
+    );
+
+    // Clean all null values
+    const productsFiltered = products.filter(
+      (product): product is Product => product !== null
+    );
+
+    return productsFiltered;
   }
 }

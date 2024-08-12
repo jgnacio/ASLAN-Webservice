@@ -1,56 +1,65 @@
 "use client";
-import { use, useEffect, useState } from "react";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { RootState } from "@/lib/store";
-import { addProduct, removeProduct } from "@/lib/features/cart/addProduct";
-import { getRelevantProducts } from "@/app/Dashboard/_actions/get-relevant-products";
-import { getFeaturedProductsByPage } from "@/app/Dashboard/_actions/get-featured-products";
-import { Button } from "@nextui-org/button";
+// import { addProduct, removeProduct } from "@/lib/features/cart/addProduct";
+import ProductRow from "@/components/ProductRow";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { getCart } from "../_actions/get-cart";
 
 export default function CartComponet() {
-  const cart = useAppSelector((state: RootState) => state.cart);
-  const dispatch = useAppDispatch();
-
-  const handleGetProducts = () => {
-    console.log("Cart:", cart.products);
-    console.log("total:", cart.total);
-    // return cart.products;
-  };
-
-  const handleAddProduct = async () => {
-    const getRelevantProduct = await getFeaturedProductsByPage({ page: 1 });
-    console.log("getRelevantProduct:", getRelevantProduct);
-    // Choose a random product from the list
-    const product =
-      getRelevantProduct[Math.floor(Math.random() * getRelevantProduct.length)];
-    dispatch(addProduct(product));
-  };
-
-  const handleRemoveProduct = async () => {
-    const lastProduct = cart.products[cart.products.length - 1];
-    dispatch(removeProduct(lastProduct.toPlainObject()));
-  };
+  const {
+    mutateAsync: server_getCart,
+    isSuccess,
+    isIdle,
+    data: dataCart,
+    isError,
+    isPending,
+  } = useMutation({
+    mutationFn: getCart,
+    retry: 3,
+    async onMutate() {
+      console.log("onMutate");
+    },
+    async onError(error) {
+      console.log("onError", error);
+    },
+    async onSuccess(data) {
+      console.log("onSuccess", data);
+    },
+    async onSettled() {
+      console.log("onSettled");
+    },
+  });
 
   useEffect(() => {
-    console.log("Cart:", cart.products);
-  }, [cart]);
+    server_getCart();
+  }, []);
+
+  const handleAddProduct = async () => {};
 
   return (
     <div>
       <h1 className="text-xl font-bold">Cart</h1>
-      <div>
-        <Button onClick={handleAddProduct}>Add Product</Button>
-        <Button onClick={handleRemoveProduct}>Remove Product</Button>
-        <Button onClick={handleGetProducts}>Get Products</Button>
-      </div>
-      <div>
-        {cart.products.map((product) => (
-          <div key={product.id}>
-            <p>{product.title}</p>
-            <p>{product.price}</p>
-          </div>
-        ))}
-      </div>
+      {dataCart && dataCart.products.length > 0 ? (
+        // dataCart.products.map((product) => (
+        //   <div key={product.id}>
+        //     <h2>{product.title}</h2>
+        //     <p>{product.price}</p>
+        //     <p>{product.tax}</p>
+        //     <p>{product.quantity}</p>
+        //     <p>{product.available}</p>
+        //     {/* <Button onClick={handleAddProduct}>Add</Button> */}
+        //     <Button color="danger" onClick={handleRemoveProduct}>
+        //       Eliminar <FaRegTrashAlt />
+        //     </Button>
+        //   </div>
+        dataCart.products.map((product) => (
+          <ProductRow product={product} onCart={true} key={product.id} />
+        ))
+      ) : isPending ? (
+        <div>Cargando...</div>
+      ) : (
+        dataCart && dataCart.products.length <= 0 && <div>Carrito Vacio</div>
+      )}
     </div>
   );
 }

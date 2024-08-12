@@ -16,7 +16,7 @@ export class Product {
   public category: ProductCategory;
   public marca: string;
   public stock: number;
-  public submitDate: Date;
+  public submitDate: Date | null;
   public favorite?: boolean;
   public onSale?: boolean;
   public guaranteeDays?: number;
@@ -44,7 +44,7 @@ export class Product {
     category: ProductCategory;
     marca: string;
     stock: number;
-    submitDate: Date;
+    submitDate: Date | null;
     favorite?: boolean;
     onSale?: boolean;
     guaranteeDays?: number;
@@ -121,12 +121,6 @@ export class Product {
     if (this.stock < 0) {
       throw new Error("Stock cannot be negative");
     }
-    if (
-      !(this.submitDate instanceof Date) ||
-      isNaN(this.submitDate.getTime())
-    ) {
-      throw new Error("SubmitDate must be a valid date");
-    }
     if (this.guaranteeDays && this.guaranteeDays < 0) {
       throw new Error("Guarantee days cannot be negative");
     }
@@ -153,7 +147,7 @@ export type ProductType = {
   category: ProductCategory;
   marca: string;
   stock: number;
-  submitDate: Date;
+  submitDate: Date | null;
   favorite?: boolean;
   onSale?: boolean;
   guaranteeDays?: number;

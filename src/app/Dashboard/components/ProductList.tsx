@@ -1,25 +1,48 @@
-"use server";
-import { Product, ProductType } from "@/domain/product/entities/Product";
-import { getProductsByPage } from "../_actions/get-product-by-page";
-import { getRelevantProducts } from "../_actions/get-relevant-products";
+"use client";
+import { ProductType } from "@/domain/product/entities/Product";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { getOffersProductsByPage } from "../_actions/get-offer-products";
+import ProductRow from "@/components/ProductRow";
 
-export default async function ProductList() {
-  const productsList = await getRelevantProducts({ page: 1 });
-  // console.log(productsList);
+export default function ProductList() {
+  const {
+    mutate: server_getProductsByPage,
+    isSuccess: isSuccessGetProductsByPage,
+    isIdle: isIdleGetProductsByPage,
+    data: dataGetProductsByPage,
+    isError: isErrorGetProductsByPage,
+  } = useMutation({
+    mutationFn: getOffersProductsByPage,
+    async onMutate() {
+      console.log("onMutate, get products by page");
+    },
+    async onError() {
+      console.log("onError, get products by page");
+    },
+    async onSuccess() {
+      console.log("onSuccess, get products by page");
+    },
+    async onSettled() {
+      console.log("onSettled,  get products by page");
+    },
+  });
+
+  useEffect(() => {
+    server_getProductsByPage({ page: 1 });
+  }, []);
+
   return (
     <div>
       <h2>ProductList</h2>
       <div>
-        {productsList?.map((product: ProductType) => (
-          <div key={product.id} className="flex flex-col border-1 border-black">
-            <h3>Producto:{product.title}</h3>
-            <p>Precio:{product.price}</p>
-            <p>Stock:{product.stock}</p>
-            <p>Marca:{product.marca}</p>
-            <p>{product.category.name}</p>
-            <p>Codigo:{product.sku}</p>
-          </div>
-        ))}
+        {isIdleGetProductsByPage && <p>isIdleGetProductsByPage</p>}
+        {isSuccessGetProductsByPage && <p>isSuccessGetProductsByPage</p>}
+        {isErrorGetProductsByPage && <p>isErrorGetProductsByPage</p>}
+        {dataGetProductsByPage &&
+          dataGetProductsByPage.map((product: ProductType) => (
+            <ProductRow product={product} key={product.id} />
+          ))}
       </div>
     </div>
   );

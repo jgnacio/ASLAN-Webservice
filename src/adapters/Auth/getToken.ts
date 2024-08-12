@@ -1,11 +1,10 @@
-"use client";
 import axios from "axios";
-import { useMutation } from "@tanstack/react-query";
 
 const WEB_UNICOM_USERNAME = process.env.NEXT_PUBLIC_ASLAN_WEB_UNICOM_USERNAME;
 const WEB_UNICOM_PASSWORD = process.env.NEXT_PUBLIC_ASLAN_WEB_UNICOM_PASSWORD;
 const API_UNICOM_USERNAME = process.env.NEXT_PUBLIC_ASLAN_API_UNICOM_USERNAME;
-const API_UNICOM_URL = process.env.NEXT_PUBLIC_API_UNICOM_URL;
+export const API_UNICOM_URL = process.env.API_UNICOM_URL;
+export const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 
 export async function getToken() {
   const body = {
