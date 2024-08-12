@@ -62,13 +62,42 @@ export default function ProductRow({
         <p>Codigo:{product.sku}</p>
       </div>
       {onCart ? (
-        <Button
-          color="danger"
-          onClick={handleRemoveProduct}
-          disabled={isPendingRemoveProductOnCart}
-        >
-          Eliminar <FaRegTrashAlt />
-        </Button>
+        <div>
+          <div>
+            <Button
+              onClick={() => {
+                if (product.quantity) {
+                  if (product.quantity > 1) {
+                    server_addToCart({ id: product.sku, quantity: -1 });
+                    // product.quantity -= 1;
+                  }
+                }
+              }}
+            >
+              -
+            </Button>
+            <p>{product.quantity}</p>
+            <Button
+              onClick={() => {
+                if (product.quantity) {
+                  if (product.quantity >= 1) {
+                    server_addToCart({ id: product.sku, quantity: 1 });
+                    // product.quantity += 1;
+                  }
+                }
+              }}
+            >
+              +
+            </Button>
+          </div>
+          <Button
+            color="danger"
+            onClick={handleRemoveProduct}
+            disabled={isPendingRemoveProductOnCart}
+          >
+            Eliminar <FaRegTrashAlt />
+          </Button>
+        </div>
       ) : (
         <div>
           {isIdleAddToCart && <p>isIdleAddToCart</p>}
