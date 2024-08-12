@@ -4,8 +4,15 @@ import ProductRow from "@/components/ProductRow";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { getCart } from "../_actions/get-cart";
+import { Button } from "@nextui-org/button";
+import { eraseCart } from "../_actions/eraseCart";
+import { useToast } from "@/components/ui/use-toast";
+import { title } from "process";
+import { colorVariants } from "@nextui-org/theme";
 
 export default function CartComponet() {
+  const { toast } = useToast();
+
   const {
     mutateAsync: server_getCart,
     isSuccess,
@@ -30,15 +37,33 @@ export default function CartComponet() {
     },
   });
 
+  const {
+    mutateAsync: server_eraseCart,
+    isPending: isPendingEraseCart,
+    isSuccess: isSuccessEraseCart,
+  } = useMutation({
+    mutationFn: () => eraseCart(),
+  });
+
   useEffect(() => {
     server_getCart();
   }, []);
 
   const handleAddProduct = async () => {};
 
+  const handleEraseCart = async () => {
+    await server_eraseCart();
+    toast({
+      title: "Carrito Vacio",
+      description: "Carrito Vacio",
+      color: colorVariants.light.success,
+    });
+  };
+
   return (
     <div>
       <h1 className="text-xl font-bold">Cart</h1>
+
       {dataCart && dataCart.products.length > 0 ? (
         // dataCart.products.map((product) => (
         //   <div key={product.id}>
@@ -52,9 +77,19 @@ export default function CartComponet() {
         //       Eliminar <FaRegTrashAlt />
         //     </Button>
         //   </div>
-        dataCart.products.map((product) => (
-          <ProductRow product={product} onCart={true} key={product.id} />
-        ))
+        <div>
+          <div>
+            {dataCart.products.map((product) => (
+              <ProductRow product={product} onCart={true} key={product.id} />
+            ))}
+          </div>
+          <div>
+            <h2>Total incluyendo IVA: {dataCart.total_including_tax} U$D</h2>
+          </div>
+          <Button color="danger" onClick={handleEraseCart}>
+            Vaciar Carrito
+          </Button>
+        </div>
       ) : isPending ? (
         <div>Cargando...</div>
       ) : (

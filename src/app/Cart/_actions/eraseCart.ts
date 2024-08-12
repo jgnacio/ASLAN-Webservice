@@ -1,12 +1,10 @@
 "use server";
-import { ICart, ICartProduct } from "@/domain/product/entities/Cart";
 import axios from "axios";
-import { removeProduct } from "@/lib/features/cart/cartProductUpdates";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
 
-export const removeProductOnCart = async (id: string) => {
+export const eraseCart = async () => {
   const config = {
     headers: {
       "Content-Type": "application/json",
@@ -17,12 +15,11 @@ export const removeProductOnCart = async (id: string) => {
 
   try {
     const response = await axios
-      .delete(`${API_UNICOM_URL}/carrito/articulo/${id}`, config)
+      .delete(`${API_UNICOM_URL}/carrito`, config)
       .then((res) => res.data);
     console.log("response", response);
   } catch (error) {
     console.log("error", error);
     return;
   }
-  return;
 };
