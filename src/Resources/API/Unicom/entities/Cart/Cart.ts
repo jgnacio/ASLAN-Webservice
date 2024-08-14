@@ -6,15 +6,15 @@ export interface UnicomAPICart {
   /**
    * Forma de pago disponible para pagar el carrito
    */
-  formaDePago?: TFormaPagoCarrito;
+  forma_de_pago?: TFormaPagoCarrito;
   /**
    * Opciones de entrega disponibles para el carrito
    */
-  opcionesEntrega?: OpcionesEntrega;
+  opciones_entrega?: OpcionesEntrega;
   /**
    * total del carrito con impuestos incluidos.
    */
-  totalConImpuestos?: number;
+  total_con_impuestos?: number;
   [property: string]: any;
 }
 
@@ -23,14 +23,14 @@ export interface UnicomAPICart {
  */
 export interface TArticuloCarrito {
   cantidad?: number;
-  codigoArticulo?: string;
-  costoUnitario?: number;
+  codigo_articulo?: string;
+  costo_unitario?: number;
   descripcion?: string;
   disponibilidad?: TformatoDisponibilidadInventario;
-  estaRematandose?: boolean;
-  ivaUnitario?: number;
-  tieneIngDeptoTecnico?: boolean;
-  tipoArticulo?: TtiposArticulos;
+  esta_rematandose?: boolean;
+  iva_unitario?: number;
+  tiene_ing_depto_tecnico?: boolean;
+  tipo_articulo?: TtiposArticulos;
   [property: string]: any;
 }
 
@@ -59,8 +59,8 @@ export enum TtiposArticulos {
  * tForma_pago_carrito, formas de pago disponibles para el carrito
  */
 export interface TFormaPagoCarrito {
-  formaDePagoCliente?: TFormaDePagoCliente;
-  tieneCreditoParaEntregarCarrito?: boolean;
+  forma_de_pago_cliente?: TFormaDePagoCliente;
+  tiene_credito_para_entregar_carrito?: boolean;
   [property: string]: any;
 }
 
@@ -68,9 +68,9 @@ export interface TFormaPagoCarrito {
  * TForma_de_pago_cliente, Schema for type Model.UserData.TForma_de_pago_cliente
  */
 export interface TFormaDePagoCliente {
-  creditoDisponible?: number;
-  formaDePago?: TFormaPago;
-  limiteCredito?: number;
+  credito_disponible?: number;
+  forma_de_pago?: TFormaPago;
+  limite_credito?: number;
   [property: string]: any;
 }
 
@@ -91,11 +91,11 @@ export interface OpcionesEntrega {
   /**
    * Direcciones de sucursales con sus metodos de entrega y horarios disponibles
    */
-  direccionesEntrega?: TDireccionEntrega[];
+  direcciones_entrega?: TDireccionEntrega[];
   /**
    * modalidades de DropShipping disponibles
    */
-  opcionesDropshipping?: OpcionesDropshipping[];
+  opciones_dropshipping?: OpcionesDropshipping[];
   [property: string]: any;
 }
 
@@ -104,12 +104,12 @@ export interface OpcionesEntrega {
  */
 export interface TDireccionEntrega {
   ciudad?: string;
-  codigoDireccion?: number;
-  codigoPostal?: string;
+  codigo_direccion?: number;
+  codigo_postal?: string;
   departamento?: string;
   direccion?: string;
   pais?: string;
-  tiposFleteValidos?: TFlete[];
+  tipos_flete_validos?: TFlete[];
   [property: string]: any;
 }
 
@@ -119,10 +119,10 @@ export interface TDireccionEntrega {
 export interface TFlete {
   costo?: number;
   descripcion?: string;
-  minimaCompraParaFlete?: number;
-  minimaCompraParaNoTenerCosto?: number;
-  proximasFranjasHorariasDeEntrega?: TProximaFranjaHorariaDeEntrega[];
-  tipoFlete?: number;
+  minima_compra_para_flete?: number;
+  minima_compra_para_no_tener_costo?: number;
+  proximas_franjas_horarias_de_entrega?: TProximaFranjaHorariaDeEntrega[];
+  tipo_flete?: number;
   zona?: string;
   [property: string]: any;
 }
@@ -135,15 +135,15 @@ export interface TProximaFranjaHorariaDeEntrega {
   /**
    * formato ISO 8601 ej. "2024-09-21T12:31:52.000-03:00"
    */
-  diaHoraDeCorte?: string;
+  dia_hora_de_corte?: string;
   /**
    * formato ISO 8601 ej. "2024-09-21T12:31:52.000-03:00"
    */
-  diaHoraDeEntrega?: string;
+  dia_hora_de_entrega?: string;
   /**
    * formato ISO 8601 ej. "2024-09-21T12:31:52.000-03:00"
    */
-  finDiaHoraEntrega?: string;
+  fin_dia_hora_entrega?: string;
   [property: string]: any;
 }
 
@@ -151,49 +151,49 @@ export interface OpcionesDropshipping {
   /**
    * para el caso de que sea la entrega en uun centro logístico
    */
-  centroLogistico?: TCentroLogistico;
-  codigoMetodoEntregaEspecial?: number;
+  centro_logistico?: TCentroLogistico;
+  codigo_metodo_entrega_especial?: number;
   descripcion?: string;
   /**
    * es true si la entrega se hace directamente al consumidor
    */
-  entregaAlConsumidor?: boolean;
+  entrega_al_consumidor?: boolean;
   /**
    * información que se requiere al ingresar la orden
    */
-  informacionRequerida?: InformacionRequerida;
+  informacion_requerida?: InformacionRequerida;
   /**
    * como se entregaría el pedido
    */
-  metodoEntrega?: TOpcionesMetodosEntregaEspecial;
+  metodo_entrega?: TOpcionesMetodosEntregaEspecial;
   /**
    * costo sin impuestos del servicio
    */
-  montoACobrar?: number;
+  monto_a_cobrar?: number;
   /**
    * Monto mínimo sin impuestos para poder realizar el servicio
    */
-  montoMinimo?: number;
+  monto_minimo?: number;
   /**
    * Monto mínimo sin impuestos para que no tenga cossto
    */
-  montoMinimoSinCosto?: number;
+  monto_minimo_sin_costo?: number;
   /**
    * Nombre referencial del servicio DropShipping
    */
-  nombreReferencial?: string;
+  nombre_referencial?: string;
   /**
    * horarios de entrega disponibles
    */
-  proximasFranjasHorariasDeEntrega?: TProximaFranjaHorariaDeEntrega[];
+  proximas_franjas_horarias_de_entrega?: TProximaFranjaHorariaDeEntrega[];
   /**
    * es true cuando el servicio es "inmediato", y no se respeta la hora de corte
    */
-  servicioFast?: boolean;
+  servicio_fast?: boolean;
   /**
    * es true si solo se puede entregar en montevideo
    */
-  soloAMontevideo?: boolean;
+  solo_a_montevideo?: boolean;
   [property: string]: any;
 }
 
@@ -207,7 +207,7 @@ export interface TCentroLogistico {
   /**
    * si es true el centro logístico incluye sub-operadores. Por ej. 3 cruces
    */
-  incluyeOperadores?: boolean;
+  incluye_operadores?: boolean;
   nombre?: string;
   [property: string]: any;
 }
@@ -220,32 +220,32 @@ export interface InformacionRequerida {
    * dir. consumidor final. Si es r_condcional, es requerido si no se ingresó la imágen de la
    * etiqueta
    */
-  requiereDireccion?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_direccion?: TOpcionesRequerimientosMetodoEntregaEspecial;
   /**
    * Doc. consumidor final
    */
-  requiereDocumento?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_documento?: TOpcionesRequerimientosMetodoEntregaEspecial;
   /**
    * Email consumidor final
    */
-  requiereEmail?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_email?: TOpcionesRequerimientosMetodoEntregaEspecial;
   /**
    * Enviará el código QR
    */
-  requiereEnvioQr?: TOpcionesRequerimientosMetodoEntregaEspecial;
-  requiereImagenEtiqueta?: string;
+  requiere_envio_qr?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_imagen_etiqueta?: string;
   /**
    * imagen factura distribuidor
    */
-  requiereImagenFactura?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_imagen_factura?: TOpcionesRequerimientosMetodoEntregaEspecial;
   /**
    * Nombre Consumidor Final
    */
-  requiereNombre?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_nombre?: TOpcionesRequerimientosMetodoEntregaEspecial;
   /**
    * tel consumidor Final. Si es r_condcional, es requerido si se ingresa la dirección
    */
-  requiereTelefono?: TOpcionesRequerimientosMetodoEntregaEspecial;
+  requiere_telefono?: TOpcionesRequerimientosMetodoEntregaEspecial;
   [property: string]: any;
 }
 
