@@ -733,7 +733,6 @@ export default function PurchaseOrder() {
               className="max-w-xs"
               value={regularDeliveryData.codigo_direccion}
               onChange={handleRegularInputChange}
-              isRequired
             />
           </div>
         )}

@@ -1,6 +1,6 @@
 import { IPurchaseOrderRepository } from "@/domain/product/repositories/IPurchaseOrderRepository";
 import axios from "axios";
-import { UnicomAPIPurchaseOrderRequest } from "../UnicomAPIRequets";
+import { EntryModes, UnicomAPIPurchaseOrderRequest } from "../UnicomAPIRequets";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
@@ -15,36 +15,24 @@ export class UnicomAPIPurchaseOrderAdapter implements IPurchaseOrderRepository {
       },
     };
 
-    const {
-      codigo_promocion,
-      comentarios,
-      comentarios_dt,
-      fecha_hora_entrega,
-      forma_entrega,
-      modo,
-    } = purchaseOrder;
+    purchaseOrder.modo = EntryModes.ModoPrueba;
+
+    console.log(purchaseOrder);
 
     const body = {
-      codigo_promocion: codigo_promocion,
-      comentarios: comentarios,
-      comentarios_dt: comentarios_dt,
-      fecha_hora_entrega: fecha_hora_entrega,
-      forma_entrega: forma_entrega,
-      modo: "modo_prueba",
+      purchaseOrder,
     };
 
-    const response = await axios.post(
-      `${API_UNICOM_URL}/ordenes_de_compra`,
-      body,
-      config
-    );
+    const response = await axios
+      .post(`${API_UNICOM_URL}/ordenes_de_compra`, body, config)
+      .then((res) => res.data)
+      .catch((err) => {
+        console.error(err);
+      });
 
-    if (response.status !== 200) {
-      throw new Error("Error al registrar la orden de compra");
-    }
+    console.log(response);
 
     console.log("Orden de compra registrada correctamente");
-    console.log(response.data);
     return;
   }
 
