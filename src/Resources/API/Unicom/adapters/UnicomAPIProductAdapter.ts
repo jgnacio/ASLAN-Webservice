@@ -18,6 +18,8 @@ import {
   ProductClassToObj,
   ProductObjToClass,
 } from "@/lib/Utils/Functions/ClassToObject";
+import { UnicomAPIProductDetailResponse } from "../entities/Product/UnicomAPIProductDetailResponse";
+import { UnicomAPIProductDetailRequest } from "../entities/Product/UnicomAPIProductDetailRequest";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
@@ -74,8 +76,80 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     return response;
   }
 
-  async getById(id: number): Promise<Product | null> {
-    return null;
+  private async fetchProduct({
+    body,
+    route,
+    method = "GET",
+  }: {
+    route: string;
+    body?: UnicomAPIProductDetailRequest;
+    method?: string;
+  }): Promise<UnicomAPIProductDetailResponse | null> {
+    const response: UnicomAPIProductDetailResponse = await fetch(
+      this.baseUrl + route,
+      {
+        method,
+        headers: {
+          "content-type": "application/json",
+          authorization: "Bearer " + this.token,
+        },
+        body: JSON.stringify(body),
+      }
+    )
+      .then((res) => {
+        // console.log("res", res);
+        if (!res.ok) {
+          return null;
+        }
+        return res.json();
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        return null;
+      });
+
+    if (!response) {
+      return null;
+    }
+
+    return response;
+  }
+
+  async getBySKU(sku: string): Promise<Product | null> {
+    const response = await this.fetchProduct({
+      method: "GET",
+      route: `/articulos/${sku}`,
+    });
+
+    if (!response) {
+      return null;
+    }
+
+    console.log(response);
+
+    try {
+      const product = new Product({
+        sku: response.codigo || "",
+        price: response.precio || 0,
+        title: response.producto || "",
+        description: response.descripcion || "",
+        images: [],
+        category: {
+          id: response.grupo_articulo?.codigo_grupo || "",
+          name: response.grupo_articulo?.descripcion || "",
+        },
+        marca: response.marca?.marca || "",
+        stock: response.inventario || 0,
+        submitDate: new Date(),
+        estimatedArrivalDate: response.fecha_estimada_llegada
+          ? new Date(response.fecha_estimada_llegada)
+          : null,
+        guaranteeDays: response.garantia_dias,
+      });
+      return product;
+    } catch {
+      return null;
+    }
   }
 
   async getAll({

@@ -2,7 +2,7 @@ import { Product, ProductType } from "../entities/Product";
 import { UnicomAPIProductRequest } from "@/Resources/API/Unicom/UnicomAPIRequets";
 
 export interface IProductRepository {
-  getById(id: number): Promise<Product | null>;
+  getBySKU(sku: string): Promise<Product | null>;
   getAll({
     request,
     page,

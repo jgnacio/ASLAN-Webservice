@@ -5,6 +5,8 @@ import { Button } from "@nextui-org/button";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { ICartProduct } from "@/domain/product/entities/Cart";
 import { removeProductOnCart } from "@/app/Cart/_actions/remove-product-on-cart";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 export default function ProductRow({
   product,
@@ -13,6 +15,8 @@ export default function ProductRow({
   product: ICartProduct;
   onCart?: boolean;
 }) {
+  const pathName = usePathname();
+
   const {
     mutate: server_addToCart,
     isSuccess: isSuccessAddToCart,
@@ -44,23 +48,26 @@ export default function ProductRow({
       key={product.id}
       className="flex justify-between border-1 border-black"
     >
-      <div>
-        <h3>Producto:{product.title}</h3>
-        <p>Precio:{product.price}</p>
-        <p>Stock:{product.stock}</p>
-        {onCart ? (
-          <>
-            <p>Cantidad en Carrito:{product.quantity}</p>
-            <p>Disponible:{product.available}</p>
-          </>
-        ) : (
-          <>
-            <p>Marca:{product.marca}</p>
-            <p>{product.category.name}</p>
-          </>
-        )}
-        <p>Codigo:{product.sku}</p>
-      </div>
+      <Link href={`/product/${product.sku}`}>
+        <div>
+          <h3>Producto:{product.title}</h3>
+          <p>Precio:{product.price}</p>
+          <p>Stock:{product.stock}</p>
+          {onCart ? (
+            <>
+              <p>Cantidad en Carrito:{product.quantity}</p>
+              <p>Disponible:{product.available}</p>
+            </>
+          ) : (
+            <>
+              <p>Marca:{product.marca}</p>
+              <p>{product.category.name}</p>
+            </>
+          )}
+          <p>Codigo:{product.sku}</p>
+        </div>
+      </Link>
+
       {onCart ? (
         <div>
           <div>
