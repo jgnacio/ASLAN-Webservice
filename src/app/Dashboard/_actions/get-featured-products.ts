@@ -5,7 +5,7 @@ import { Product, ProductType } from "@/domain/product/entities/Product";
 export const getFeaturedProductsByPage = async ({
   page,
 }: {
-  page: number;
+  page?: number;
 }): Promise<ProductType[]> => {
   const unicomAPIAdapter = new UnicomAPIProductAdapter();
 

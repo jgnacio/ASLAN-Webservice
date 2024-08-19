@@ -236,7 +236,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     }
     const flatResponse = response.flat();
 
-    console.log("flatResponse", flatResponse);
+    // console.log("flatResponse", flatResponse);
 
     const products = this.mapUnicomProduct(flatResponse as Product[]);
 

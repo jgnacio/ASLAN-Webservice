@@ -1,6 +1,6 @@
 "use server";
 import { UnicomAPIProductAdapter } from "@/Resources/API/Unicom/adapters/UnicomAPIProductAdapter";
-import { Product } from "@/domain/product/entities/Product";
+import { Product, ProductType } from "@/domain/product/entities/Product";
 
 export const getProductsByPage = async ({
   page,
@@ -8,9 +8,12 @@ export const getProductsByPage = async ({
 }: {
   page: number;
   category?: string;
-}): Promise<Product[]> => {
+}): Promise<ProductType[]> => {
   const unicomAPIAdapter = new UnicomAPIProductAdapter();
 
   const products = unicomAPIAdapter.getAll({ page, category });
-  return products;
+  const productList: ProductType[] = (await products).map((product) =>
+    product.toPlainObject()
+  );
+  return productList;
 };

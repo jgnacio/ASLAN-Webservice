@@ -12,6 +12,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Providers } from "./Providers/Providers";
 import { RiShoppingCartFill } from "react-icons/ri";
 import Link from "next/link";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,7 +46,10 @@ export default function RootLayout({
             </SignedIn>
           </header>
 
-          <Providers>{children}</Providers>
+          <main>
+            <Providers>{children}</Providers>
+          </main>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

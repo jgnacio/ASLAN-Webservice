@@ -6,7 +6,7 @@ import { ProductClassToObj } from "@/lib/Utils/Functions/ClassToObject";
 export const getOffersProductsByPage = async ({
   page,
 }: {
-  page: number;
+  page?: number;
 }): Promise<ProductType[]> => {
   const unicomAPIAdapter = new UnicomAPIProductAdapter();
 
