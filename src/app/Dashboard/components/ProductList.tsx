@@ -77,7 +77,7 @@ export default function ProductList() {
   ];
 
   useEffect(() => {
-    if (dataGetProductsByPage && rows.length === 0) {
+    if (dataGetProductsByPage) {
       handleSetRows(dataGetProductsByPage);
     }
   }, [dataGetProductsByPage]);
