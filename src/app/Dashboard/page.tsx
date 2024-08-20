@@ -1,20 +1,22 @@
-"use server";
-import { auth } from "@clerk/nextjs/server";
-import { Suspense } from "react";
+"use client";
+import { useAuth } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 import { redirect } from "next/navigation";
-import ProductList from "./components/ProductList";
+import ResentSales from "./components/ResentSales";
 
-export default async function Dashboard() {
-  const { userId } = auth();
+export default function Dashboard() {
+  const { userId } = useAuth();
   if (!userId) {
     redirect("/sign-in");
   }
   return (
-    <div>
-      <h1 className="text-xl font-bold">Dashboard</h1>
-      <Suspense fallback={<div>Loading...</div>}>
-        <ProductList />
-      </Suspense>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ duration: 0.4 }}
+    >
+      <ResentSales />
+    </motion.div>
   );
 }

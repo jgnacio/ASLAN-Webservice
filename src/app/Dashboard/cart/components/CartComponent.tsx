@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { title } from "process";
 import { colorVariants } from "@nextui-org/theme";
 
-export default function CartComponet() {
+export default function CartComponent() {
   const { toast } = useToast();
 
   const {

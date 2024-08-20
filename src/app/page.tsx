@@ -17,7 +17,7 @@ export default function Home() {
         <h1>Next.js / Clerk / Chadcn / NextUI </h1>
         <div className="space-x-4">
           {userId ? (
-            <Link href="/Dashboard">
+            <Link href="/dashboard">
               <Button color="primary">Dashboard</Button>
             </Link>
           ) : (

@@ -1,34 +1,26 @@
 "use client";
 import { ProductType } from "@/domain/product/entities/Product";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getOffersProductsByPage } from "../_actions/get-offer-products";
-import ProductRow from "@/components/ProductRow";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { Button } from "@nextui-org/button";
-import { RiShoppingCartFill } from "react-icons/ri";
-import ButtonAddToCart from "./ButtonAddToCart";
-import { getAllFeaturedProducts } from "../_actions/get-all-featured-products";
-import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
-import { getAllOfferProducts } from "../_actions/get-all-offer-products";
-import { getAllProducts } from "../_actions/get-all-products";
 
-export default function ProductList() {
+import { Spinner } from "@nextui-org/spinner";
+import { motion } from "framer-motion";
+import { getAllProducts } from "../_actions/get-all-products";
+import ButtonAddToCart from "./ButtonAddToCart";
+import { getOffersProductsByPage } from "../_actions/get-offer-products";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+export default function ProductOfferList() {
   const [rows, setRows] = useState<any>([]);
+  const router = useRouter();
 
   const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
     useQuery({
       queryKey: ["get-offer-products"],
       queryFn: () => getOffersProductsByPage({ page: 1 }),
     });
-
-  // const {
-  //   isLoading: isLoadingGetAllProductsByPage,
-  //   data: dataGetAllFeaturedProductsByPage,
-  // } = useQuery({
-  //   queryKey: ["get-all-featured-products"],
-  //   queryFn: getAllFeaturedProducts,
-  // });
 
   const {
     isPending: isLoadingGetAllProducts,
@@ -39,7 +31,16 @@ export default function ProductList() {
   });
 
   const columns: GridColDef[] = [
-    { field: "title", headerName: "Producto", flex: 1 },
+    {
+      field: "title",
+      headerName: "Producto",
+      renderCell: (params: GridRenderCellParams) => (
+        <Link href={`/dashboard/product/${params.row.sku}`}>
+          {params.row.title}
+        </Link>
+      ),
+      flex: 1,
+    },
     {
       field: "price",
       headerName: "Precio",
@@ -112,46 +113,33 @@ export default function ProductList() {
     setRows(newRows);
   };
 
-  const handleGetAllProducts = async () => {
-    // const products = await server_getAllProducts();
-    // console.log("products", products);
-    // handleSetAllNewRows(products);
-  };
-
   return (
-    <div>
-      <h2>ProductList</h2>
-      <div>
-        <p>Obtener todos los productos en oferta</p>
-        <Button
-          disabled={isLoadingGetAllProducts}
-          onClick={() => {
-            handleGetAllProducts();
-          }}
+    <div className="w-full h-full">
+      {isLoadingGetAllProducts ? "cargado todos los productos" : ""}
+      {isLoadingGetProductsByPage ? (
+        <Spinner color="primary" />
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
-          Obtener
-        </Button>
-        <div className="w-full h-full">
-          {isLoadingGetAllProducts ? "cargado todos los productos" : ""}
-          {isLoadingGetProductsByPage ? (
-            "Cargando..."
-          ) : (
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              disableColumnSelector
-              disableRowSelectionOnClick
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 5 },
-                },
-              }}
-              pageSizeOptions={[5, 10]}
-              autoHeight
-            />
-          )}
-        </div>
-      </div>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            disableColumnSelector
+            onRowClick={(params) => {
+              router.push(`/dashboard/product/${params.row.sku}`);
+            }}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[10, 20]}
+          />
+        </motion.div>
+      )}
     </div>
   );
 }

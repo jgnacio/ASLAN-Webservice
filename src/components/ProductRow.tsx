@@ -1,10 +1,10 @@
 import { ProductType } from "@/domain/product/entities/Product";
-import addToCart from "@/app/Cart/_actions/add-product-to-cart";
+import addToCart from "@/app/dashboard/cart/_actions/add-product-to-cart";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@nextui-org/button";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { ICartProduct } from "@/domain/product/entities/Cart";
-import { removeProductOnCart } from "@/app/Cart/_actions/remove-product-on-cart";
+import { removeProductOnCart } from "@/app/dashboard/cart/_actions/remove-product-on-cart";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 

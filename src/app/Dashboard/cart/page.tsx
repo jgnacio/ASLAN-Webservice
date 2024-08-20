@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
-import CartComponet from "./components/CartComponet";
 import { redirect } from "next/navigation";
 import { Button } from "@nextui-org/button";
 import Link from "next/link";
+import CartComponent from "./components/CartComponent";
 
 export default function Cart() {
   const { userId } = auth();
@@ -13,8 +13,8 @@ export default function Cart() {
   return (
     <div>
       <h1>Shop</h1>
-      <CartComponet />
-      <Link href="/purchase_order">
+      <CartComponent />
+      <Link href="/dashboard/purchase_order">
         <Button color="primary">Realizar Orden de Compra</Button>
       </Link>
     </div>

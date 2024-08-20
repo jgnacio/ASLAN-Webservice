@@ -37,14 +37,6 @@ export default function RootLayout({
       <html lang="en" className={`${inter.className}`}>
         <body>
           <NextTopLoader />
-          <header className="flex justify-end p-4">
-            <SignedIn>
-              <Link href="/Cart">
-                <RiShoppingCartFill />
-              </Link>
-              <UserButton showName />
-            </SignedIn>
-          </header>
 
           <main>
             <Providers>{children}</Providers>

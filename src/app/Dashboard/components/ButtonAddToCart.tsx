@@ -1,9 +1,10 @@
 "use client";
-import addToCart from "@/app/Cart/_actions/add-product-to-cart";
-import { getCart } from "@/app/Cart/_actions/get-cart";
+import addToCart from "@/app/dashboard/cart/_actions/add-product-to-cart";
+import { getCart } from "@/app/dashboard/cart/_actions/get-cart";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@nextui-org/button";
 import { useMutation } from "@tanstack/react-query";
+import { CircleX, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { RiShoppingCartFill } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
@@ -83,11 +84,17 @@ export default function ButtonAddToCart({
 
   return (
     <Button
-      color={!onCart ? "default" : "danger"}
+      color={!onCart ? "secondary" : "danger"}
+      variant="solid"
+      className="rounded-full"
       onClick={handleAddProductToCart}
       size="sm"
     >
-      {!onCart ? <RiShoppingCartFill /> : <RxCross2 />}
+      {!onCart ? (
+        <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+      ) : (
+        <CircleX />
+      )}
     </Button>
   );
 }
