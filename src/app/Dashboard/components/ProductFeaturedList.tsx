@@ -7,9 +7,8 @@ import { useEffect, useState } from "react";
 import { Spinner } from "@nextui-org/spinner";
 import { motion } from "framer-motion";
 import { getAllProducts } from "../_actions/get-all-products";
-import ButtonAddToCart from "./ButtonAddToCart";
-import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
+import ButtonAddToCart from "./ButtonAddToCart";
 
 export default function ProductFeaturedList() {
   const [rows, setRows] = useState<any>([]);

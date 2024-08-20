@@ -6,8 +6,6 @@ import { Button } from "@nextui-org/button";
 import { useMutation } from "@tanstack/react-query";
 import { CircleX, ShoppingCart } from "lucide-react";
 import { useState } from "react";
-import { RiShoppingCartFill } from "react-icons/ri";
-import { RxCross2 } from "react-icons/rx";
 
 export default function ButtonAddToCart({
   params,
