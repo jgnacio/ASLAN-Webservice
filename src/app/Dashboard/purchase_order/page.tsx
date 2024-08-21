@@ -5,7 +5,6 @@ import {
 } from "@/Resources/API/Unicom/UnicomAPIRequets";
 import {
   CalendarDate,
-  CalendarDateTime,
   getLocalTimeZone,
   startOfMonth,
   startOfWeek,
@@ -32,16 +31,22 @@ import { useEffect, useState } from "react";
 import { FaFileImage } from "react-icons/fa";
 import { FaClock } from "react-icons/fa6";
 import { sendPurchaseOrderRegistration } from "./_actions/send-purchase-order-registration";
+import { DropShippingDeliveryState } from "@/Resources/API/Unicom/entities/PurchaseOrder/UnicomAPIPurchaseOrder";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  document_types,
+  regularDeliveryMethods,
+} from "@/Resources/API/Unicom/entities/PurchaseOrder/UnicomAPIPurchaseOrder";
 
-interface DropShippingDeliveryState
-  extends Omit<
-    DropShippingDelivery,
-    "hora_cierre" | "hora_entrega" | "hora_fin"
-  > {
-  hora_cierre: Time;
-  hora_entrega: Time;
-  hora_fin: Time;
-}
+import {
+  convertDateToCalendarDate,
+  convertDateToISOFormat,
+  converDateToTime,
+  convertCalendarDateToDate,
+} from "@/lib/functions/DateFunctions";
+import { Link } from "lucide-react";
+import { ToastAction } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
 
 export default function PurchaseOrder() {
   let defaultDate = today(getLocalTimeZone());
@@ -52,9 +57,11 @@ export default function PurchaseOrder() {
   let nextMonth = startOfMonth(now.add({ months: 1 }));
 
   let isDateUnavailable = (date: DateValue) => date.compare(now) < 0;
+  const { toast } = useToast();
+  const router = useRouter();
 
   const {
-    mutate: server_sendPurchaseOrderRegistration,
+    mutateAsync: server_sendPurchaseOrderRegistration,
     isPending,
     isSuccess,
     isError,
@@ -62,10 +69,27 @@ export default function PurchaseOrder() {
   } = useMutation({
     mutationFn: sendPurchaseOrderRegistration,
     onSuccess: () => {
-      console.log("Orden de compra registrada correctamente");
+      toast({
+        title: "Orden de compra registrada",
+        description: "La orden de compra ha sido registrada con éxito",
+      });
     },
     onError: (error) => {
-      console.error("Error al registrar la orden de compra", error);
+      toast({
+        title: "Error al registrar la orden de compra",
+        description: error.message,
+        variant: "destructive",
+        action: (
+          <ToastAction
+            onClick={() => {
+              router.push("/dashboard/cart");
+            }}
+            altText="Ir al carrito"
+          >
+            Ir al carrito
+          </ToastAction>
+        ),
+      });
     },
   });
 
@@ -79,44 +103,6 @@ export default function PurchaseOrder() {
     forma_entrega: "",
   });
   const [focusedDate, setFocusedDate] = useState(defaultDate);
-
-  const document_types = [
-    {
-      label: "Cédula de identidad",
-      value: "CI",
-    },
-    {
-      label: "DNI",
-      value: "DNI",
-    },
-    {
-      label: "Pasaporte",
-      value: "pasaporte",
-    },
-    {
-      label: "Otro documento",
-      value: "otro_documento",
-    },
-  ];
-
-  const regularDeliveryMethods = [
-    {
-      label: "Entrega en mostrador",
-      value: "entrega_en_mostrador",
-    },
-    {
-      label: "Flete fast",
-      value: "flete_fast",
-    },
-    {
-      label: "Flete Regular",
-      value: "flete_regular",
-    },
-    {
-      label: "Flete Interior",
-      value: "flete_interior",
-    },
-  ];
 
   const [dropshippingData, setDropshippingData] =
     useState<DropShippingDeliveryState>({
@@ -264,11 +250,8 @@ export default function PurchaseOrder() {
     setFocusedDate(date);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Datos del formulario:", formData);
-    console.log("Datos del dropshipping:", dropshippingData);
-    console.log("Datos de la entrega regular:", regularDeliveryData);
     // crear una copia del objeto formData
     let data = { ...formData } as any;
     // agregar los datos de dropshipping al objeto data, si es que no tiene forma de entrega regular
@@ -332,65 +315,13 @@ export default function PurchaseOrder() {
     // console.log("Data DropshippingData:", dropshippingData);
 
     // enviar la orden de compra al servidor
-    const response = server_sendPurchaseOrderRegistration(data);
-    console.log(response);
+    await server_sendPurchaseOrderRegistration(data);
   };
 
   // AUX FUNCTIONS
   const valitadeSubmit = (data: any) => {
     return;
   };
-
-  function convertDateToCalendarDate(date: Date): CalendarDate {
-    // Extrae año, mes y día del objeto Date
-    const year = date.getUTCFullYear(); // Usa getUTCFullYear para evitar problemas de zona horaria
-    const month = date.getUTCMonth() + 1; // Los meses en Date están basados en 0 (0-11)
-    const day = date.getUTCDate();
-
-    // Crea una instancia de CalendarDate
-    return new CalendarDate(year, month, day);
-  }
-
-  function convertCalendarDateToDate(date: CalendarDate): Date {
-    const calendarToDate = date.toDate("America/Montevideo");
-    calendarToDate.setHours(12, 0, 0);
-
-    return calendarToDate;
-  }
-
-  function converDateToTime(date: Date): Time {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
-
-    return new Time(hours, minutes, seconds);
-  }
-
-  function convertDateToISOFormat(date: Date): string {
-    var tzo = -date.getTimezoneOffset(),
-      dif = tzo >= 0 ? "+" : "-",
-      pad = function (num: number) {
-        return (num < 10 ? "0" : "") + num;
-      };
-
-    return (
-      date.getFullYear() +
-      "-" +
-      pad(date.getMonth() + 1) +
-      "-" +
-      pad(date.getDate()) +
-      "T" +
-      pad(date.getHours()) +
-      ":" +
-      pad(date.getMinutes()) +
-      ":" +
-      pad(date.getSeconds()) +
-      dif +
-      pad(Math.floor(Math.abs(tzo) / 60)) +
-      ":" +
-      pad(Math.abs(tzo) % 60)
-    );
-  }
 
   useEffect(() => {
     console.log(formData);

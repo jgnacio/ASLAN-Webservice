@@ -27,7 +27,14 @@ export class UnicomAPIPurchaseOrderAdapter implements IPurchaseOrderRepository {
       .post(`${API_UNICOM_URL}/ordenes_de_compra`, body, config)
       .then((res) => res.data)
       .catch((err) => {
-        console.error(err);
+        console.error(err.response.data.message.codigo_error);
+        if (err.response.data.message.codigo_error === -2) {
+          throw new Error(
+            "No se pudo registrar la orden de compra, el carrito de compras está vacío. Debe tener al menos un producto para registrar la orden de compra"
+          );
+        } else {
+          throw new Error("No se pudo registrar la orden de compra");
+        }
       });
 
     console.log(response);

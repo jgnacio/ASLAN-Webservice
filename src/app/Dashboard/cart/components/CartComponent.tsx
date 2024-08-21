@@ -1,39 +1,67 @@
 "use client";
 // import { addProduct, removeProduct } from "@/lib/features/cart/addProduct";
 import ProductRow from "@/components/ProductRow";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { getCart } from "../_actions/get-cart";
-import { Button } from "@nextui-org/button";
-import { eraseCart } from "../_actions/eraseCart";
 import { useToast } from "@/components/ui/use-toast";
-import { title } from "process";
+import { Button } from "@nextui-org/button";
 import { colorVariants } from "@nextui-org/theme";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { eraseCart } from "../_actions/eraseCart";
+import { getCart } from "../_actions/get-cart";
+import { Spinner } from "@nextui-org/spinner";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import Link from "next/link";
+import { ProductType } from "@/domain/product/entities/Product";
+import { useRouter } from "next/navigation";
+import { CartProductType } from "@/domain/product/entities/Cart";
+import addToCart from "../_actions/add-product-to-cart";
+import { CircleX, Minus, PackageCheck, Plus, Trash2 } from "lucide-react";
+import { removeProductOnCart } from "../_actions/remove-product-on-cart";
+import {
+  CardTitle,
+  Card,
+  CardHeader,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { CardFooter } from "@/components/ui/card";
 
 export default function CartComponent() {
   const { toast } = useToast();
+  const [rows, setRows] = useState<any>([]);
+  const router = useRouter();
 
   const {
     mutateAsync: server_getCart,
-    isSuccess,
-    isIdle,
+    isSuccess: isSuccessGetCart,
     data: dataCart,
-    isError,
-    isPending,
+    isPending: isLoadingGetCart,
+    isError: isErrorGetCart,
   } = useMutation({
-    mutationFn: getCart,
-    retry: 3,
-    async onMutate() {
-      console.log("onMutate");
+    mutationFn: () => getCart(),
+    onSuccess: (data) => {
+      handleSetRows(data.products);
     },
-    async onError(error) {
-      console.log("onError", error);
+  });
+
+  const {
+    mutateAsync: server_removeProductOnCart,
+    isPending: isPendingRemoveProductOnCart,
+    isSuccess: isSuccessRemoveProductOnCart,
+  } = useMutation({
+    mutationFn: ({ id }: { id: string }) => removeProductOnCart(id),
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Hubo un error al eliminar el producto del carrito: ${error.message}`,
+        variant: "destructive",
+      });
     },
-    async onSuccess(data) {
-      console.log("onSuccess", data);
-    },
-    async onSettled() {
-      console.log("onSettled");
+    onSuccess: () => {
+      toast({
+        title: "Producto Eliminado",
+        description: "El producto ha sido eliminado del carrito exitosamente.",
+      });
     },
   });
 
@@ -45,56 +73,295 @@ export default function CartComponent() {
     mutationFn: () => eraseCart(),
   });
 
+  const {
+    mutate: server_addToCart,
+    isPending: isPendingAddToCart,
+    isSuccess: isSuccessAddToCart,
+    isError: isErrorAddToCart,
+  } = useMutation({
+    mutationFn: async ({ id, quantity }: { id: string; quantity: number }) => {
+      addToCart(id, quantity);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Producto Agregado",
+        description: "El producto ha sido agregado al carrito exitosamente.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Hubo un error al agregar el producto al carrito: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddProduct = async (id: string, quantity: number) => {
+    try {
+      await server_addToCart({ id, quantity });
+      server_getCart();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleRemoveProduct = async (id: string) => {
+    try {
+      await server_removeProductOnCart({ id });
+      server_getCart();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleAddQuantityToRow = (id: string, quantity: number) => {
+    const newRows = rows.map((row: any) => {
+      if (row.id === id) {
+        return { ...row, quantity: row.quantity + quantity };
+      }
+      return row;
+    });
+    setRows(newRows);
+  };
+
+  const handleEraseCart = async () => {
+    try {
+      await server_eraseCart();
+      toast({
+        title: "Carrito Vacio",
+        description: "El carrito ha sido vaciado exitosamente.",
+        variant: "default",
+      });
+      handleSetRows([]);
+      if (dataCart) {
+        dataCart.products = [];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const columns: GridColDef[] = [
+    {
+      field: "title",
+      headerName: "Producto",
+      renderCell: (params: GridRenderCellParams) => (
+        <Link href={`/dashboard/product/${params.row.sku}`}>
+          {params.row.title}
+        </Link>
+      ),
+      flex: 1,
+    },
+    {
+      field: "price",
+      headerName: "Precio C/U",
+      type: "number",
+      width: 90,
+      valueFormatter: (value, row) => `${row.price} U$D`,
+    },
+    // { field: "availability", headerName: "Disponibilidad", width: 120 },
+    { field: "marca", headerName: "Marca", width: 120 },
+    {
+      field: "availability",
+      headerName: "Disponibilidad",
+      width: 120,
+      valueGetter: (value, row) => {
+        if (row.availability === "con_inventario") {
+          return "En Stock";
+        } else {
+          return "Sin Stock";
+        }
+      },
+    },
+    { field: "sku", headerName: "SKU", width: 120 },
+    {
+      field: "priceByQuantity",
+      headerName: "Total",
+      type: "number",
+      width: 90,
+      valueGetter: (value, row) => `${row.price * row.quantity} U$D`,
+    },
+    {
+      field: "addremove",
+      headerName: "Cantidad",
+      width: 120,
+      type: "actions",
+      sortable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <div className="flex justify-center items-center">
+          <Button
+            isIconOnly
+            color="secondary"
+            size="sm"
+            onClick={() => {
+              if (params.row.quantity <= 1) return;
+              handleAddQuantityToRow(params.row.id, -1);
+            }}
+          >
+            <Minus className="h-5 w-5" />
+          </Button>
+          <span className="mx-4">{params.row.quantity}</span>
+          <Button
+            isIconOnly
+            color="secondary"
+            size="sm"
+            onClick={() => {
+              handleAddQuantityToRow(params.row.id, 1);
+            }}
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
+        </div>
+      ),
+    },
+
+    {
+      field: "update",
+      headerName: "",
+      type: "actions",
+      sortable: false,
+      width: 90,
+      renderCell: (params: GridRenderCellParams) => (
+        <Button
+          color="secondary"
+          onClick={() => {
+            let actualQuantity = params.row.quantity;
+            let previousQuantity = dataCart?.products.find(
+              (product) => product.id === params.row.id
+            )?.quantity;
+
+            let isUpdateable =
+              actualQuantity - (previousQuantity || 0) > 0 ||
+              (previousQuantity || 0) > 0;
+
+            console.log("result", actualQuantity - (previousQuantity || 0));
+
+            if (isUpdateable) {
+              handleAddProduct(
+                params.row.sku,
+                actualQuantity - (previousQuantity || 0)
+              );
+            }
+            console.log("isUpdateable", isUpdateable);
+          }}
+        >
+          Actualizar
+        </Button>
+      ),
+    },
+    {
+      field: "delete",
+      headerName: "",
+      type: "actions",
+      sortable: false,
+      width: 60,
+      renderCell: (params: GridRenderCellParams) => (
+        <Button
+          isIconOnly
+          color="danger"
+          onClick={() => {
+            handleRemoveProduct(params.row.sku);
+          }}
+        >
+          <CircleX />
+        </Button>
+      ),
+    },
+    // {
+    //   field: "fullName",
+    //   headerName: "Full name",
+    //   description: "This column has a value getter and is not sortable.",
+    //   sortable: false,
+    //   width: 160,
+    //   valueGetter: (value, row) =>
+    //     `${row.firstName || ""} ${row.lastName || ""}`,
+    // },
+  ];
+
+  const handleSetRows = (products: CartProductType[]) => {
+    const newRows = products.map((product) => {
+      return {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        marca: product.marca,
+        availability: product.available,
+        quantity: product.quantity,
+        guaranteeDays: product.guaranteeDays,
+        sku: product.sku,
+      };
+    });
+    setRows(newRows);
+  };
+
   useEffect(() => {
     server_getCart();
   }, []);
 
-  const handleAddProduct = async () => {};
-
-  const handleEraseCart = async () => {
-    await server_eraseCart();
-    toast({
-      title: "Carrito Vacio",
-      description: "Carrito Vacio",
-      color: colorVariants.light.success,
-    });
-  };
-
   return (
-    <div>
-      <h1 className="text-xl font-bold">Cart</h1>
+    <Card>
+      <CardHeader>
+        <CardTitle>Carrito</CardTitle>
+        <CardDescription>Listado de productos en el Carrito</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoadingGetCart ? <Spinner /> : ""}
 
-      {dataCart && dataCart.products.length > 0 ? (
-        // dataCart.products.map((product) => (
-        //   <div key={product.id}>
-        //     <h2>{product.title}</h2>
-        //     <p>{product.price}</p>
-        //     <p>{product.tax}</p>
-        //     <p>{product.quantity}</p>
-        //     <p>{product.available}</p>
-        //     {/* <Button onClick={handleAddProduct}>Add</Button> */}
-        //     <Button color="danger" onClick={handleRemoveProduct}>
-        //       Eliminar <FaRegTrashAlt />
-        //     </Button>
-        //   </div>
-        <div>
-          <div>
-            {dataCart.products.map((product) => (
-              <ProductRow product={product} onCart={true} key={product.id} />
-            ))}
+        {dataCart && dataCart.products.length > 0 && (
+          <div className="space-y-4">
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              disableColumnSelector
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 10 },
+                },
+              }}
+              autoHeight
+              pageSizeOptions={[10, 20]}
+            />
+            <Button size="sm" color="secondary" onClick={handleEraseCart}>
+              Vaciar Carrito <Trash2 className="h-5 w-5" />
+            </Button>
           </div>
-          <div>
-            <h2>Total incluyendo IVA: {dataCart.total_including_tax} U$D</h2>
+        )}
+        {dataCart && dataCart.products.length <= 0 ? (
+          <div className="flex flex-col space-y-4">
+            <h3 className="text-lg font-bold text-primary">
+              No hay productos en el carrito
+            </h3>
+            <Link href="/dashboard/products">
+              <Button color="primary">Ver Productos</Button>
+            </Link>
           </div>
-          <Button color="danger" onClick={handleEraseCart}>
-            Vaciar Carrito
-          </Button>
-        </div>
-      ) : isPending ? (
-        <div>Cargando...</div>
-      ) : (
-        dataCart && dataCart.products.length <= 0 && <div>Carrito Vacio</div>
-      )}
-    </div>
+        ) : (
+          ""
+        )}
+      </CardContent>
+      <CardFooter>
+        {dataCart && dataCart.products.length > 0 && (
+          <div className="flex justify-between w-full">
+            <div>
+              <h3 className="text-lg">
+                Total incluyendo IVA:
+                <span className="font-bold mx-2">
+                  {dataCart.total_including_tax} U$D
+                </span>
+              </h3>
+            </div>
+            {/* TODO: Crear una boton para el toast de agregar carrito que te lleve al carrito y ver el producto que agregaste */}
+            <div>
+              <Link href="/dashboard/purchase_order">
+                <Button color="primary">
+                  Confirmar <PackageCheck />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 }

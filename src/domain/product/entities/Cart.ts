@@ -236,7 +236,7 @@ export type CartType = {
   userId: string;
   lastUpdate: string;
   total: number;
-  products: ProductType[];
+  products: CartProductType[];
   delivery_options: [];
   payment_options: [];
   total_including_tax: number;

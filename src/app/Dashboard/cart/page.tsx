@@ -1,22 +1,23 @@
-import { auth } from "@clerk/nextjs/server";
+"use client";
+import { useAuth } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 import { redirect } from "next/navigation";
-import { Button } from "@nextui-org/button";
-import Link from "next/link";
 import CartComponent from "./components/CartComponent";
 
 export default function Cart() {
-  const { userId } = auth();
+  const { userId } = useAuth();
   if (!userId) {
     redirect("/sign-in");
   }
 
   return (
-    <div>
-      <h1>Shop</h1>
+    <motion.div
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ duration: 0.4 }}
+    >
       <CartComponent />
-      <Link href="/dashboard/purchase_order">
-        <Button color="primary">Realizar Orden de Compra</Button>
-      </Link>
-    </div>
+    </motion.div>
   );
 }
