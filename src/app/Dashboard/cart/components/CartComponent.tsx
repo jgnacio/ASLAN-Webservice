@@ -1,30 +1,26 @@
 "use client";
-// import { addProduct, removeProduct } from "@/lib/features/cart/addProduct";
-import ProductRow from "@/components/ProductRow";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { CartProductType } from "@/domain/product/entities/Cart";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Button } from "@nextui-org/button";
-import { colorVariants } from "@nextui-org/theme";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Spinner } from "@nextui-org/spinner";
+import { useMutation } from "@tanstack/react-query";
+import { CircleX, Minus, PackageCheck, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import addToCart from "../_actions/add-product-to-cart";
 import { eraseCart } from "../_actions/eraseCart";
 import { getCart } from "../_actions/get-cart";
-import { Spinner } from "@nextui-org/spinner";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import Link from "next/link";
-import { ProductType } from "@/domain/product/entities/Product";
-import { useRouter } from "next/navigation";
-import { CartProductType } from "@/domain/product/entities/Cart";
-import addToCart from "../_actions/add-product-to-cart";
-import { CircleX, Minus, PackageCheck, Plus, Trash2 } from "lucide-react";
 import { removeProductOnCart } from "../_actions/remove-product-on-cart";
-import {
-  CardTitle,
-  Card,
-  CardHeader,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { CardFooter } from "@/components/ui/card";
 
 export default function CartComponent() {
   const { toast } = useToast();
