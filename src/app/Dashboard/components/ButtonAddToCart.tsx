@@ -1,6 +1,6 @@
 "use client";
-import addToCart from "@/app/dashboard/cart/_actions/add-product-to-cart";
-import { getCart } from "@/app/dashboard/cart/_actions/get-cart";
+import addToCart from "../cart/_actions/add-product-to-cart";
+import { getCart } from "../cart/_actions/get-cart";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@nextui-org/button";
 import { useMutation } from "@tanstack/react-query";
