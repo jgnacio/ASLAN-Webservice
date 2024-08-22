@@ -105,7 +105,11 @@ export default function CartComponent() {
   const handleRemoveProduct = async (id: string) => {
     try {
       await server_removeProductOnCart({ id });
-      server_getCart();
+      const newCart = dataCart?.products.filter(
+        (product: any) => product.sku !== id
+      );
+      if (dataCart) dataCart.products = newCart || [];
+      if (newCart) handleSetRows(newCart);
     } catch (error) {
       console.log(error);
     }

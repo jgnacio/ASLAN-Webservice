@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { getAllProducts } from "../_actions/get-all-products";
 import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
 import ButtonAddToCart from "./ButtonAddToCart";
+import { getCart } from "../cart/_actions/get-cart";
 
 export default function ProductFeaturedList() {
   const [rows, setRows] = useState<any>([]);
@@ -26,6 +27,20 @@ export default function ProductFeaturedList() {
   } = useMutation({
     mutationFn: () => getAllProducts(),
   });
+
+  const {
+    mutateAsync: server_getCart,
+    isSuccess,
+    isPending,
+    data: dataCart,
+    isError,
+  } = useMutation({
+    mutationFn: getCart,
+  });
+
+  useEffect(() => {
+    server_getCart();
+  }, []);
 
   const columns: GridColDef[] = [
     { field: "title", headerName: "Producto", flex: 1 },
@@ -50,9 +65,12 @@ export default function ProductFeaturedList() {
       headerName: "",
       type: "actions",
       sortable: false,
-      renderCell: (params: GridRenderCellParams) => (
-        <ButtonAddToCart params={{ id: params.row.sku }} />
-      ),
+      renderCell: (params: GridRenderCellParams) =>
+        isPending ? (
+          <Spinner color="primary" />
+        ) : (
+          <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
+        ),
     },
     // {
     //   field: "fullName",

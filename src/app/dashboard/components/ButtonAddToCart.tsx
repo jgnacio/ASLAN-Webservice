@@ -5,20 +5,27 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@nextui-org/button";
 import { useMutation } from "@tanstack/react-query";
 import { CircleX, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { removeProductOnCart } from "../cart/_actions/remove-product-on-cart";
+import { ToastAction } from "@/components/ui/toast";
+import { useRouter } from "next/navigation";
 
 export default function ButtonAddToCart({
   params,
 }: {
-  params: { id: string };
+  params: { id: string; cart: any };
 }) {
+  const { toast } = useToast();
+  const [onCart, setOnCart] = useState(false);
+  const router = useRouter();
   const {
     mutateAsync: server_getCart,
     isSuccess,
     isIdle,
     data: dataCart,
     isError,
-    isPending,
+    isPending: isPendingGetCart,
   } = useMutation({
     mutationFn: getCart,
     retry: 3,
@@ -30,32 +37,50 @@ export default function ButtonAddToCart({
     isIdle: isIdleAddToCart,
     data: dataAddToCart,
     isError: isErrorAddToCart,
+    isPending: isPendingAddToCart,
   } = useMutation({
     mutationFn: ({ id, quantity }: { id: string; quantity: number }) =>
       addToCart(id, quantity),
   });
 
-  const { toast } = useToast();
-  const [onCart, setOnCart] = useState(false);
+  const {
+    mutateAsync: server_removeProductOnCart,
+    isPending: isPendingRemoveProductOnCart,
+    isSuccess: isSuccessRemoveProductOnCart,
+  } = useMutation({
+    mutationFn: ({ id }: { id: string }) => removeProductOnCart(id),
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Hubo un error al eliminar el producto del carrito: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const findProduct = (id: string) => {
+    if (!params.cart) return false;
+    return params.cart.products.find((product: any) => product.sku === id);
+  };
+
+  useEffect(() => {
+    const product = findProduct(params.id);
+    setOnCart(!!product);
+  }, []);
 
   const handleAddProductToCart = async () => {
     if (onCart) {
+      await removeProductOnCart(params.id);
       toast({
-        title: "Producto eliminado",
-        description: `El producto ${params.id} se ha eliminado del carrito`,
+        title: "Producto Eliminado",
+        description: "El producto ha sido eliminado del carrito exitosamente.",
       });
       setOnCart(false);
       return;
     }
 
-    console.log("add to cart", params.id);
     const cart = await server_getCart();
-    console.log("cart", cart);
-    // Find if the product is on cart
-    const product = cart.products.find(
-      (product: any) => product.sku === params.id
-    );
-
+    const product = findProduct(params.id);
     setOnCart(true);
     if (product) {
       toast({
@@ -77,6 +102,16 @@ export default function ButtonAddToCart({
     toast({
       title: "Producto agregado",
       description: `El producto ${params.id} se ha agregado al carrito`,
+      action: (
+        <ToastAction
+          onClick={() => {
+            router.push("/dashboard/cart");
+          }}
+          altText="Ir al carrito"
+        >
+          Ir al carrito
+        </ToastAction>
+      ),
     });
   };
 
@@ -85,6 +120,9 @@ export default function ButtonAddToCart({
       color={!onCart ? "secondary" : "danger"}
       variant="solid"
       className="rounded-full"
+      disabled={
+        isPendingRemoveProductOnCart || isPendingAddToCart || isPendingGetCart
+      }
       onClick={handleAddProductToCart}
       size="sm"
     >

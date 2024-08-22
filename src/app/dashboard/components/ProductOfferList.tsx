@@ -11,6 +11,7 @@ import ButtonAddToCart from "./ButtonAddToCart";
 import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getCart } from "../cart/_actions/get-cart";
 
 export default function ProductOfferList() {
   const [rows, setRows] = useState<any>([]);
@@ -29,6 +30,20 @@ export default function ProductOfferList() {
   } = useMutation({
     mutationFn: () => getAllProducts(),
   });
+
+  const {
+    mutateAsync: server_getCart,
+    isSuccess,
+    isPending,
+    data: dataCart,
+    isError,
+  } = useMutation({
+    mutationFn: getCart,
+  });
+
+  useEffect(() => {
+    server_getCart();
+  }, []);
 
   const columns: GridColDef[] = [
     {
@@ -62,9 +77,12 @@ export default function ProductOfferList() {
       headerName: "",
       type: "actions",
       sortable: false,
-      renderCell: (params: GridRenderCellParams) => (
-        <ButtonAddToCart params={{ id: params.row.sku }} />
-      ),
+      renderCell: (params: GridRenderCellParams) =>
+        isPending ? (
+          <Spinner color="primary" />
+        ) : (
+          <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
+        ),
     },
     // {
     //   field: "fullName",
@@ -115,7 +133,6 @@ export default function ProductOfferList() {
 
   return (
     <div className="w-full h-full">
-      {isLoadingGetAllProducts ? "cargado todos los productos" : ""}
       {isLoadingGetProductsByPage ? (
         <Spinner color="primary" />
       ) : (
