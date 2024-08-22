@@ -35,7 +35,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    <div className="flex min-h-screen w-full flex-col bg-gray-50">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col items-center gap-4 px-2 py-4">
           <TooltipProvider>
@@ -172,8 +172,8 @@ export default function DashboardLayout({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="grid  items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-16 ">
-          <div className="md:mx-auto min-w-[70vw] flex-1  gap-4">
+        <main className="grid  items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-16  bg-gray-50">
+          <div className="md:mx-auto min-w-[70vw] flex-1  gap-4 ">
             {children}
           </div>
         </main>
