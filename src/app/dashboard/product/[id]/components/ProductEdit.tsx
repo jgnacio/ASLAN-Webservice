@@ -190,6 +190,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                   {file &&
                     file.map((img) => (
                       <img
+                        key={img.name}
                         alt="Product img"
                         src={img.src}
                         className="aspect-square items-center justify-center rounded-md border border-dashed h-[6rem]"
