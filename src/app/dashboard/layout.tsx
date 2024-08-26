@@ -1,11 +1,15 @@
 "use client";
 import {
+  Home,
   LayoutDashboard,
+  LineChart,
   Package,
+  Package2,
   PackagePlus,
   PanelLeft,
   Settings,
   ShoppingCart,
+  Users2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -18,7 +22,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Tooltip,
   TooltipContent,
@@ -125,6 +129,50 @@ export default function DashboardLayout({
                 <span className="sr-only">Alternar Menú</span>
               </Button>
             </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs">
+              <nav className="grid gap-6 text-lg font-medium">
+                {/* <SignedIn>
+                  <UserButton showName />
+                </SignedIn>
+                <span className="sr-only">Cuenta</span> */}
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/dashboard/products"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
+                >
+                  <Package className="h-5 w-5" />
+                  Productos
+                </Link>
+                <Link
+                  href="/dashboard/cart"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  Carrito
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <Users2 className="h-5 w-5" />
+                  Customers
+                </Link>
+
+                <Link
+                  href="#"
+                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  <LineChart className="h-5 w-5" />
+                  Settings
+                </Link>
+              </nav>
+            </SheetContent>
           </Sheet>
           <Breadcrumb className="hidden md:flex">
             <BreadcrumbList>
@@ -172,7 +220,7 @@ export default function DashboardLayout({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <main className="grid  items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-16  bg-gray-50">
+        <main className="grid  items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-8  bg-gray-50">
           <div className="md:mx-auto min-w-[70vw] flex-1  gap-4 ">
             {children}
           </div>

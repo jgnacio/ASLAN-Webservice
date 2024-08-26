@@ -1,5 +1,5 @@
 "use client";
-import { PlusIcon, Upload } from "lucide-react";
+import { ImagePlus, PlusIcon, Upload } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,16 @@ import { ProductType } from "@/domain/product/entities/Product";
 import { useEffect, useState } from "react";
 import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type imageProps = {
   name: string;
@@ -59,45 +69,55 @@ export function ProductEdit({ product }: { product: ProductType }) {
   useEffect(() => {
     console.log("file", file);
   }, [file]);
-  function handleChange(e: any) {
-    if (!file) {
-      setImageTemplate({
-        name: e.target.files[0].name,
-        src: URL.createObjectURL(e.target.files[0]),
+
+  const handleChange = (e: any) => {
+    setImageTemplate({
+      name: e.target.files[0].name,
+      src: URL.createObjectURL(e.target.files[0]),
+    });
+  };
+
+  function addToImages() {
+    if (imageTemplate.src === "") {
+      toast({
+        title: "Error",
+        description: "No se ha seleccionado ninguna imagen.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    if (!file) {
       setFile([
         {
-          name: e.target.files[0].name,
-          src: URL.createObjectURL(e.target.files[0]),
+          name: imageTemplate.name,
+          src: imageTemplate.src,
         },
       ]);
       return;
     }
     // check first if there img allerady not exists on the file array
-    const name = file.map((img) => {
-      if (img.name === e.target.files[0].name) {
+    const name = file.map((i) => {
+      if (i.name === imageTemplate.name) {
         toast({
           title: "Error",
           description: "La imagen ya fue cargada anteriormente.",
           variant: "destructive",
         });
-        return img.name;
+        return i.name;
       }
     });
 
-    if (name.includes(e.target.files[0].name)) {
+    if (name.includes(imageTemplate.name)) {
       return;
     }
 
     const fileCopy = [...file];
     fileCopy.push({
-      name: e.target.files[0].name,
-      src: URL.createObjectURL(e.target.files[0]),
+      name: imageTemplate.name,
+      src: imageTemplate.src,
     });
-    setImageTemplate({
-      name: e.target.files[0].name,
-      src: URL.createObjectURL(e.target.files[0]),
-    });
+
     setFile(fileCopy);
 
     toast({
@@ -106,13 +126,26 @@ export function ProductEdit({ product }: { product: ProductType }) {
       variant: "default",
     });
   }
+
+  function removeImage(name: string) {
+    const fileCopy = file?.filter((i) => i.name !== name);
+
+    if (!fileCopy) {
+      setFile([]);
+      return;
+    }
+    setFile(fileCopy);
+  }
   return (
     <div className="mx-auto grid max-w-[70vw] flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
         <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
           Publicar Producto
         </h1>
-        <Badge variant="outline" className="ml-auto sm:ml-0">
+        <Badge
+          variant={product.stock > 0 ? "default" : "destructive"}
+          className="ml-auto sm:ml-0"
+        >
           {product.stock > 0 ? <span>En stock</span> : <span>Sin stock</span>}
         </Badge>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
@@ -189,12 +222,42 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 <div className="flex flex-wrap justify-center items-center gap-4">
                   {file &&
                     file.map((img) => (
-                      <img
-                        key={img.name}
-                        alt="Product img"
-                        src={img.src}
-                        className="aspect-square items-center justify-center rounded-md border border-dashed h-[6rem]"
-                      />
+                      <Dialog>
+                        <DialogTrigger>
+                          {" "}
+                          <img
+                            key={img.name}
+                            alt="Product img"
+                            src={img.src}
+                            className="aspect-square object-cover items-center justify-center rounded-md border border-dashed h-[6rem]"
+                          />
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Estas seguro de eliminar esta imagen?
+                            </DialogTitle>
+                            <DialogDescription>
+                              <img
+                                key={img.name}
+                                alt="Product img"
+                                src={img.src}
+                                className="aspect-square object-cover items-center justify-center rounded-md border border-dashed h-[6rem]"
+                              />
+                            </DialogDescription>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button
+                                  onClick={() => removeImage(img.name)}
+                                  color="primary"
+                                >
+                                  Eliminar
+                                </Button>
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
                     ))}
                   <Drawer>
                     <DrawerTrigger>
@@ -216,13 +279,11 @@ export function ProductEdit({ product }: { product: ProductType }) {
                         <DrawerTitle>Subir imagen de producto</DrawerTitle>
                         <DrawerDescription>
                           <Card className="flex justify-center border-0">
-                            <CardContent className={file ? "h-40 w-40" : ""}>
+                            <CardContent>
                               {imageTemplate.src != "" && (
                                 <img
                                   alt="Product img"
-                                  className="aspect-square w-full rounded-md object-cover"
-                                  height="100"
-                                  width="100"
+                                  className="rounded-md object-cover min-h-[40vh] max-h-[60vh]"
                                   src={imageTemplate.src}
                                 />
                               )}
@@ -232,9 +293,26 @@ export function ProductEdit({ product }: { product: ProductType }) {
                       </DrawerHeader>
                       <DrawerFooter>
                         <Input type="file" onChange={handleChange}></Input>
-                        <DrawerClose>
-                          <Button variant="outline">Cancel</Button>
-                        </DrawerClose>
+                        <div className="w-full flex justify-center space-x-8">
+                          <DrawerClose>
+                            <Button variant="outline">Cancel</Button>
+                          </DrawerClose>
+                          <DrawerClose
+                            className={
+                              imageTemplate.src === ""
+                                ? "pointer-events-none"
+                                : ""
+                            }
+                          >
+                            <Button
+                              disabled={imageTemplate.src === ""}
+                              onClick={addToImages}
+                              color="primary"
+                            >
+                              Agregar <ImagePlus />
+                            </Button>
+                          </DrawerClose>
+                        </div>
                       </DrawerFooter>
                     </DrawerContent>
                   </Drawer>

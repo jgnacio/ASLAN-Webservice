@@ -145,8 +145,9 @@ export default function ProductOfferList() {
             rows={rows}
             columns={columns}
             disableColumnSelector
+            autoHeight
             onRowClick={(params) => {
-              router.push(`/dashboard/product/${params.row.sku}`);
+              router.push(`/dashboard/product/${params.row.sku}/edit`);
             }}
             initialState={{
               pagination: {

@@ -16,6 +16,7 @@ import { getAllProducts } from "../_actions/get-all-products";
 import { getRelevantProducts } from "../_actions/get-relevant-products";
 import ButtonAddToCart from "./ButtonAddToCart";
 import { getCart } from "../cart/_actions/get-cart";
+import { useRouter } from "next/navigation";
 
 export function CustomFooterStatusComponent(
   props: NonNullable<GridSlotsComponentsProps["footer"]>
@@ -24,6 +25,7 @@ export function CustomFooterStatusComponent(
 }
 
 export default function ProductRelevantList() {
+  const router = useRouter();
   const [rows, setRows] = useState<any>([]);
 
   const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
@@ -148,6 +150,9 @@ export default function ProductRelevantList() {
             disableColumnSelector
             disableRowSelectionOnClick
             autoHeight
+            onRowClick={(params) => {
+              router.push(`/dashboard/product/${params.row.sku}/edit`);
+            }}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },

@@ -10,8 +10,10 @@ import { getAllProducts } from "../_actions/get-all-products";
 import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
 import ButtonAddToCart from "./ButtonAddToCart";
 import { getCart } from "../cart/_actions/get-cart";
+import { useRouter } from "next/navigation";
 
 export default function ProductFeaturedList() {
+  const router = useRouter();
   const [rows, setRows] = useState<any>([]);
 
   const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
@@ -135,6 +137,10 @@ export default function ProductFeaturedList() {
             columns={columns}
             disableColumnSelector
             disableRowSelectionOnClick
+            autoHeight
+            onRowClick={(params) => {
+              router.push(`/dashboard/product/${params.row.sku}/edit`);
+            }}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },
