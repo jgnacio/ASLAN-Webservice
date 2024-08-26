@@ -222,11 +222,10 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 <div className="flex flex-wrap justify-center items-center gap-4">
                   {file &&
                     file.map((img) => (
-                      <Dialog>
+                      <Dialog key={img.name}>
                         <DialogTrigger>
                           {" "}
                           <img
-                            key={img.name}
                             alt="Product img"
                             src={img.src}
                             className="aspect-square object-cover items-center justify-center rounded-md border border-dashed h-[6rem]"
