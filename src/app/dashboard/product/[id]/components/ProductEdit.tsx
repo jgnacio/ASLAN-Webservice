@@ -1,5 +1,5 @@
 "use client";
-import { ImagePlus, PlusIcon, Upload } from "lucide-react";
+import { ImagePlus, Link, PlusIcon, Upload } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { publishProduct } from "../_actions/publish-product";
+
 type imageProps = {
   name: string;
   src: string;
@@ -65,10 +69,32 @@ export function ProductEdit({ product }: { product: ProductType }) {
     src: "",
   });
   const [file, setFile] = useState<imageListProps | null>(null);
+  const [contentDescripcion, serContentDescripcion] = useState<string>(
+    product.description
+  );
+  const router = useRouter();
   const { toast } = useToast();
-  useEffect(() => {
-    console.log("file", file);
-  }, [file]);
+
+  const {
+    mutateAsync: server_publishProduct,
+    isError,
+    isSuccess,
+  } = useMutation({
+    mutationFn: (product: ProductType) => publishProduct(product),
+    onSuccess: () => {
+      toast({
+        title: "Producto publicado",
+        description: "El producto fue publicado con éxito.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Hubo un error al publicar el producto.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleChange = (e: any) => {
     setImageTemplate({
@@ -136,6 +162,15 @@ export function ProductEdit({ product }: { product: ProductType }) {
     }
     setFile(fileCopy);
   }
+
+  function handleSubmmit() {
+    product.description = contentDescripcion;
+    if (file) {
+      product.images = file.map((img) => img.src);
+    }
+    server_publishProduct(product);
+  }
+
   return (
     <div className="mx-auto grid max-w-[70vw] flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
@@ -149,10 +184,16 @@ export function ProductEdit({ product }: { product: ProductType }) {
           {product.stock > 0 ? <span>En stock</span> : <span>Sin stock</span>}
         </Badge>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
-          <Button variant="outline" size="sm">
+          <Button
+            onClick={() => router.push("/dashboard/products")}
+            variant="outline"
+            size="sm"
+          >
             Descartar
           </Button>
-          <Button size="sm">Publicar</Button>
+          <Button size="sm" onClick={handleSubmmit}>
+            Publicar
+          </Button>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
@@ -178,7 +219,8 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 <div className="grid gap-3">
                   <Label htmlFor="description">Descripción</Label>
                   <ProductDescriptionEditor
-                    contentPlainText={product.description}
+                    contentPlainText={contentDescripcion}
+                    setContentPlainText={serContentDescripcion}
                   />
                 </div>
               </div>
@@ -203,7 +245,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="draft">Borrador</SelectItem>
-                      <SelectItem value="published">Publico</SelectItem>
+                      <SelectItem disabled value="published">
+                        Publico
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -259,19 +303,16 @@ export function ProductEdit({ product }: { product: ProductType }) {
                       </Dialog>
                     ))}
                   <Drawer>
-                    <DrawerTrigger>
-                      <Button
-                        onClick={() => {
-                          setImageTemplate({
-                            name: "",
-                            src: "",
-                          });
-                        }}
-                        variant="outline"
-                        className="flex aspect-square items-center justify-center rounded-md border border-dashed h-[6rem]"
-                      >
-                        <PlusIcon />
-                      </Button>
+                    <DrawerTrigger
+                      onClick={() => {
+                        setImageTemplate({
+                          name: "",
+                          src: "",
+                        });
+                      }}
+                      className="flex aspect-square items-center justify-center rounded-md border border-dashed h-[6rem]"
+                    >
+                      <PlusIcon />
                     </DrawerTrigger>
                     <DrawerContent>
                       <DrawerHeader>

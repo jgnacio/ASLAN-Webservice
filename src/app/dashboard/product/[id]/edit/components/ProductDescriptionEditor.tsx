@@ -10,16 +10,16 @@ import "froala-editor/js/plugins.pkgd.min.js";
 
 function ProductDescriptionEditor({
   contentPlainText,
+  setContentPlainText,
 }: {
   contentPlainText: string;
+  setContentPlainText: (content: string) => void;
 }) {
-  const [content, setContent] = useState(contentPlainText || "");
-
   return (
     <FroalaEditor
       tag="textarea"
-      model={content}
-      onModelChange={setContent}
+      model={contentPlainText}
+      onModelChange={setContentPlainText}
       config={{
         toolbarSticky: true,
         charCounterCount: false,

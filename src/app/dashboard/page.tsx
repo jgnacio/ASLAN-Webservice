@@ -30,8 +30,10 @@ export default function Dashboard() {
       exit={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.4 }}
     >
-      <span className="flex justify-end items-center space-x-2">
-        Conexión a API ASLAN Woocommerce. Status:{" "}
+      <div className="flex justify-end items-center h-16 spa">
+        <span className="font-light text-gray-500">
+          Conexión a API ASLAN Woocommerce. Status:{" "}
+        </span>
         {isLoading ? (
           <Spinner size="sm" className="h-12 w-12" />
         ) : isSuccess ? (
@@ -59,10 +61,10 @@ export default function Dashboard() {
             animate={{ scale: [1, 1.2, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 0.6, repeat: Infinity }}
           >
-            <Dot className="h-12 w-12 text-danger-400" />
+            <Dot className="h-12 w-12 text-black/50" />
           </motion.div>
         )}
-      </span>
+      </div>
       <ResentSales />
     </motion.div>
   );
