@@ -55,10 +55,17 @@ import {
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { publishProduct } from "../_actions/publish-product";
+import { WordPressRestAPIMediaAttributes } from "@/Resources/API/ASLAN/entities/AslanWPAPI";
+import { createMedia } from "../_actions/create-media";
+import fs, { read } from "fs";
+import axios from "axios";
 
 type imageProps = {
   name: string;
   src: string;
+  content: File | null;
+  type: string;
+  filename: string;
 };
 
 type imageListProps = imageProps[];
@@ -67,6 +74,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
     name: "",
     src: "",
+    content: null,
+    type: "",
+    filename: "",
   });
   const [file, setFile] = useState<imageListProps | null>(null);
   const [contentDescripcion, serContentDescripcion] = useState<string>(
@@ -96,10 +106,34 @@ export function ProductEdit({ product }: { product: ProductType }) {
     },
   });
 
+  // const {
+  //   mutateAsync: server_createMedia,
+  //   isError: mediaIsError,
+  //   isSuccess: mediaIsSuccess,
+  // } = useMutation({
+  //   mutationFn: (data: { content: File; title: string }) => createMedia(data),
+  //   onSuccess: () => {
+  //     toast({
+  //       title: "Imagen subida",
+  //       description: "La imagen fue subida con éxito.",
+  //     });
+  //   },
+  //   onError: (error) => {
+  //     toast({
+  //       title: "Error",
+  //       description: "Hubo un error al subir la imagen.",
+  //       variant: "destructive",
+  //     });
+  //   },
+  // });
+
   const handleChange = (e: any) => {
     setImageTemplate({
       name: e.target.files[0].name,
       src: URL.createObjectURL(e.target.files[0]),
+      content: e.target.files[0],
+      type: e.target.files[0].type,
+      filename: e.target.files[0].name,
     });
   };
 
@@ -118,8 +152,12 @@ export function ProductEdit({ product }: { product: ProductType }) {
         {
           name: imageTemplate.name,
           src: imageTemplate.src,
+          content: imageTemplate.content,
+          type: imageTemplate.type,
+          filename: imageTemplate.filename,
         },
       ]);
+
       return;
     }
     // check first if there img allerady not exists on the file array
@@ -142,6 +180,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
     fileCopy.push({
       name: imageTemplate.name,
       src: imageTemplate.src,
+      content: imageTemplate.content,
+      type: imageTemplate.type,
+      filename: imageTemplate.filename,
     });
 
     setFile(fileCopy);
@@ -161,6 +202,23 @@ export function ProductEdit({ product }: { product: ProductType }) {
       return;
     }
     setFile(fileCopy);
+  }
+
+  async function SubmitImageToProduction(imgName: string) {
+    const img = file?.filter((i) => i.name === imgName);
+    if (img && img[0]) {
+      const { name: title, filename, content, type } = img[0];
+
+      if (content) {
+        const formData = new FormData();
+        formData.append("file", content, filename); // El archivo es añadido directamente a FormData
+        formData.append("title", title); // Puedes añadir otros datos también
+
+        const response = await axios.post("/api/upload", formData);
+
+        console.log(response.data);
+      }
+    }
   }
 
   function handleSubmmit() {
@@ -218,10 +276,10 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="description">Descripción</Label>
-                  <ProductDescriptionEditor
+                  {/* <ProductDescriptionEditor
                     contentPlainText={contentDescripcion}
                     setContentPlainText={serContentDescripcion}
-                  />
+                  /> */}
                 </div>
               </div>
             </CardContent>
@@ -289,6 +347,14 @@ export function ProductEdit({ product }: { product: ProductType }) {
                               />
                             </DialogDescription>
                             <DialogFooter>
+                              <Button
+                                onClick={() =>
+                                  SubmitImageToProduction(img.name)
+                                }
+                                color="primary"
+                              >
+                                Subir
+                              </Button>
                               <DialogClose asChild>
                                 <Button
                                   onClick={() => removeImage(img.name)}
@@ -308,6 +374,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
                         setImageTemplate({
                           name: "",
                           src: "",
+                          content: null,
+                          type: "",
+                          filename: "",
                         });
                       }}
                       className="flex aspect-square items-center justify-center rounded-md border border-dashed h-[6rem]"
@@ -332,7 +401,11 @@ export function ProductEdit({ product }: { product: ProductType }) {
                         </DrawerDescription>
                       </DrawerHeader>
                       <DrawerFooter>
-                        <Input type="file" onChange={handleChange}></Input>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleChange}
+                        ></Input>
                         <div className="w-full flex justify-center space-x-8">
                           <DrawerClose>
                             <Button variant="outline">Cancel</Button>

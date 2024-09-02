@@ -119,7 +119,6 @@ export default function ButtonAddToCart({
     <Button
       color={!onCart ? "secondary" : "danger"}
       variant="solid"
-      className="rounded-full"
       disabled={
         isPendingRemoveProductOnCart || isPendingAddToCart || isPendingGetCart
       }

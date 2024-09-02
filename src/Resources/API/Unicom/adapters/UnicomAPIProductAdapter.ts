@@ -125,8 +125,6 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       return null;
     }
 
-    console.log(response);
-
     try {
       const product = new Product({
         sku: response.codigo || "",

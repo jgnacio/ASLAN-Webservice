@@ -17,6 +17,8 @@ import { getRelevantProducts } from "../_actions/get-relevant-products";
 import ButtonAddToCart from "./ButtonAddToCart";
 import { getCart } from "../cart/_actions/get-cart";
 import { useRouter } from "next/navigation";
+import { Button } from "@nextui-org/button";
+import { FilePen } from "lucide-react";
 
 export function CustomFooterStatusComponent(
   props: NonNullable<GridSlotsComponentsProps["footer"]>
@@ -75,8 +77,25 @@ export default function ProductRelevantList() {
     },
     { field: "sku", headerName: "SKU", flex: 1 },
     {
+      field: "edit",
+      headerName: "Publicar",
+      type: "actions",
+      sortable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <Button
+          color="secondary"
+          isIconOnly
+          onClick={() =>
+            router.push(`/dashboard/product/${params.row.sku}/edit`)
+          }
+        >
+          <FilePen className="h-5 w-5 text-muted-foreground" />
+        </Button>
+      ),
+    },
+    {
       field: "add",
-      headerName: "",
+      headerName: "Agregar",
       type: "actions",
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
@@ -150,9 +169,6 @@ export default function ProductRelevantList() {
             disableColumnSelector
             disableRowSelectionOnClick
             autoHeight
-            onRowClick={(params) => {
-              router.push(`/dashboard/product/${params.row.sku}/edit`);
-            }}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },

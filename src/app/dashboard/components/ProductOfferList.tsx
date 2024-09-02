@@ -12,6 +12,8 @@ import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getCart } from "../cart/_actions/get-cart";
+import { Button } from "@nextui-org/button";
+import { FilePen } from "lucide-react";
 
 export default function ProductOfferList() {
   const [rows, setRows] = useState<any>([]);
@@ -46,16 +48,7 @@ export default function ProductOfferList() {
   }, []);
 
   const columns: GridColDef[] = [
-    {
-      field: "title",
-      headerName: "Producto",
-      renderCell: (params: GridRenderCellParams) => (
-        <Link href={`/dashboard/product/${params.row.sku}`}>
-          {params.row.title}
-        </Link>
-      ),
-      flex: 1,
-    },
+    { field: "title", headerName: "Producto", flex: 1 },
     {
       field: "price",
       headerName: "Precio",
@@ -73,8 +66,25 @@ export default function ProductOfferList() {
     },
     { field: "sku", headerName: "SKU", flex: 1 },
     {
+      field: "edit",
+      headerName: "Publicar",
+      type: "actions",
+      sortable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <Button
+          color="secondary"
+          isIconOnly
+          onClick={() =>
+            router.push(`/dashboard/product/${params.row.sku}/edit`)
+          }
+        >
+          <FilePen className="h-5 w-5 text-muted-foreground" />
+        </Button>
+      ),
+    },
+    {
       field: "add",
-      headerName: "",
+      headerName: "Agregar",
       type: "actions",
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
@@ -146,9 +156,6 @@ export default function ProductOfferList() {
             columns={columns}
             disableColumnSelector
             autoHeight
-            onRowClick={(params) => {
-              router.push(`/dashboard/product/${params.row.sku}/edit`);
-            }}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },

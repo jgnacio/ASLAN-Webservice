@@ -22,7 +22,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Tooltip,
   TooltipContent,
@@ -135,42 +140,42 @@ export default function DashboardLayout({
                   <UserButton showName />
                 </SignedIn>
                 <span className="sr-only">Cuenta</span> */}
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/dashboard/products"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
-                >
-                  <Package className="h-5 w-5" />
-                  Productos
-                </Link>
-                <Link
-                  href="/dashboard/cart"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  Carrito
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Users2 className="h-5 w-5" />
-                  Customers
-                </Link>
-
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <LineChart className="h-5 w-5" />
-                  Settings
-                </Link>
+                <SheetClose asChild>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
+                    Dashboard
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link
+                    href="/dashboard/products"
+                    className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
+                  >
+                    <Package className="h-5 w-5" />
+                    Productos
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link
+                    href="/dashboard/cart"
+                    className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    Carrito
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link
+                    href="#"
+                    className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <Settings className="h-5 w-5" />
+                    Settings
+                  </Link>
+                </SheetClose>
               </nav>
             </SheetContent>
           </Sheet>
@@ -182,7 +187,7 @@ export default function DashboardLayout({
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
-              {pathname.startsWith("/dashboard/products") && (
+              {pathname?.startsWith("/dashboard/products") && (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="select-none">
@@ -193,7 +198,7 @@ export default function DashboardLayout({
                 </>
               )}
 
-              {pathname.startsWith("/dashboard/product") &&
+              {pathname?.startsWith("/dashboard/product") &&
                 !pathname.endsWith("products") && (
                   <>
                     <BreadcrumbSeparator />
@@ -209,7 +214,7 @@ export default function DashboardLayout({
                   </>
                 )}
 
-              {pathname.startsWith("/dashboard/cart") && (
+              {pathname?.startsWith("/dashboard/cart") && (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="pointer-events-none select-none">

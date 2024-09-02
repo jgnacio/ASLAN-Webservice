@@ -7,7 +7,7 @@ export class AslanWooAPI {
   public static getInstance(): WooCommerceRestApi<WooRestApiOptions> {
     if (!AslanWooAPI.instance) {
       const opt: WooRestApiOptions = {
-        url: process.env.WC_URL || "",
+        url: process.env.WP_URL || "",
         consumerKey: process.env.WC_CONSUMER_KEY || "",
         consumerSecret: process.env.WC_CONSUMER_SECRET || "",
         version: "wc/v3",

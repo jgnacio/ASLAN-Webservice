@@ -1,9 +1,11 @@
-import { auth } from "@clerk/nextjs/server";
+"use client";
+import { useAuth } from "@clerk/nextjs";
+// import { auth } from "@clerk/nextjs/server";
 import { Button } from "@nextui-org/button";
 import Link from "next/link";
 
 export default function Home() {
-  const { userId } = auth();
+  const { userId } = useAuth();
 
   return (
     <main className="flex min-h-[80vh] flex-col items-center justify-between p-24">
