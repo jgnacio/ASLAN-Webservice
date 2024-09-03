@@ -8,10 +8,17 @@ export interface AslanWooAPIProductRequest {
   categories: {
     id: number;
   }[];
-  images: (
-    | {
-        id: number;
-      }
-    | { src: string }
-  )[];
+  images:
+    | (
+        | {
+            id: number;
+          }
+        | { src?: string }
+      )[]
+    | (
+        | {
+            id?: number;
+          }
+        | { src: string }
+      )[];
 }

@@ -143,7 +143,7 @@ export type ProductType = {
   price: number;
   title: string;
   description: string;
-  images: string[];
+  images: any[];
   category: ProductCategory;
   marca: string;
   stock: number;

@@ -1,5 +1,5 @@
 "use client";
-import { ImagePlus, Link, PlusIcon, Upload } from "lucide-react";
+import { ImagePlus, PlusIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerClose,
@@ -37,29 +47,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProductType } from "@/domain/product/entities/Product";
-import { useEffect, useState } from "react";
-import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ProductType } from "@/domain/product/entities/Product";
+import { useState } from "react";
 
-import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { publishProduct } from "../_actions/publish-product";
-import { WordPressRestAPIMediaAttributes } from "@/Resources/API/ASLAN/entities/AslanWPAPI";
-import { createMedia } from "../_actions/create-media";
-import fs, { read } from "fs";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
+import { publishProduct } from "../_actions/publish-product";
+import { motion } from "framer-motion";
+import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 type imageProps = {
   name: string;
   src: string;
@@ -82,6 +79,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
   const [contentDescripcion, serContentDescripcion] = useState<string>(
     product.description
   );
+
+  const [productState, setProductState] = useState<ProductType>(product);
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -204,7 +204,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
     setFile(fileCopy);
   }
 
-  async function SubmitImageToProduction(imgName: string) {
+  async function SubmitImageToProduction(
+    imgName: string
+  ): Promise<number | undefined> {
     const img = file?.filter((i) => i.name === imgName);
     if (img && img[0]) {
       const { name: title, filename, content, type } = img[0];
@@ -216,17 +218,64 @@ export function ProductEdit({ product }: { product: ProductType }) {
 
         const response = await axios.post("/api/upload", formData);
 
-        console.log(response.data);
+        const id = response.data.result.id || undefined;
+
+        return id;
       }
+      return undefined;
     }
   }
 
-  function handleSubmmit() {
-    product.description = contentDescripcion;
+  async function submitImagesToProduction(): Promise<
+    (number | null)[] | undefined
+  > {
     if (file) {
-      product.images = file.map((img) => img.src);
+      const ids: any[] = [];
+      for (let i = 0; i < file.length; i++) {
+        const img = file[i];
+        try {
+          const id = await SubmitImageToProduction(img.name);
+          if (!id) {
+            ids.push(null);
+          } else {
+            ids.push(id);
+          }
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: `Hubo un error al subir la imagen ${img.filename}.`,
+            variant: "destructive",
+          });
+          break; // Detiene el bucle si ocurre un error
+        }
+      }
+
+      if (ids.includes(null)) {
+        return undefined;
+      }
+
+      if (!ids) {
+        return undefined;
+      }
+
+      return ids;
     }
-    server_publishProduct(product);
+  }
+
+  async function handleSubmmit() {
+    // TODO: accepct the product image as object
+
+    try {
+      const ids = await submitImagesToProduction();
+      if (!ids) {
+        return;
+      }
+
+      product.images = ids;
+      server_publishProduct(product);
+    } catch (error) {
+      return;
+    }
   }
 
   return (
@@ -276,10 +325,10 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="description">Descripción</Label>
-                  {/* <ProductDescriptionEditor
+                  <ProductDescriptionEditor
                     contentPlainText={contentDescripcion}
                     setContentPlainText={serContentDescripcion}
-                  /> */}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -327,11 +376,24 @@ export function ProductEdit({ product }: { product: ProductType }) {
                       <Dialog key={img.name}>
                         <DialogTrigger>
                           {" "}
-                          <img
-                            alt="Product img"
-                            src={img.src}
-                            className="aspect-square object-cover items-center justify-center rounded-md border border-dashed h-[6rem]"
-                          />
+                          <motion.div
+                            whileHover={{
+                              scale: 1.1,
+                              backgroundColor: "#feaaaa",
+                            }}
+                            whileTap={{
+                              scale: 0.9,
+                              backgroundColor: "#fF6671",
+                            }}
+                            initial={{ backgroundColor: "#ffffff" }}
+                            className="aspect-square items-center justify-center rounded-md border border-dashed h-[6rem] bg-opacity-0"
+                          >
+                            <img
+                              alt="Product img"
+                              src={img.src}
+                              className="object-cover"
+                            />
+                          </motion.div>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
@@ -343,18 +405,10 @@ export function ProductEdit({ product }: { product: ProductType }) {
                                 key={img.name}
                                 alt="Product img"
                                 src={img.src}
-                                className="aspect-square object-cover items-center justify-center rounded-md border border-dashed h-[6rem]"
+                                className="object-cover items-center justify-center rounded-md border border-dashed h-[70vh}"
                               />
                             </DialogDescription>
                             <DialogFooter>
-                              <Button
-                                onClick={() =>
-                                  SubmitImageToProduction(img.name)
-                                }
-                                color="primary"
-                              >
-                                Subir
-                              </Button>
                               <DialogClose asChild>
                                 <Button
                                   onClick={() => removeImage(img.name)}
@@ -462,6 +516,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
                       <Input
                         id="price-1"
                         type="number"
+                        onChange={(e) => {
+                          product.price = Number(e.target.value);
+                        }}
                         defaultValue={product.price || ""}
                       />
                       U$D
