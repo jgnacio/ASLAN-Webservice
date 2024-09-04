@@ -96,7 +96,7 @@ export default function CartComponent() {
   const handleAddProduct = async (id: string, quantity: number) => {
     try {
       await server_addToCart({ id, quantity });
-      server_getCart();
+      await server_getCart();
     } catch (error) {
       console.log(error);
     }
@@ -105,17 +105,23 @@ export default function CartComponent() {
   const handleRemoveProduct = async (id: string) => {
     try {
       await server_removeProductOnCart({ id });
-      const newCart = dataCart?.products.filter(
-        (product: any) => product.sku !== id
-      );
-      if (dataCart) dataCart.products = newCart || [];
-      if (newCart) handleSetRows(newCart);
+      await server_getCart();
+      console.log("###############Antes");
+      console.log("rows", rows);
+      console.log("id", id);
+      console.log("cart", dataCart);
+      const newRows = rows.filter((row: any) => row.sku !== id);
+      setRows(newRows);
+      console.log("###############DESPUES");
+      console.log("rows", rows);
+      console.log("id", id);
+      console.log("cart", dataCart);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleAddQuantityToRow = (id: string, quantity: number) => {
+  const handleAddQuantityToRow = async (id: string, quantity: number) => {
     const newRows = rows.map((row: any) => {
       if (row.id === id) {
         return { ...row, quantity: row.quantity + quantity };
@@ -133,7 +139,8 @@ export default function CartComponent() {
         description: "El carrito ha sido vaciado exitosamente.",
         variant: "default",
       });
-      handleSetRows([]);
+      setRows([]);
+      getCart();
       if (dataCart) {
         dataCart.products = [];
       }
@@ -221,7 +228,6 @@ export default function CartComponent() {
       headerName: "",
       type: "actions",
       sortable: false,
-      width: 90,
       renderCell: (params: GridRenderCellParams) => (
         <Button
           color="secondary"
@@ -255,7 +261,6 @@ export default function CartComponent() {
       headerName: "",
       type: "actions",
       sortable: false,
-      width: 60,
       renderCell: (params: GridRenderCellParams) => (
         <Button
           isIconOnly

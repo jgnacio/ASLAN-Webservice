@@ -19,6 +19,7 @@ import { getCart } from "../cart/_actions/get-cart";
 import { useRouter } from "next/navigation";
 import { Button } from "@nextui-org/button";
 import { FilePen } from "lucide-react";
+import Link from "next/link";
 
 export function CustomFooterStatusComponent(
   props: NonNullable<GridSlotsComponentsProps["footer"]>
@@ -82,15 +83,11 @@ export default function ProductRelevantList() {
       type: "actions",
       sortable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <Button
-          color="secondary"
-          isIconOnly
-          onClick={() =>
-            router.push(`/dashboard/product/${params.row.sku}/edit`)
-          }
-        >
-          <FilePen className="h-5 w-5 text-muted-foreground" />
-        </Button>
+        <Link href={`/dashboard/product/${params.row.sku}/edit`}>
+          <Button color="secondary" isIconOnly onClick={() => router.push(``)}>
+            <FilePen className="h-5 w-5 text-muted-foreground" />
+          </Button>
+        </Link>
       ),
     },
     {
