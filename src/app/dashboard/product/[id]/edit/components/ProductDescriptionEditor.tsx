@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { CardContent } from "@mui/material";
 import { Card } from "@nextui-org/card";
+import { FormPublishProduct } from "../../components/types/formTypes";
 
 const ReactQuill = dynamic(() => import("react-quill"), {
   ssr: false,
@@ -9,19 +10,24 @@ const ReactQuill = dynamic(() => import("react-quill"), {
 import "react-quill/dist/quill.snow.css";
 
 function ProductDescriptionEditor({
-  contentPlainText,
-  setContentPlainText,
+  productState,
+  setProductState,
 }: {
-  contentPlainText: string;
-  setContentPlainText: (content: string) => void;
+  productState: FormPublishProduct;
+  setProductState: (product: FormPublishProduct) => void;
 }) {
   return (
     <Card>
       <CardContent>
         <ReactQuill
           theme="snow"
-          value={contentPlainText}
-          onChange={setContentPlainText}
+          value={productState.description}
+          onChange={(value) => {
+            setProductState({
+              ...productState,
+              description: value,
+            });
+          }}
         />
       </CardContent>
     </Card>

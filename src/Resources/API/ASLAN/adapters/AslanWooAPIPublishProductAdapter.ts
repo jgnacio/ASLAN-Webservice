@@ -9,9 +9,6 @@ export class AslanWooAPIPublishProductAdapter {
   public static async publishProduct(product: ProductType) {
     const wooAPI = AslanWooAPI.getInstance();
 
-    // console.log(product.images.map((images) => ({ src: images })));
-    console.log(product.images);
-
     const productMapped: AslanWooAPIProductRequest = {
       name: product.title,
       type: "simple",
@@ -19,20 +16,12 @@ export class AslanWooAPIPublishProductAdapter {
       description: product.description,
       short_description: "",
       categories: [],
-      images: product.images.map((image) => {
-        if (typeof image === "string") {
-          return { src: image };
-        }
-        if (typeof image === "number") {
-          return { id: image };
-        }
-        return { src: "" };
-      }),
-      // images: product.images.map((images) => ({ src: images })),
+      images: product.images,
       status: "draft",
     };
 
-    const response = await wooAPI.post("products", productMapped as any);
+    await wooAPI.post("products", productMapped as any);
+
     // console.log(response);
   }
 }

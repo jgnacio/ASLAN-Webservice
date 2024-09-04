@@ -1,5 +1,5 @@
 "use client";
-import { ImagePlus, PlusIcon } from "lucide-react";
+import { ArrowLeft, Check, ImagePlus, PlusIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,15 +57,11 @@ import { useRouter } from "next/navigation";
 import { publishProduct } from "../_actions/publish-product";
 import { motion } from "framer-motion";
 import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
-type imageProps = {
-  name: string;
-  src: string;
-  content: File | null;
-  type: string;
-  filename: string;
-};
-
-type imageListProps = imageProps[];
+import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
+import { validateFormData } from "@/lib/Utils/validation";
+import { imageProps, imageListProps } from "./types/imageTypes";
+import { FormPublishProduct } from "./types/formTypes";
+import { Spinner } from "@nextui-org/spinner";
 
 export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
@@ -76,25 +72,30 @@ export function ProductEdit({ product }: { product: ProductType }) {
     filename: "",
   });
   const [file, setFile] = useState<imageListProps | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [contentDescripcion, serContentDescripcion] = useState<string>(
     product.description
   );
 
-  const [productState, setProductState] = useState<ProductType>(product);
+  const [productState, setProductState] = useState<FormPublishProduct>({
+    ...product,
+    publishState: "draft",
+  });
 
   const router = useRouter();
   const { toast } = useToast();
 
   const {
     mutateAsync: server_publishProduct,
-    isError,
-    isSuccess,
+    isError: isErrorPublish,
+    isSuccess: isSuccessPublish,
   } = useMutation({
     mutationFn: (product: ProductType) => publishProduct(product),
     onSuccess: () => {
       toast({
         title: "Producto publicado",
         description: "El producto fue publicado con éxito.",
+        variant: "success",
       });
     },
     onError: (error) => {
@@ -105,27 +106,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
       });
     },
   });
-
-  // const {
-  //   mutateAsync: server_createMedia,
-  //   isError: mediaIsError,
-  //   isSuccess: mediaIsSuccess,
-  // } = useMutation({
-  //   mutationFn: (data: { content: File; title: string }) => createMedia(data),
-  //   onSuccess: () => {
-  //     toast({
-  //       title: "Imagen subida",
-  //       description: "La imagen fue subida con éxito.",
-  //     });
-  //   },
-  //   onError: (error) => {
-  //     toast({
-  //       title: "Error",
-  //       description: "Hubo un error al subir la imagen.",
-  //       variant: "destructive",
-  //     });
-  //   },
-  // });
 
   const handleChange = (e: any) => {
     setImageTemplate({
@@ -227,56 +207,99 @@ export function ProductEdit({ product }: { product: ProductType }) {
   }
 
   async function submitImagesToProduction(): Promise<
-    (number | null)[] | undefined
+    | { src?: string; id: number | null }[]
+    | { src: string; id?: number | null }[]
+    | undefined
   > {
     if (file) {
-      const ids: any[] = [];
+      const ids: { id: number | null }[] = [];
       for (let i = 0; i < file.length; i++) {
         const img = file[i];
         try {
           const id = await SubmitImageToProduction(img.name);
-          if (!id) {
-            ids.push(null);
-          } else {
-            ids.push(id);
-          }
+          ids.push({ id: id || null });
         } catch (error) {
           toast({
             title: "Error",
             description: `Hubo un error al subir la imagen ${img.filename}.`,
             variant: "destructive",
           });
-          break; // Detiene el bucle si ocurre un error
+          break;
         }
       }
 
-      if (ids.includes(null)) {
+      if (ids.some((item) => item.id === null)) {
         return undefined;
       }
 
-      if (!ids) {
-        return undefined;
-      }
-
+      // No actualices el estado aquí, retorna los ids
       return ids;
     }
   }
-
   async function handleSubmmit() {
-    // TODO: accepct the product image as object
-
+    setIsSubmitting(true);
     try {
-      const ids = await submitImagesToProduction();
-      if (!ids) {
+      const imagesIds = await submitImagesToProduction();
+      let cleanImagesIds = [] as {
+        id: number;
+        src?: string;
+      }[];
+      if (imagesIds) {
+        if (imagesIds.some((item) => item.id === null)) {
+          setProductState({
+            ...productState,
+            images: [],
+          });
+          return;
+        }
+
+        // Filtrar los valores que tienen id nulo
+        cleanImagesIds = imagesIds.filter((item) => item.id !== null) as {
+          id: number;
+          src?: string;
+        }[];
+      }
+      const newProductStateBuffer = {
+        ...productState,
+        images: cleanImagesIds, // Aseguramos que solo se envían objetos válidos
+      };
+      const { errors, data } = validateFormData(
+        schemaPublishProduct,
+        newProductStateBuffer
+      );
+
+      if (errors) {
         return;
       }
-
-      product.images = ids;
-      server_publishProduct(product);
+      setProductState(data);
+      await server_publishProduct(data);
+      setIsSubmitting(false);
     } catch (error) {
+      setIsSubmitting(false);
       return;
     }
   }
+  const handleProductChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+
+    if (id === "price") {
+      // Si el campo está vacío, asignar un valor nulo
+      const parsedValue = value === "" ? null : parseFloat(value);
+
+      setProductState({
+        ...productState,
+        price:
+          parsedValue !== null && !isNaN(parsedValue) && parsedValue >= 0
+            ? parsedValue
+            : 0,
+      });
+    } else {
+      setProductState({
+        ...productState,
+        [id]: value,
+      });
+    }
+  };
 
   return (
     <div className="mx-auto grid max-w-[70vw] flex-1 auto-rows-max gap-4">
@@ -295,11 +318,23 @@ export function ProductEdit({ product }: { product: ProductType }) {
             onClick={() => router.push("/dashboard/products")}
             variant="outline"
             size="sm"
+            disabled={isSubmitting}
           >
-            Descartar
+            {isSuccessPublish ? "Ir a Productos" : "Descartar"}
           </Button>
-          <Button size="sm" onClick={handleSubmmit}>
-            Publicar
+          <Button
+            disabled={isSubmitting || isSuccessPublish}
+            size="sm"
+            onClick={handleSubmmit}
+            variant={isSuccessPublish ? "success" : "default"}
+          >
+            {isSubmitting ? (
+              <Spinner size="sm" color="white" />
+            ) : isSuccessPublish ? (
+              <Check />
+            ) : (
+              "Publicar"
+            )}
           </Button>
         </div>
       </div>
@@ -315,19 +350,21 @@ export function ProductEdit({ product }: { product: ProductType }) {
             <CardContent>
               <div className="grid gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="name">Nombre</Label>
+                  <Label htmlFor="title">Nombre</Label>
                   <Input
-                    id="name"
+                    id="title"
                     type="text"
                     className="w-full"
-                    defaultValue={product.title}
+                    onChange={handleProductChange}
+                    value={productState.title}
                   />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="description">Descripción</Label>
+                  {/* EDITOR DE TEXTO PARA LA DESCRIPCION */}
                   <ProductDescriptionEditor
-                    contentPlainText={contentDescripcion}
-                    setContentPlainText={serContentDescripcion}
+                    productState={productState}
+                    setProductState={setProductState}
                   />
                 </div>
               </div>
@@ -342,10 +379,19 @@ export function ProductEdit({ product }: { product: ProductType }) {
             <CardContent>
               <div className="grid gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="status">Estado</Label>
-                  <Select>
+                  <Label htmlFor="publishState">Estado</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      setProductState({
+                        ...productState,
+                        publishState: value,
+                      });
+                    }}
+                    value={productState.publishState}
+                    defaultValue="draft"
+                  >
                     <SelectTrigger
-                      id="status"
+                      id="publishState"
                       aria-label="Selecciona el estado"
                     >
                       <SelectValue placeholder="Selecciona el estado" />
@@ -499,27 +545,30 @@ export function ProductEdit({ product }: { product: ProductType }) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">SKU</TableHead>
-                    <TableHead>Precio a Publicar</TableHead>
+                    <TableHead className="">SKU</TableHead>
+                    <TableHead className="w-[20rem]">
+                      Precio a Publicar
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="font-semibold">
+                    <TableCell className="font-semibold flex-wrap">
                       {product.sku}
                     </TableCell>
 
-                    <TableCell className="flex items-center gap-4">
-                      <Label htmlFor="price-1" className="sr-only">
+                    <TableCell className="flex items-center gap-4 flex-1">
+                      <Label htmlFor="price" className="sr-only">
                         Precio a Publicar
                       </Label>
                       <Input
-                        id="price-1"
+                        id="price"
                         type="number"
-                        onChange={(e) => {
-                          product.price = Number(e.target.value);
-                        }}
-                        defaultValue={product.price || ""}
+                        onChange={handleProductChange}
+                        value={
+                          productState.price === 0 ? "" : productState.price
+                        }
+                        className="w-full "
                       />
                       U$D
                     </TableCell>
