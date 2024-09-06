@@ -3,6 +3,7 @@ import {
   ProductObjToClass,
 } from "@/lib/Utils/Functions/ClassToObject";
 import { v4 as uuid } from "uuid";
+
 /**
  * Representa una entidad de producto en el dominio de la aplicación.
  */
@@ -11,6 +12,7 @@ export class Product {
   private readonly sku: string;
   public readonly price: number;
   public title: string;
+  public partNumber?: ProductPartNumber[];
   public description: string;
   public images: string[];
   public category: ProductCategory;
@@ -22,9 +24,10 @@ export class Product {
   public guaranteeDays?: number;
   public estimatedArrivalDate?: Date | null;
   constructor({
+    title,
+    partNumber,
     sku,
     price,
-    title,
     description,
     images,
     category,
@@ -36,9 +39,10 @@ export class Product {
     guaranteeDays,
     estimatedArrivalDate,
   }: {
+    title: string;
+    partNumber?: ProductPartNumber[];
     sku: string;
     price: number;
-    title: string;
     description: string;
     images: string[];
     category: ProductCategory;
@@ -51,6 +55,7 @@ export class Product {
     estimatedArrivalDate?: Date | null;
   }) {
     this.id = uuid();
+    this.partNumber = partNumber;
     this.sku = sku;
     this.price = price;
     this.title = title;
@@ -140,6 +145,8 @@ export class Product {
 export type ProductType = {
   id: string;
   sku: string;
+  partNumber?: ProductPartNumber[];
+  partNumberToSend?: string;
   price: number;
   title: string;
   description: string;
@@ -152,6 +159,12 @@ export type ProductType = {
   onSale?: boolean;
   guaranteeDays?: number;
   estimatedArrivalDate?: Date | null;
+};
+
+export type ProductPartNumber = {
+  partNumber: string;
+  ean: number;
+  units_x_box: number;
 };
 
 export type ProductCategory = {

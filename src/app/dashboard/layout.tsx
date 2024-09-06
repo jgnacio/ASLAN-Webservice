@@ -226,7 +226,7 @@ export default function DashboardLayout({
           </Breadcrumb>
         </header>
         <main className="grid  items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 mt-8  bg-gray-50">
-          <div className="md:mx-auto min-w-[70vw] flex-1  gap-4 ">
+          <div className="md:mx-auto min-w-[75vw] flex-1  gap-4 ">
             {children}
           </div>
         </main>

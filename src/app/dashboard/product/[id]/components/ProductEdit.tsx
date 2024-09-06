@@ -48,7 +48,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { ProductType } from "@/domain/product/entities/Product";
+import {
+  ProductCategory,
+  ProductPartNumber,
+  ProductType,
+} from "@/domain/product/entities/Product";
 import { useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
@@ -282,6 +286,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
   const handleProductChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
 
+    // Manejo especial para el campo "price"
     if (id === "price") {
       // Si el campo está vacío, asignar un valor nulo
       const parsedValue = value === "" ? null : parseFloat(value);
@@ -293,12 +298,14 @@ export function ProductEdit({ product }: { product: ProductType }) {
             ? parsedValue
             : 0,
       });
-    } else {
-      setProductState({
-        ...productState,
-        [id]: value,
-      });
+      return; // Salir de la función después de manejar el "price"
     }
+
+    // Manejo genérico para otros campos
+    setProductState({
+      ...productState,
+      [id]: value,
+    });
   };
 
   return (
@@ -405,6 +412,73 @@ export function ProductEdit({ product }: { product: ProductType }) {
                   </Select>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card x-chunk="dashboard-07-chunk-1">
+            <CardHeader>
+              <CardTitle>Identificadores</CardTitle>
+              <CardDescription>
+                Modifica los identificadores del producto antes de publicarlo en
+                ASLAN.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Label htmlFor="partNumber">SKU Aslan</Label>
+              <Input
+                id="partNumberToSend"
+                type="text"
+                onChange={handleProductChange}
+                value={productState.partNumberToSend}
+              />
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="">SKU</TableHead>
+                    {/* <TableHead className="w-[20rem]">Value</TableHead> */}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-semibold flex-wrap">
+                      {product.sku}
+                    </TableCell>
+                    {/* <TableCell className="flex items-center gap-4 flex-1">
+                      <Label htmlFor="sku" className="sr-only">
+                        SKU
+                      </Label>
+                      <Input
+                        id="sku"
+                        type="text"
+                        onChange={handleProductChange}
+                        value={productState.sku}
+                        className="w-full "
+                      />
+                    </TableCell> */}
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="">Part Numbers</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {product.partNumber && product.partNumber.length > 0 ? (
+                    product.partNumber.map((partNumber, index) => (
+                      <TableRow key={`partNumber-${index}`}>
+                        <TableCell className="font-semibold flex-wrap">
+                          {partNumber.partNumber}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <p>Sin Part Numbers Disponibles</p>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
           <Card className="overflow-hidden" x-chunk="dashboard-07-chunk-4">

@@ -3,12 +3,12 @@
  */
 export interface UnicomAPIPreAssembledPC {
   articulos?: TEquipoArticulo[];
-  codigoEquipo?: string;
+  codigo_equipo?: string;
   costo?: number;
-  costoBonificado?: number;
+  costo_bonificado?: number;
   disponibilidad?: TformatoDisponibilidadInventario;
-  enCarrito?: number;
-  nombreEquipo?: string;
+  en_carrito?: number;
+  nombre_equipo?: string;
   [property: string]: any;
 }
 

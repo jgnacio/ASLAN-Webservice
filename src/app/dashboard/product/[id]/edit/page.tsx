@@ -5,6 +5,7 @@ import { ProductEdit } from "../components/ProductEdit";
 import { getProductBySku } from "../../_actions/get-product-by-sku";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@nextui-org/spinner";
+import { useEffect } from "react";
 
 export default function EditProduct({ params }: { params: { id: string } }) {
   const {
@@ -15,6 +16,11 @@ export default function EditProduct({ params }: { params: { id: string } }) {
     queryKey: ["product", params.id],
     queryFn: () => getProductBySku(params.id),
   });
+  useEffect(() => {
+    if (product) {
+      console.log(product);
+    }
+  }, [product]);
   return (
     <Card className="bg-transparent border-0">
       <CardContent>

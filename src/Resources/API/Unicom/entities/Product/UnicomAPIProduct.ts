@@ -2,94 +2,44 @@
  * TArticulo_completo, Schema for type Model.UserData.TArticulo_completo
  */
 export interface UnicomAPIProduct {
-  /**
-   * artículos que tenemos relacionados. En los datos de relación está el campo que los
-   * relaciona (memoria, color, etc)
-   */
-  articulosRelacionados?: ArticulosRelacionado[];
-  /**
-   * codigo artículo de Unicom
-   */
   codigo?: string;
   /**
-   * si es true, fue dado de baja
+   * es true si este artículo fue dado de baja
    */
-  dadoDeBaja?: boolean;
-  /**
-   * Datos para publicar en MercadoLibre
-   */
-  datosMercadoLibre: DatosMercadoLibre;
-  /**
-   * partnumbers del artículo. Puede haber mas de uno en el mismo artículo. Se ingresan en
-   * formato de pila
-   */
-  datosPartnumbers?: TDatosPartNumber[];
-  /**
-   * descuentos adicionales
-   */
-  dctosXCantidad?: TDctoXCantidad[];
+  dado_de_baja?: boolean;
+  datos_ultimo_partnumber?: TDatosPartNumber;
   descripcion?: string;
-  /**
-   * Disponibilidad
-   */
   disponibilidad?: TformatoDisponibilidadInventario;
+  encargado_garantia?: string;
   /**
-   * unidades que ya se tienen en el carrito del usuario
-   */
-  enCarrito?: number;
-  encargadoGarantia?: string;
-  /**
-   * es true si está rematandose. En este caso el precio y precio bonificado se verían
-   * afectados
-   */
-  estaEnRemate?: boolean;
-  /**
-   * el cliente lo tiene como favorito
+   * es true si esta configurado como favorito en el cliente
    */
   favorito?: boolean;
   /**
-   * Si está en transito. Incluye la fecha estimada de llegada
+   * fecha estimada de ingreso. Formato ISO 8601
    */
-  fechaEstimadaLlegada?: string;
-  /**
-   * fotos en base64
-   */
-  fotos?: TFoto[];
-  garantiaDias?: number;
-  grupoArticulo?: TgrupoArticulos;
-  /**
-   * Unidades disponibles.
-   */
+  fecha_estimada_llegada?: string;
+  garantia_dias?: number;
+  grupo_articulo?: TgrupoArticulos;
   inventario?: number;
-  /**
-   * Link en la web del fabricante
-   */
-  linkEspecificaciones?: string;
-  linksVideos?: TLinkVideoArticulo[];
+  link_especificaciones?: string;
   marca?: TMarca;
-  nombrePm?: string;
   /**
-   * pesos y medidas del artícuo. Pero son referenciales, ya que depende como se embale
+   * pesos y medidas aproximadas del artículo.
    */
-  pesoYMedidasAprox?: TpesoYMedidas;
+  peso_y_medidas_aprox?: TpesoYMedidas;
   /**
-   * precio sin impuestos
+   * precio regular sin impuestos. Los precios pueden variar
    */
   precio?: number;
   /**
-   * precio bonificado sin impuestos. Precio de vta del momento
+   * mejor precio sin impuestos y al que compraría en el momento. Los precios pueden variar
    */
-  precioBonificado?: number;
-  /**
-   * nombre
-   */
+  precio_bonificado?: number;
   producto?: string;
-  tablaEspecificaciones?: string;
-  tagsDeBusqueda?: string[];
-  /**
-   * importe del billete de RMA impuestos incluidos
-   */
-  valorBilleteRma?: number;
+  tags_de_busqueda?: string[];
+  tiene_dctos_x_cantidad?: boolean;
+  valor_billete_rma?: number;
   [property: string]: any;
 }
 
@@ -163,7 +113,7 @@ export interface Atributo {
 export interface TDatosPartNumber {
   ean?: number;
   partnumber?: any;
-  unidadesXCaja?: number;
+  unidades_x_caja?: number;
   [property: string]: any;
 }
 

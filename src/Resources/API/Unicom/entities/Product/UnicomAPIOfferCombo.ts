@@ -6,14 +6,14 @@ export interface UnicomAPIOfferCombo {
    * artículos que componen la orferta
    */
   articulos?: TComboArticulo[];
-  codigoOferta?: string;
+  codigo_oferta?: string;
   costo?: number;
-  costoBonificado?: number;
+  costo_bonificado?: number;
   disponibilidad?: TformatoDisponibilidadInventario;
-  enCarrito?: number;
-  fechaFin?: string;
-  fechaInicio?: string;
-  nombreOferta?: string;
+  en_carrito?: number;
+  fecha_fin?: string;
+  fecha_inicio?: string;
+  nombre_oferta?: string;
   [property: string]: any;
 }
 

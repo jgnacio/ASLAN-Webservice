@@ -12,12 +12,23 @@ import ButtonAddToCart from "./ButtonAddToCart";
 import { getCart } from "../cart/_actions/get-cart";
 import { useRouter } from "next/navigation";
 import { Button } from "@nextui-org/button";
-import { FilePen, Pencil } from "lucide-react";
+import { Building2, FilePen, Pencil, Search, SearchIcon } from "lucide-react";
 import Link from "next/link";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Clipboard } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/components/ui/use-toast";
+import HoverCardActions from "./HoverCardActions";
 
 export default function ProductFeaturedList() {
   const router = useRouter();
   const [rows, setRows] = useState<any>([]);
+
+  const { toast } = useToast();
 
   const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
     useQuery({
@@ -48,28 +59,82 @@ export default function ProductFeaturedList() {
   }, []);
 
   const columns: GridColDef[] = [
-    { field: "title", headerName: "Producto", flex: 1 },
+    {
+      field: "title",
+      headerName: "Producto",
+      minWidth: 300,
+      flex: 2,
+      resizable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <HoverCardActions content={params.row.title} />
+      ),
+    },
     {
       field: "price",
       headerName: "Precio",
       type: "number",
       width: 90,
+      resizable: false,
     },
     // { field: "availability", headerName: "Disponibilidad", width: 120 },
-    { field: "marca", headerName: "Marca", width: 120 },
-    { field: "stock", headerName: "Stock", type: "number", width: 90 },
+    {
+      field: "marca",
+      headerName: "Marca",
+      minWidth: 80,
+      maxWidth: 120,
+
+      resizable: false,
+    },
+    {
+      field: "stock",
+      headerName: "Stock",
+      type: "number",
+      minWidth: 10,
+      maxWidth: 90,
+      resizable: false,
+    },
     {
       field: "guaranteeDays",
       headerName: "Garantia",
       type: "number",
       width: 90,
     },
-    { field: "sku", headerName: "SKU", flex: 1 },
+    {
+      field: "sku",
+      headerName: "SKU",
+      minWidth: 120,
+      maxWidth: 150,
+      flex: 1,
+
+      resizable: false,
+      renderCell: (params: GridRenderCellParams) =>
+        params.row.sku ? (
+          <HoverCardActions content={params.row.sku} />
+        ) : (
+          <span className="text-muted-foreground">N/A</span>
+        ),
+    },
+    {
+      field: "partNumber",
+      headerName: "Part Number",
+      minWidth: 120,
+      flex: 1,
+      resizable: false,
+
+      renderCell: (params: GridRenderCellParams) =>
+        params.row.partNumber[0].partNumber ? (
+          <HoverCardActions content={params.row.partNumber[0].partNumber} />
+        ) : (
+          <span className="text-muted-foreground">N/A</span>
+        ),
+    },
     {
       field: "edit",
       headerName: "Publicar",
       type: "actions",
       sortable: false,
+      resizable: false,
+
       renderCell: (params: GridRenderCellParams) => (
         <Link href={`/dashboard/product/${params.row.sku}/edit`}>
           <Button color="secondary" isIconOnly onClick={() => router.push(``)}>
@@ -82,6 +147,8 @@ export default function ProductFeaturedList() {
       field: "add",
       headerName: "Agregar",
       type: "actions",
+      resizable: false,
+
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
         isPending ? (
@@ -117,6 +184,7 @@ export default function ProductFeaturedList() {
         stock: product.stock,
         guaranteeDays: product.guaranteeDays,
         sku: product.sku,
+        partNumber: product.partNumber,
       };
     });
     setRows(newRows);
@@ -132,6 +200,7 @@ export default function ProductFeaturedList() {
         stock: product.stock,
         guaranteeDays: product.guaranteeDays,
         sku: product.sku,
+        partNumber: product.partNumber,
       };
     });
     setRows(newRows);
@@ -153,7 +222,7 @@ export default function ProductFeaturedList() {
             columns={columns}
             disableColumnSelector
             disableRowSelectionOnClick
-            autoHeight
+            rowHeight={45}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },

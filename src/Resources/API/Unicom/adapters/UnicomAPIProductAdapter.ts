@@ -4,6 +4,7 @@ import { IProductRepository } from "@/domain/product/repositories/IProductReposi
 import {
   Product,
   ProductCategory,
+  ProductPartNumber,
   ProductType,
 } from "@/domain/product/entities/Product";
 import {
@@ -11,7 +12,10 @@ import {
   UnicomAPIProductRequest,
 } from "../UnicomAPIRequets";
 import { UnicomAPIOfferCombo } from "../entities/Product/UnicomAPIOfferCombo";
-import { UnicomAPIProduct } from "../entities/Product/UnicomAPIProduct";
+import {
+  TDatosPartNumber,
+  UnicomAPIProduct,
+} from "../entities/Product/UnicomAPIProduct";
 import { UnicomAPIOfferProduct } from "../entities/Product/UnicomAPIOfferProduct";
 import { UnicomAPIPreAssembledPC } from "../entities/Product/UnicomAPIPreAssembledPC";
 import {
@@ -125,8 +129,22 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       return null;
     }
 
+    const datosPartnumbers = response.datos_partnumbers ?? [];
+
+    const mappedPartnumbers: ProductPartNumber[] = datosPartnumbers.map(
+      (partNumber: TDatosPartNumber) => {
+        const { partnumber, ean, unidades_x_caja } = partNumber;
+        return {
+          partNumber: partnumber || "",
+          ean: ean || 0,
+          units_x_box: unidades_x_caja || 0,
+        };
+      }
+    );
+
     try {
       const product = new Product({
+        partNumber: mappedPartnumbers,
         sku: response.codigo || "",
         price: response.precio || 0,
         title: response.producto || "",
@@ -287,6 +305,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     if (!productsResponse) {
       return [];
     }
+
     const products = productsResponse.map(
       (
         item:
@@ -296,22 +315,48 @@ export class UnicomAPIProductAdapter implements IProductRepository {
           | UnicomAPIPreAssembledPC
       ) => {
         try {
+          const {
+            codigo,
+            producto,
+            precio,
+            descripcion,
+            fotos,
+            grupo_articulo,
+            marca,
+            inventario,
+            fecha_estimada_llegada,
+            garantia_dias,
+            datos_ultimo_partnumber,
+          } = item;
+
+          const { partnumber, ean, unidades_x_caja } = datos_ultimo_partnumber;
+
+          const mappedPartnumber = [
+            {
+              partNumber: partnumber || "",
+              ean: ean || 0,
+              units_x_box: unidades_x_caja || 0,
+            },
+          ];
+
           return new Product({
-            sku: item.codigo,
-            price: item.precio,
-            title: item.producto,
-            description: item.descripcion,
-            images: item.fotos,
-            category: item.grupo_articulo.descripcion,
-            marca: item.marca.marca,
-            stock: item.inventario,
+            title: producto,
+            sku: codigo,
+            price: precio,
+            partNumber: mappedPartnumber,
+            description: descripcion,
+            images: fotos,
+            category: grupo_articulo.descripcion,
+            marca: marca.marca,
+            stock: inventario,
             submitDate: new Date(),
-            estimatedArrivalDate: item.fecha_estimada_llegada
-              ? new Date(item.fecha_estimada_llegada)
+            estimatedArrivalDate: fecha_estimada_llegada
+              ? new Date(fecha_estimada_llegada)
               : null,
-            guaranteeDays: item.garantia_dias,
+            guaranteeDays: garantia_dias,
           });
-        } catch {
+        } catch (error) {
+          console.error("Error:", error);
           return null;
         }
       }
@@ -321,6 +366,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     const productsFiltered = products.filter(
       (product): product is Product => product !== null
     );
+    // console.log("productsFiltered", productsFiltered);
 
     return productsFiltered;
   }

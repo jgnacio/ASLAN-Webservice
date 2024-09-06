@@ -3,28 +3,28 @@
  */
 export interface UnicomAPIOfferProduct {
   codigo?: string;
-  dadoDeBaja?: boolean;
-  datosUltimoPartnumber?: TDatosPartNumber;
+  dado_de_baja?: boolean;
+  datos_ultimo_partnumber?: TDatosPartNumber;
   descripcion?: string;
   disponibilidad?: TformatoDisponibilidadInventario;
-  encargadoGarantia?: string;
+  encargado_garantia?: string;
   favorito?: boolean;
   /**
    * fecha estimada de ingreso. Formato ISO 8601
    */
-  fechaEstimadaLlegada?: string;
-  garantiaDias?: number;
-  grupoArticulo?: TgrupoArticulos;
+  fecha_estimada_llegada?: string;
+  garantia_dias?: number;
+  grupo_articulo?: TgrupoArticulos;
   inventario?: number;
-  linkEspecificaciones?: string;
+  link_especificaciones?: string;
   marca?: TMarca;
-  pesoYMedidasAprox?: TpesoYMedidas;
+  peso_y_medidas_aprox?: TpesoYMedidas;
   precio?: number;
-  precioBonificado?: number;
+  precio_bonificado?: number;
   producto?: string;
-  tagsDeBusqueda?: string[];
-  tieneDctosXCantidad?: boolean;
-  valorBilleteRma?: number;
+  tags_de_busqueda?: string[];
+  tiene_dctos_x_cantidad?: boolean;
+  valor_billete_rma?: number;
   [property: string]: any;
 }
 
