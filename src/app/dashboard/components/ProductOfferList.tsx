@@ -13,8 +13,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getCart } from "../cart/_actions/get-cart";
 import { Button } from "@nextui-org/button";
-import { FilePen } from "lucide-react";
+import { FilePen, Plane } from "lucide-react";
 import HoverCardActions from "./HoverCardActions";
+import StockStatus from "./StockStatus";
+import { Tooltip } from "@mui/material";
 
 export default function ProductOfferList() {
   const [rows, setRows] = useState<any>([]);
@@ -56,7 +58,18 @@ export default function ProductOfferList() {
       flex: 2,
       resizable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <HoverCardActions content={params.row.title} />
+        <div className="flex flex-col h-full w-full justify-center items-start">
+          <HoverCardActions content={params.row.title} />
+          {params.row.estimatedArrivalDate && (
+            <Tooltip
+              title={`Fecha estimada de Arribo ${params.row.estimatedArrivalDate?.getDate()}/${
+                params.row.estimatedArrivalDate?.getMonth() + 1
+              }/${params.row.estimatedArrivalDate?.getFullYear()}`}
+            >
+              <Plane className="text-blue-400" size={18} />
+            </Tooltip>
+          )}
+        </div>
       ),
     },
     {
@@ -66,7 +79,6 @@ export default function ProductOfferList() {
       width: 90,
       resizable: false,
     },
-    // { field: "availability", headerName: "Disponibilidad", width: 120 },
     {
       field: "marca",
       headerName: "Marca",
@@ -76,12 +88,18 @@ export default function ProductOfferList() {
       resizable: false,
     },
     {
-      field: "stock",
+      field: "availability",
       headerName: "Stock",
-      type: "number",
-      minWidth: 10,
-      maxWidth: 90,
+      type: "string",
+      width: 50,
       resizable: false,
+      renderCell: (params: GridRenderCellParams) => {
+        return (
+          <StockStatus
+            stock={params.row.availability as ProductType["availability"]}
+          />
+        );
+      },
     },
     {
       field: "guaranteeDays",
@@ -112,7 +130,7 @@ export default function ProductOfferList() {
       resizable: false,
 
       renderCell: (params: GridRenderCellParams) =>
-        params.row.partNumber[0].partNumber ? (
+        params.row.partNumber && params.row.partNumber[0].partNumber ? (
           <HoverCardActions content={params.row.partNumber[0].partNumber} />
         ) : (
           <span className="text-muted-foreground">N/A</span>
@@ -147,15 +165,6 @@ export default function ProductOfferList() {
           <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
         ),
     },
-    // {
-    //   field: "fullName",
-    //   headerName: "Full name",
-    //   description: "This column has a value getter and is not sortable.",
-    //   sortable: false,
-    //   width: 160,
-    //   valueGetter: (value, row) =>
-    //     `${row.firstName || ""} ${row.lastName || ""}`,
-    // },
   ];
 
   useEffect(() => {
@@ -165,6 +174,7 @@ export default function ProductOfferList() {
   }, [dataGetProductsByPage]);
 
   const handleSetRows = (products: ProductType[]) => {
+    console.log(products);
     const newRows = products.map((product) => {
       return {
         id: product.id,
@@ -172,6 +182,7 @@ export default function ProductOfferList() {
         price: product.price,
         marca: product.marca,
         stock: product.stock,
+        availability: product.availability,
         guaranteeDays: product.guaranteeDays,
         partNumber: product.partNumber,
         sku: product.sku,
@@ -188,6 +199,7 @@ export default function ProductOfferList() {
         price: product.price,
         marca: product.marca,
         stock: product.stock,
+        availability: product.availability,
         guaranteeDays: product.guaranteeDays,
         partNumber: product.partNumber,
 
@@ -211,7 +223,7 @@ export default function ProductOfferList() {
             rows={rows}
             columns={columns}
             disableColumnSelector
-            rowHeight={45}
+            rowHeight={55}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },

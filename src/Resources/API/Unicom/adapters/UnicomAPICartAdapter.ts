@@ -65,7 +65,7 @@ export class UnicomAPICartAdapter implements ICartRepository {
 
       return response.data;
     } catch (error) {
-      console.log("error", error);
+      // console.log("error", error);
       return null;
     }
   }
@@ -80,7 +80,7 @@ export class UnicomAPICartAdapter implements ICartRepository {
       return cart.toPlainObject();
     }
 
-    console.log("response", response);
+    // console.log("response", response);
 
     const { articulos, total_con_impuestos } = response;
 

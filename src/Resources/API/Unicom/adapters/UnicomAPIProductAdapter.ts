@@ -3,6 +3,7 @@
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
 import {
   Product,
+  ProductAvailability,
   ProductCategory,
   ProductPartNumber,
   ProductType,
@@ -62,7 +63,6 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       body: JSON.stringify(body),
     })
       .then((res) => {
-        // console.log("res", res);
         if (!res.ok) {
           return null;
         }
@@ -142,6 +142,20 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       }
     );
 
+    let mappedAvailability: ProductAvailability = "out_of_stock";
+
+    if (response.disponibilidad === "con_inventario") {
+      mappedAvailability = "in_stock";
+    }
+
+    if (response.disponibilidad === "sin_inventario") {
+      mappedAvailability = "out_of_stock";
+    }
+
+    if (response.disponibilidad === "consultar") {
+      mappedAvailability = "on_demand";
+    }
+
     try {
       const product = new Product({
         partNumber: mappedPartnumbers,
@@ -156,12 +170,14 @@ export class UnicomAPIProductAdapter implements IProductRepository {
         },
         marca: response.marca?.marca || "",
         stock: response.inventario || 0,
+        availability: mappedAvailability,
         submitDate: new Date(),
         estimatedArrivalDate: response.fecha_estimada_llegada
           ? new Date(response.fecha_estimada_llegada)
           : null,
         guaranteeDays: response.garantia_dias,
       });
+
       return product;
     } catch {
       return null;
@@ -214,6 +230,8 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       route: "/articulos",
     });
 
+    // console.log("response", response);
+
     if (!response) {
       return [];
     }
@@ -229,10 +247,10 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       route: "/ofertas/liquidaciones",
     });
 
-    const combosOffersResponse = this.fetchProducts({
-      method: "GET",
-      route: "/ofertas/combos",
-    });
+    // const combosOffersResponse = this.fetchProducts({
+    //   method: "GET",
+    //   route: "/ofertas/combos",
+    // });
 
     const pcOffersResponse = this.fetchProducts({
       method: "GET",
@@ -242,9 +260,11 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     // Merge all responses on one array
     const response = await Promise.all([
       onSaleResponse,
-      combosOffersResponse,
-      pcOffersResponse,
+      // pcOffersResponse,
+      // combosOffersResponse,
     ]);
+
+    console.log("response", response);
 
     // Validate response
     if (!response) {
@@ -315,45 +335,77 @@ export class UnicomAPIProductAdapter implements IProductRepository {
           | UnicomAPIPreAssembledPC
       ) => {
         try {
-          const {
-            codigo,
-            producto,
-            precio,
-            descripcion,
-            fotos,
-            grupo_articulo,
-            marca,
-            inventario,
-            fecha_estimada_llegada,
-            garantia_dias,
-            datos_ultimo_partnumber,
-          } = item;
-
-          const { partnumber, ean, unidades_x_caja } = datos_ultimo_partnumber;
-
-          const mappedPartnumber = [
+          let mappedPartnumber = [
             {
-              partNumber: partnumber || "",
-              ean: ean || 0,
-              units_x_box: unidades_x_caja || 0,
+              partNumber: "",
+              ean: 0,
+              units_x_box: 0,
             },
           ];
 
+          if (item.datos_ultimo_partnumber) {
+            const { partnumber, ean, unidades_x_caja } =
+              item.datos_ultimo_partnumber;
+            mappedPartnumber = [
+              {
+                partNumber: partnumber || "",
+                ean: ean || 0,
+                units_x_box: unidades_x_caja || 0,
+              },
+            ];
+          }
+
+          let mappedAvailability: ProductAvailability = "out_of_stock";
+
+          if (item.disponibilidad === "con_inventario") {
+            mappedAvailability = "in_stock";
+          }
+
+          if (item.disponibilidad === "sin_inventario") {
+            mappedAvailability = "out_of_stock";
+          }
+
+          if (item.disponibilidad === "consultar") {
+            mappedAvailability = "on_demand";
+          }
+
+          if (item.articulos && item.articulos.length > 0) {
+            return new Product({
+              title: item.producto,
+              sku: item.codigo || "",
+              price: item.precio,
+              partNumber: mappedPartnumber,
+              description: "",
+              images: item.fotos || [],
+              category: item.grupo_articulo.descripcion || "",
+              availability: "out_of_stock",
+              marca: item.marca.marca || "",
+              stock: item.inventario || 0,
+              submitDate: new Date(),
+              estimatedArrivalDate: item.fecha_estimada_llegada
+                ? new Date(item.fecha_estimada_llegada)
+                : null,
+              guaranteeDays: item.garantia_dias || 0,
+            });
+          }
+          console.log("item", item);
+
           return new Product({
-            title: producto,
-            sku: codigo,
-            price: precio,
+            title: item.producto,
+            sku: item.codigo || "",
+            price: item.precio,
             partNumber: mappedPartnumber,
-            description: descripcion,
-            images: fotos,
-            category: grupo_articulo.descripcion,
-            marca: marca.marca,
-            stock: inventario,
+            description: item.descripcion || "",
+            images: item.fotos || [],
+            category: item.grupo_articulo.descripcion || "",
+            availability: mappedAvailability || "out_of_stock",
+            marca: item.marca.marca || "",
+            stock: item.inventario || 0,
             submitDate: new Date(),
-            estimatedArrivalDate: fecha_estimada_llegada
-              ? new Date(fecha_estimada_llegada)
+            estimatedArrivalDate: item.fecha_estimada_llegada
+              ? new Date(item.fecha_estimada_llegada)
               : null,
-            guaranteeDays: garantia_dias,
+            guaranteeDays: item.garantia_dias || 0,
           });
         } catch (error) {
           console.error("Error:", error);

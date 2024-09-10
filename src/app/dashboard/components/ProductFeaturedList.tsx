@@ -4,25 +4,20 @@ import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { motion } from "framer-motion";
+import { FilePen, Plane } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getAllProducts } from "../_actions/get-all-products";
 import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
-import ButtonAddToCart from "./ButtonAddToCart";
 import { getCart } from "../cart/_actions/get-cart";
-import { useRouter } from "next/navigation";
-import { Button } from "@nextui-org/button";
-import { Building2, FilePen, Pencil, Search, SearchIcon } from "lucide-react";
-import Link from "next/link";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { Clipboard } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import ButtonAddToCart from "./ButtonAddToCart";
 import HoverCardActions from "./HoverCardActions";
+import StockStatus from "./StockStatus";
+import { Tooltip } from "@mui/material";
 
 export default function ProductFeaturedList() {
   const router = useRouter();
@@ -66,7 +61,18 @@ export default function ProductFeaturedList() {
       flex: 2,
       resizable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <HoverCardActions content={params.row.title} />
+        <div className="flex flex-col h-full w-full justify-center items-start">
+          <HoverCardActions content={params.row.title} />
+          {params.row.estimatedArrivalDate && (
+            <Tooltip
+              title={`Fecha estimada de Arribo ${params.row.estimatedArrivalDate?.getDate()}/${
+                params.row.estimatedArrivalDate?.getMonth() + 1
+              }/${params.row.estimatedArrivalDate?.getFullYear()}`}
+            >
+              <Plane className="text-blue-400" size={18} />
+            </Tooltip>
+          )}
+        </div>
       ),
     },
     {
@@ -76,22 +82,26 @@ export default function ProductFeaturedList() {
       width: 90,
       resizable: false,
     },
-    // { field: "availability", headerName: "Disponibilidad", width: 120 },
     {
       field: "marca",
       headerName: "Marca",
       minWidth: 80,
-      maxWidth: 120,
-
+      maxWidth: 90,
       resizable: false,
     },
     {
-      field: "stock",
+      field: "availability",
       headerName: "Stock",
-      type: "number",
-      minWidth: 10,
-      maxWidth: 90,
+      type: "string",
+      width: 50,
       resizable: false,
+      renderCell: (params: GridRenderCellParams) => {
+        return (
+          <StockStatus
+            stock={params.row.availability as ProductType["availability"]}
+          />
+        );
+      },
     },
     {
       field: "guaranteeDays",
@@ -157,15 +167,6 @@ export default function ProductFeaturedList() {
           <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
         ),
     },
-    // {
-    //   field: "fullName",
-    //   headerName: "Full name",
-    //   description: "This column has a value getter and is not sortable.",
-    //   sortable: false,
-    //   width: 160,
-    //   valueGetter: (value, row) =>
-    //     `${row.firstName || ""} ${row.lastName || ""}`,
-    // },
   ];
 
   useEffect(() => {
@@ -182,6 +183,7 @@ export default function ProductFeaturedList() {
         price: product.price,
         marca: product.marca,
         stock: product.stock,
+        availability: product.availability,
         guaranteeDays: product.guaranteeDays,
         sku: product.sku,
         partNumber: product.partNumber,
@@ -198,6 +200,7 @@ export default function ProductFeaturedList() {
         price: product.price,
         marca: product.marca,
         stock: product.stock,
+        availability: product.availability,
         guaranteeDays: product.guaranteeDays,
         sku: product.sku,
         partNumber: product.partNumber,

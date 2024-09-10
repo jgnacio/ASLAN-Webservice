@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeft, Check, ImagePlus, PlusIcon } from "lucide-react";
+import { Check, ImagePlus, PlusIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,24 +48,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  ProductCategory,
-  ProductPartNumber,
-  ProductType,
-} from "@/domain/product/entities/Product";
+import { ProductType } from "@/domain/product/entities/Product";
 import { useState } from "react";
 
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { publishProduct } from "../_actions/publish-product";
-import { motion } from "framer-motion";
-import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
 import { validateFormData } from "@/lib/Utils/validation";
-import { imageProps, imageListProps } from "./types/imageTypes";
-import { FormPublishProduct } from "./types/formTypes";
 import { Spinner } from "@nextui-org/spinner";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { publishProduct } from "../_actions/publish-product";
+import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
+import { FormPublishProduct } from "./types/formTypes";
+import { imageListProps, imageProps } from "./types/imageTypes";
 
 export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
@@ -315,11 +311,30 @@ export function ProductEdit({ product }: { product: ProductType }) {
           Publicar Producto
         </h1>
         <Badge
-          variant={product.stock > 0 ? "default" : "destructive"}
+          variant={
+            product.availability === "in_stock"
+              ? "default"
+              : product.availability === "out_of_stock"
+              ? "destructive"
+              : "warning"
+          }
           className="ml-auto sm:ml-0"
         >
-          {product.stock > 0 ? <span>En stock</span> : <span>Sin stock</span>}
+          {product.availability === "in_stock"
+            ? "En Stock"
+            : product.availability === "out_of_stock"
+            ? "Sin Stock"
+            : "Consultar disponibilidad"}
         </Badge>
+        <Badge variant={"outline"}>{product.category.name}</Badge>
+        {product.estimatedArrivalDate && (
+          <Badge
+            variant={"outline"}
+            className="text-blue-400"
+          >{`Llegada estimada: ${product.estimatedArrivalDate?.getDate()}/${
+            product.estimatedArrivalDate?.getMonth() + 1
+          }/${product.estimatedArrivalDate?.getFullYear()}`}</Badge>
+        )}
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
           <Button
             onClick={() => router.push("/dashboard/products")}

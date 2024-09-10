@@ -22,7 +22,9 @@ export default function HoverCardActions({ content }: { content: string }) {
           });
         }}
       >
-        <div className="w-full h-full pointer-events-none">{content}</div>
+        <div className="w-full h-full pointer-events-none text-sm flex items-center ">
+          {content}
+        </div>
       </HoverCardTrigger>
       <HoverCardContent className="z-10  w-40 p-2 overflow-hidden">
         <div className="flex justify-between ">
@@ -55,7 +57,7 @@ export default function HoverCardActions({ content }: { content: string }) {
           </Button>
         </div>
         <div className="flex items-center pt-2">
-          <span className="text-xs text-muted-foreground">{content}</span>
+          <span className="text-xs text-muted-foreground ">{content}</span>
         </div>
       </HoverCardContent>
     </HoverCard>

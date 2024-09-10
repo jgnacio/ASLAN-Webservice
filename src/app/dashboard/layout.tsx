@@ -1,6 +1,7 @@
 "use client";
 import {
   Home,
+  Layers,
   LayoutDashboard,
   LineChart,
   Package,
@@ -88,6 +89,22 @@ export default function DashboardLayout({
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right">Carrito</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/dashboard/identify"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                >
+                  <Layers className="h-5 w-5" />
+                  <span className="sr-only">Identificar Productos</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                Identificar Productos
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </nav>

@@ -22,7 +22,7 @@ export const getRelevantProducts = async ({
         solo_favoritos: false,
         rango_articulos_informe: {
           desde_articulo_nro: 0,
-          hasta_articulo_nro: 100,
+          hasta_articulo_nro: 200,
         },
         solo_modificados_desde: isoDate,
       },

@@ -1,5 +1,5 @@
 "use client";
-import { ProductType } from "@/domain/product/entities/Product";
+import { Product, ProductType } from "@/domain/product/entities/Product";
 import {
   DataGrid,
   GridColDef,
@@ -18,9 +18,13 @@ import ButtonAddToCart from "./ButtonAddToCart";
 import { getCart } from "../cart/_actions/get-cart";
 import { useRouter } from "next/navigation";
 import { Button } from "@nextui-org/button";
-import { FilePen } from "lucide-react";
+import { FilePen, Plane, PlaneLanding } from "lucide-react";
 import Link from "next/link";
 import HoverCardActions from "./HoverCardActions";
+import StockStatus from "./StockStatus";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip } from "@mui/material";
+import { Badge } from "@/components/ui/badge";
 
 export function CustomFooterStatusComponent(
   props: NonNullable<GridSlotsComponentsProps["footer"]>
@@ -68,7 +72,18 @@ export default function ProductRelevantList() {
       flex: 2,
       resizable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <HoverCardActions content={params.row.title} />
+        <div className="flex flex-col h-full w-full justify-center items-start">
+          <HoverCardActions content={params.row.title} />
+          {params.row.estimatedArrivalDate && (
+            <Tooltip
+              title={`Fecha estimada de Arribo ${params.row.estimatedArrivalDate?.getDate()}/${
+                params.row.estimatedArrivalDate?.getMonth() + 1
+              }/${params.row.estimatedArrivalDate?.getFullYear()}`}
+            >
+              <Plane className="text-blue-400" size={18} />
+            </Tooltip>
+          )}
+        </div>
       ),
     },
     {
@@ -88,12 +103,18 @@ export default function ProductRelevantList() {
       resizable: false,
     },
     {
-      field: "stock",
+      field: "availability",
       headerName: "Stock",
-      type: "number",
-      minWidth: 10,
-      maxWidth: 90,
+      type: "string",
+      width: 50,
       resizable: false,
+      renderCell: (params: GridRenderCellParams) => {
+        return (
+          <StockStatus
+            stock={params.row.availability as ProductType["availability"]}
+          />
+        );
+      },
     },
     {
       field: "guaranteeDays",
@@ -159,15 +180,6 @@ export default function ProductRelevantList() {
           <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
         ),
     },
-    // {
-    //   field: "fullName",
-    //   headerName: "Full name",
-    //   description: "This column has a value getter and is not sortable.",
-    //   sortable: false,
-    //   width: 160,
-    //   valueGetter: (value, row) =>
-    //     `${row.firstName || ""} ${row.lastName || ""}`,
-    // },
   ];
 
   useEffect(() => {
@@ -186,8 +198,8 @@ export default function ProductRelevantList() {
         stock: product.stock,
         guaranteeDays: product.guaranteeDays,
         partNumber: product.partNumber,
-
         sku: product.sku,
+        availability: product.availability,
       };
     });
     setRows(newRows);
@@ -203,7 +215,7 @@ export default function ProductRelevantList() {
         stock: product.stock,
         guaranteeDays: product.guaranteeDays,
         partNumber: product.partNumber,
-
+        avalability: product.availability,
         sku: product.sku,
       };
     });
@@ -226,7 +238,7 @@ export default function ProductRelevantList() {
             columns={columns}
             disableColumnSelector
             disableRowSelectionOnClick
-            rowHeight={45}
+            rowHeight={55}
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 10 },

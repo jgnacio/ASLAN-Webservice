@@ -18,6 +18,7 @@ export class Product {
   public category: ProductCategory;
   public marca: string;
   public stock: number;
+  public availability: ProductAvailability;
   public submitDate: Date | null;
   public favorite?: boolean;
   public onSale?: boolean;
@@ -33,6 +34,7 @@ export class Product {
     category,
     marca,
     stock,
+    availability,
     submitDate,
     favorite,
     onSale,
@@ -48,6 +50,7 @@ export class Product {
     category: ProductCategory;
     marca: string;
     stock: number;
+    availability?: ProductAvailability;
     submitDate: Date | null;
     favorite?: boolean;
     onSale?: boolean;
@@ -64,6 +67,7 @@ export class Product {
     this.category = category;
     this.marca = marca;
     this.stock = stock;
+    this.availability = availability || "out_of_stock";
     this.submitDate = submitDate;
     this.favorite = favorite;
     this.onSale = onSale;
@@ -154,6 +158,7 @@ export type ProductType = {
   category: ProductCategory;
   marca: string;
   stock: number;
+  availability: ProductAvailability;
   submitDate: Date | null;
   favorite?: boolean;
   onSale?: boolean;
@@ -172,3 +177,9 @@ export type ProductCategory = {
   name: string;
   subCategories?: ProductCategory[];
 };
+
+export type ProductAvailability =
+  | "in_stock"
+  | "out_of_stock"
+  | "pre_order"
+  | "on_demand";

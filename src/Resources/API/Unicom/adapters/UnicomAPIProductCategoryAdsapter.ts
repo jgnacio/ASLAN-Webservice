@@ -33,7 +33,7 @@ export class UnicomAPIProductCategoryAdapter
       body: JSON.stringify(body),
     })
       .then((res) => {
-        console.log("res", res);
+        // console.log("res", res);
         if (!res.ok) {
           return null;
         }
@@ -47,7 +47,7 @@ export class UnicomAPIProductCategoryAdapter
     if (!response) {
       return null;
     }
-    console.log("Categories", response);
+    // console.log("Categories", response);
 
     return response;
   }
