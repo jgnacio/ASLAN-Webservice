@@ -2,6 +2,11 @@ import axios, { AxiosResponse } from "axios";
 import fs from "fs";
 import FormData from "form-data";
 
+const WP_URL = process.env.WP_URL || "";
+const WP_USERNAME = process.env.WP_REST_API_USER || "";
+const WP_PASSWORD = process.env.WP_REST_API_PASSWORD || "";
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 interface WPConfig {
   url: string;
   username: string;
@@ -68,12 +73,20 @@ class WordPressRestAPIEntity {
       });
     return response;
   }
+
+  public async getProducts(page: number, per_page: number): Promise<any> {
+    const response = await axios.get(
+      `${this.url}/wp-json/wc/v3/products?per_page=${per_page}&page=${page}`,
+      { headers: this.headers }
+    );
+    return response.data;
+  }
 }
 
 const wpConfig: WPConfig = {
-  url: process.env.WP_URL || "",
-  username: process.env.WP_REST_API_USER || "",
-  password: process.env.WP_REST_API_PASSWORD || "",
+  url: WP_URL,
+  username: WP_USERNAME,
+  password: WP_PASSWORD,
 };
 
 const wpRAPI = WordPressRestAPIEntity.getInstance(wpConfig);

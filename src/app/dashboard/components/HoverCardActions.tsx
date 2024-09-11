@@ -4,11 +4,26 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { useToast } from "@/components/ui/use-toast";
+import { getUrlWP } from "@/lib/functions/getUrlWP";
 import { Button } from "@nextui-org/button";
-import { Building2, Clipboard, SearchIcon } from "lucide-react";
+import {
+  Building,
+  Building2,
+  Clipboard,
+  Package,
+  SearchIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function HoverCardActions({ content }: { content: string }) {
   const { toast } = useToast();
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    getUrlWP().then((res: any) => {
+      setUrl(res);
+    });
+  }, []);
 
   return (
     <HoverCard>
@@ -26,7 +41,7 @@ export default function HoverCardActions({ content }: { content: string }) {
           {content}
         </div>
       </HoverCardTrigger>
-      <HoverCardContent className="z-10  w-40 p-2 overflow-hidden">
+      <HoverCardContent className="z-10  w-52 p-2 overflow-hidden">
         <div className="flex justify-between ">
           <Button isIconOnly variant="solid" color="secondary">
             <Clipboard
@@ -50,9 +65,17 @@ export default function HoverCardActions({ content }: { content: string }) {
           <Button isIconOnly variant="solid" color="secondary">
             <a
               target="_blank"
-              href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${content}`}
+              href={`${url}/wp-admin/edit.php?s=${content}&post_status=all&post_type=product&action=-1&seo_filter&readability_filter&product_cat&product_type&stock_status&fb_sync_enabled&paged=1&action2=-1`}
             >
               <Building2 />
+            </a>
+          </Button>
+          <Button isIconOnly variant="solid" color="secondary">
+            <a
+              target="_blank"
+              href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${content}`}
+            >
+              <Package />
             </a>
           </Button>
         </div>
