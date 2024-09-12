@@ -27,7 +27,17 @@ import { Tooltip } from "@mui/material";
 import { Badge } from "@/components/ui/badge";
 import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
 import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { useToast } from "@/components/ui/use-toast";
 
 export function CustomFooterStatusComponent(
   props: NonNullable<GridSlotsComponentsProps["footer"]>
@@ -41,6 +51,8 @@ export default function ProductRelevantList() {
   const [category, setCategory] = useState<UnicomAPICategory>(
     defaultUnicomAPIRelevantCategories[0]
   );
+
+  const { toast } = useToast();
 
   const {
     mutateAsync: server_getRelevantProducts,
@@ -202,14 +214,17 @@ export default function ProductRelevantList() {
     }
   }, [dataGetProductsByPage]);
 
-  useEffect(() => {
-    if (category) {
-      server_getRelevantProducts({
-        page: 1,
-        category: category,
-      });
+  const handleSearchCategory = async () => {
+    console.log("category", category);
+    const response = await server_getRelevantProducts({
+      page: 1,
+      category: category,
+    });
+
+    if (response) {
+      handleSetRows(response);
     }
-  }, [category]);
+  };
 
   const handleSetRows = (products: ProductType[]) => {
     const newRows = products.map((product) => {
@@ -228,27 +243,41 @@ export default function ProductRelevantList() {
     setRows(newRows);
   };
 
-  const handleSetAllNewRows = (products: ProductType[]) => {
-    const newRows = products.map((product) => {
-      return {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        marca: product.marca,
-        stock: product.stock,
-        guaranteeDays: product.guaranteeDays,
-        partNumber: product.partNumber,
-        avalability: product.availability,
-        sku: product.sku,
-      };
-    });
-    setRows(newRows);
-  };
-
   return (
     <div className="w-full h-full">
-      <Select></Select>
-      {isLoadingGetAllProducts ? "cargado todos los productos" : ""}
+      <div className="flex space-x-2 h-16 -mt-16 items-center w-full justify-end">
+        <Select
+          defaultValue="Notebooks"
+          onValueChange={(value) => {
+            const category = defaultUnicomAPIRelevantCategories.find(
+              (category) => category.name === value
+            );
+            if (category) {
+              setCategory(category);
+              console.log("category", category);
+            }
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select a Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Categorias</SelectLabel>
+              {defaultUnicomAPIRelevantCategories.map((category, index) => (
+                <SelectItem value={category.name} key={category.code + index}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Separator orientation="vertical" />
+        <Button color="primary" onClick={handleSearchCategory}>
+          Buscar
+        </Button>
+      </div>
+
       {isLoadingGetProductsByPage ? (
         <Spinner color="primary" />
       ) : (
