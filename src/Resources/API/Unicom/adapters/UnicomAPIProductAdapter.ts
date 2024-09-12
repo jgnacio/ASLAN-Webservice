@@ -239,8 +239,8 @@ export class UnicomAPIProductAdapter implements IProductRepository {
   async getOffers(request?: UnicomAPIProductRequest): Promise<Product[]> {
     const routes = [
       "/ofertas/liquidaciones",
-      "/ofertas/combos",
-      "/ofertas/equipos",
+      // "/ofertas/combos",
+      // "/ofertas/equipos",
     ];
 
     // iter one by one route
