@@ -1,10 +1,13 @@
 import { IProductCategoryRepository } from "@/domain/product/repositories/IProductCategoryRepository";
 import { UnicomAPICategory } from "../entities/Category/UnicomAPICategory";
 import {
+  defaultUnicomAPICategoryRequest,
   defaultUnicomAPIProductRequest,
+  UnicomAPICategoryRequest,
   UnicomAPIProductRequest,
 } from "../UnicomAPIRequets";
 import { ProductCategory } from "@/domain/product/entities/Product";
+import axios from "axios";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
@@ -21,23 +24,41 @@ export class UnicomAPIProductCategoryAdapter
     method = "GET",
   }: {
     route: string;
-    body?: UnicomAPIProductRequest;
+    body?: UnicomAPICategoryRequest;
     method?: string;
   }): Promise<UnicomAPICategory[] | null> {
-    const response: UnicomAPICategory[] = await fetch(this.baseUrl + route, {
+    // const response: UnicomAPICategory[] = await fetch(this.baseUrl + route, {
+    //   method,
+    //   headers: {
+    //     "content-type": "application/json",
+    //     authorization: "Bearer " + this.token,
+    //   },
+    //   body: JSON.stringify(body),
+    // })
+    //   .then((res) => {
+    //     // console.log("res", res);
+    //     if (!res.ok) {
+    //       return null;
+    //     }
+    //     return res.json();
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error:", error);
+    //     return null;
+    //   });
+
+    // same fetch but axios
+    const response = await axios({
       method,
+      url: this.baseUrl + route,
       headers: {
         "content-type": "application/json",
         authorization: "Bearer " + this.token,
       },
-      body: JSON.stringify(body),
+      data: JSON.stringify(body),
     })
       .then((res) => {
-        // console.log("res", res);
-        if (!res.ok) {
-          return null;
-        }
-        return res.json();
+        return res.data;
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -57,14 +78,18 @@ export class UnicomAPIProductCategoryAdapter
   }
 
   async getAll(): Promise<ProductCategory[]> {
-    const defaultCategoryRequest = defaultUnicomAPIProductRequest;
+    const defaultCategoryRequest = defaultUnicomAPICategoryRequest;
 
     const categories = await this.fetchCategories({
       method: "GET",
       route: "/articulos/grupos_articulos",
-      // body: defaultCategoryRequest,
+      body: defaultCategoryRequest,
     });
-    // console.log("Categories", categories);
+
+    categories?.forEach((category) => {
+      console.log("Category", category.descripcion);
+      console.log("Subcategories", category.grupos_hijos);
+    });
 
     if (!categories) {
       console.error("Error fetching categories");
@@ -87,7 +112,7 @@ export class UnicomAPIProductCategoryAdapter
       id: category.codigo_grupo,
       name: category.descripcion,
       subCategories:
-        category.gruposHijos
+        category.grupos_hijos
           ?.map(this.UnicomMapSubCategory.bind(this))
           .filter(
             (subCategory): subCategory is ProductCategory =>

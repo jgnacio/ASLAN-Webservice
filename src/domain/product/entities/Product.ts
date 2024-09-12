@@ -134,15 +134,15 @@ export class Product {
       throw new Error("Guarantee days cannot be negative");
     }
 
-    if (
-      !this.title ||
-      (this.title.trim().length === 0 &&
-        !this.description &&
-        !this.price &&
-        !this.sku)
-    ) {
-      throw new Error("Title cannot be empty");
-    }
+    // if (
+    //   !this.title ||
+    //   (this.title.trim().length === 0 &&
+    //     !this.description &&
+    //     !this.price &&
+    //     !this.sku)
+    // ) {
+    //   throw new Error("Title cannot be empty");
+    // }
   }
 }
 

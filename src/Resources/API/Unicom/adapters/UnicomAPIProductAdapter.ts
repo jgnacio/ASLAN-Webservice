@@ -25,6 +25,7 @@ import {
 } from "@/lib/Utils/Functions/ClassToObject";
 import { UnicomAPIProductDetailResponse } from "../entities/Product/UnicomAPIProductDetailResponse";
 import { UnicomAPIProductDetailRequest } from "../entities/Product/UnicomAPIProductDetailRequest";
+import axios from "axios";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
@@ -50,23 +51,17 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     | UnicomAPIPreAssembledPC[]
     | null
   > {
-    const response:
-      | UnicomAPIProduct[]
-      | UnicomAPIOfferCombo[]
-      | UnicomAPIOfferProduct[]
-      | UnicomAPIPreAssembledPC[] = await fetch(this.baseUrl + route, {
+    const response = await axios({
       method,
+      url: this.baseUrl + route,
       headers: {
         "content-type": "application/json",
         authorization: "Bearer " + this.token,
       },
-      body: JSON.stringify(body),
+      data: JSON.stringify(body),
     })
       .then((res) => {
-        if (!res.ok) {
-          return null;
-        }
-        return res.json();
+        return res.data;
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -187,11 +182,11 @@ export class UnicomAPIProductAdapter implements IProductRepository {
   async getAll({
     request,
     page,
-    category,
+    categoryCode,
   }: {
     request?: UnicomAPIProductRequest;
     page?: number;
-    category?: string;
+    categoryCode?: string;
   }): Promise<Product[]> {
     const defaultRequest: UnicomAPIProductRequest =
       request || defaultUnicomAPIProductRequest;
@@ -200,19 +195,19 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       defaultRequest.rango_articulos_informe.desde_articulo_nro =
         200 * page - 199;
     }
-    if (category) {
-      defaultRequest.codigo_grupo = category;
+    if (categoryCode) {
+      defaultRequest.codigo_grupo = categoryCode;
     }
-    const UnicomProductRequest = this.mapToUnicomRequest(defaultRequest);
     const response = await this.fetchProducts({
       method: "PUT",
-      body: UnicomProductRequest,
+      body: defaultRequest,
       route: "/articulos",
     });
 
     if (!response) {
       return [];
     }
+    // console.log("response:", response);
 
     const products = this.mapUnicomProduct(response);
 
@@ -242,39 +237,39 @@ export class UnicomAPIProductAdapter implements IProductRepository {
   }
 
   async getOffers(request?: UnicomAPIProductRequest): Promise<Product[]> {
-    const onSaleResponse = this.fetchProducts({
-      method: "GET",
-      route: "/ofertas/liquidaciones",
-    });
+    const routes = [
+      "/ofertas/liquidaciones",
+      "/ofertas/combos",
+      "/ofertas/equipos",
+    ];
 
-    // const combosOffersResponse = this.fetchProducts({
-    //   method: "GET",
-    //   route: "/ofertas/combos",
-    // });
+    // iter one by one route
+    let productList: any = [];
 
-    const pcOffersResponse = this.fetchProducts({
-      method: "GET",
-      route: "/ofertas/equipos",
-    });
+    for (const route of routes) {
+      const response = await this.fetchProducts({
+        method: "GET",
+        route,
+      });
 
-    // Merge all responses on one array
-    const response = await Promise.all([
-      onSaleResponse,
-      // pcOffersResponse,
-      // combosOffersResponse,
-    ]);
-
-    console.log("response", response);
+      productList.push(response);
+    }
 
     // Validate response
-    if (!response) {
+    if (!productList) {
       return [];
     }
-    const flatResponse = response.flat();
+    const flatResponse = productList.flat();
 
     // console.log("flatResponse", flatResponse);
 
-    const products = this.mapUnicomProduct(flatResponse as Product[]);
+    // Eliminar nulls y mapear productos
+
+    const cleanedResponse = flatResponse.filter((item: any) => item !== null);
+
+    console.log("cleanedResponse", cleanedResponse);
+
+    const products = this.mapUnicomProduct(cleanedResponse as Product[]);
 
     return products;
   }
@@ -322,7 +317,11 @@ export class UnicomAPIProductAdapter implements IProductRepository {
       | UnicomAPIPreAssembledPC[]
       | null
   ): Product[] {
-    if (!productsResponse) {
+    if (
+      !productsResponse ||
+      productsResponse.length === 0 ||
+      productsResponse === null
+    ) {
       return [];
     }
 
@@ -368,38 +367,26 @@ export class UnicomAPIProductAdapter implements IProductRepository {
           if (item.disponibilidad === "consultar") {
             mappedAvailability = "on_demand";
           }
-
-          if (item.articulos && item.articulos.length > 0) {
-            return new Product({
-              title: item.producto,
-              sku: item.codigo || "",
-              price: item.precio,
-              partNumber: mappedPartnumber,
-              description: "",
-              images: item.fotos || [],
-              category: item.grupo_articulo.descripcion || "",
-              availability: "out_of_stock",
-              marca: item.marca.marca || "",
-              stock: item.inventario || 0,
-              submitDate: new Date(),
-              estimatedArrivalDate: item.fecha_estimada_llegada
-                ? new Date(item.fecha_estimada_llegada)
-                : null,
-              guaranteeDays: item.garantia_dias || 0,
-            });
+          if (!item.producto && !item.nombre_equipo && !item.nombre_oferta) {
+            return null;
           }
-          console.log("item", item);
 
           return new Product({
-            title: item.producto,
-            sku: item.codigo || "",
-            price: item.precio,
+            title:
+              item.producto || item.nombre_equipo || item.nombre_oferta || "",
+            sku: item.codigo || item.codigo_equipo || item.codigo_oferta || "",
+            price:
+              item.precio ||
+              item.costo ||
+              item.precio_bonificado ||
+              item.costo_bonificado,
             partNumber: mappedPartnumber,
             description: item.descripcion || "",
             images: item.fotos || [],
-            category: item.grupo_articulo.descripcion || "",
-            availability: mappedAvailability || "out_of_stock",
-            marca: item.marca.marca || "",
+            category:
+              (item.grupo_articulo && item.grupo_articulo.descripcion) || "",
+            availability: mappedAvailability,
+            marca: (item.marca && item.marca.marca) || "",
             stock: item.inventario || 0,
             submitDate: new Date(),
             estimatedArrivalDate: item.fecha_estimada_llegada

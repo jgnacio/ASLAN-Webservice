@@ -37,21 +37,80 @@ export const defaultUnicomAPICategoryRequest: UnicomAPICategoryRequest = {
 
 export const defaultUnicomAPIRelevantCategories = [
   {
-    name: "computers",
-    code: "08",
+    name: "Notebooks",
+    code: "08.00",
   },
   {
-    name: "gadgets",
-    code: "00",
+    name: "UltraBooks",
+    code: "08.25",
   },
-
+  {
+    name: "Notebooks Accessories",
+    code: "00.30",
+  },
+  {
+    name: "Memories",
+    code: "01.07",
+  },
+  {
+    name: "CPU",
+    code: "01.06",
+  },
+  {
+    name: "Motherboards",
+    code: "01.05",
+  },
+  {
+    name: "Graphics Cards",
+    code: "01.03",
+  },
+  {
+    name: "Power Supplies",
+    code: "01.17",
+  },
+  {
+    name: "Storage",
+    code: "01.01",
+  },
+  {
+    name: "Cooling",
+    code: "01.01",
+  },
+  {
+    name: "Peripherals",
+    code: "01.00",
+  },
+  {
+    name: "Cabinets",
+    code: "01.10",
+  },
+  {
+    name: "Webcams",
+    code: "00.14",
+  },
   {
     name: "monitors",
     code: "02",
   },
   {
-    name: "smartphones",
-    code: "50",
+    name: "For Cabinets",
+    code: "00.90",
+  },
+  {
+    name: "Desks",
+    code: "62.10",
+  },
+  {
+    name: "Gaming Chairs",
+    code: "62.11",
+  },
+  {
+    name: "Headets",
+    code: "00.02",
+  },
+  {
+    name: "speakers",
+    code: "00.04",
   },
 ];
 

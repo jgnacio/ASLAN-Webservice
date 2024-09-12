@@ -21,7 +21,7 @@ export default function Products() {
       exit={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.4 }}
     >
-      <Tabs defaultValue="relevant">
+      <Tabs defaultValue="offers">
         <TabsList>
           <TabsTrigger value="offers">Ofertas</TabsTrigger>
           <TabsTrigger value="relevant">Relevantes</TabsTrigger>

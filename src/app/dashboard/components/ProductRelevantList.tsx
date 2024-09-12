@@ -25,6 +25,9 @@ import StockStatus from "./StockStatus";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip } from "@mui/material";
 import { Badge } from "@/components/ui/badge";
+import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
+import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
+import { Select } from "@/components/ui/select";
 
 export function CustomFooterStatusComponent(
   props: NonNullable<GridSlotsComponentsProps["footer"]>
@@ -35,13 +38,24 @@ export function CustomFooterStatusComponent(
 export default function ProductRelevantList() {
   const router = useRouter();
   const [rows, setRows] = useState<any>([]);
+  const [category, setCategory] = useState<UnicomAPICategory>(
+    defaultUnicomAPIRelevantCategories[0]
+  );
 
-  const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
-    useQuery({
-      queryKey: ["get-relevant-products"],
-      staleTime: 1000 * 60 * 10, // 10 minutes
-      queryFn: () => getRelevantProducts({ page: 1 }),
-    });
+  const {
+    mutateAsync: server_getRelevantProducts,
+    data: dataGetProductsByPage,
+    isPending: isLoadingGetProductsByPage,
+  } = useMutation({
+    mutationFn: ({
+      page,
+      category,
+    }: {
+      page: number;
+      category: UnicomAPICategory;
+    }) => getRelevantProducts({ page, category }),
+  });
+
   const {
     isPending: isLoadingGetAllProducts,
     data: dataGetAllProducts,
@@ -188,6 +202,15 @@ export default function ProductRelevantList() {
     }
   }, [dataGetProductsByPage]);
 
+  useEffect(() => {
+    if (category) {
+      server_getRelevantProducts({
+        page: 1,
+        category: category,
+      });
+    }
+  }, [category]);
+
   const handleSetRows = (products: ProductType[]) => {
     const newRows = products.map((product) => {
       return {
@@ -224,6 +247,7 @@ export default function ProductRelevantList() {
 
   return (
     <div className="w-full h-full">
+      <Select></Select>
       {isLoadingGetAllProducts ? "cargado todos los productos" : ""}
       {isLoadingGetProductsByPage ? (
         <Spinner color="primary" />
