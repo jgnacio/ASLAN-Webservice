@@ -11,7 +11,7 @@ export const getProductsByPage = async ({
 }): Promise<ProductType[]> => {
   const unicomAPIAdapter = new UnicomAPIProductAdapter();
 
-  const products = unicomAPIAdapter.getAll({ page, category });
+  const products = unicomAPIAdapter.getAll({ page, categoryCode: category });
   const productList: ProductType[] = (await products).map((product) =>
     product.toPlainObject()
   );
