@@ -212,7 +212,15 @@ export default function ProductOfferList() {
   return (
     <div className="w-full h-full">
       {isLoadingGetProductsByPage ? (
-        <Spinner color="primary" />
+        <div className="flex justify-center items-center h-[200px]">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2 }}
+          >
+            <Spinner color="primary" />
+          </motion.div>
+        </div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}

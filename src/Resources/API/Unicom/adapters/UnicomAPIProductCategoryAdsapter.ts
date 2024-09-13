@@ -88,6 +88,7 @@ export class UnicomAPIProductCategoryAdapter
 
     categories?.forEach((category) => {
       console.log("Category", category.descripcion);
+      console.log("Subcategories", category.codigo_grupo);
       console.log("Subcategories", category.grupos_hijos);
     });
 

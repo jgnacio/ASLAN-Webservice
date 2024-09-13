@@ -38,78 +38,97 @@ export const defaultUnicomAPICategoryRequest: UnicomAPICategoryRequest = {
 export const defaultUnicomAPIRelevantCategories = [
   {
     name: "Notebooks",
+    nameES: "Notebooks",
     code: "08.00",
   },
   {
     name: "UltraBooks",
+    nameES: "UltraBooks",
     code: "08.25",
   },
   {
     name: "Notebooks Accessories",
+    nameES: "Accesorios de Notebooks",
     code: "00.30",
   },
   {
     name: "Memories",
+    nameES: "Memorias",
     code: "01.07",
   },
   {
     name: "CPU",
+    nameES: "Procesadores",
     code: "01.06",
   },
   {
     name: "Motherboards",
+    nameES: "Motherboards",
     code: "01.05",
   },
   {
     name: "Graphics Cards",
+    nameES: "GPU",
     code: "01.03",
   },
   {
     name: "Power Supplies",
+    nameES: "Fuentes",
     code: "01.17",
   },
   {
     name: "Storage",
+    nameES: "Almacenamiento",
     code: "01.01",
   },
   {
     name: "Cooling",
+    nameES: "Refrigeración",
     code: "01.01",
   },
   {
-    name: "Peripherals",
-    code: "01.00",
+    name: "Accessories",
+    nameES: "Accesorios",
+    code: "00",
   },
   {
     name: "Cabinets",
+    nameES: "Gabinetes",
     code: "01.10",
   },
   {
     name: "Webcams",
+    nameES: "Webcams",
     code: "00.14",
   },
   {
     name: "monitors",
+    nameES: "Monitores",
     code: "02",
   },
   {
     name: "For Cabinets",
+    nameES: "Accesorios Gabinetes",
     code: "00.90",
   },
   {
     name: "Desks",
+    nameES: "Escritorios",
     code: "62.10",
   },
   {
-    name: "Gaming Chairs",
+    name: "Chairs",
+    nameES: "Sillas",
     code: "62.11",
   },
   {
     name: "Headets",
+    nameES: "Auriculares",
     code: "00.02",
   },
   {
     name: "speakers",
+    nameES: "Parlantes",
     code: "00.04",
   },
 ];

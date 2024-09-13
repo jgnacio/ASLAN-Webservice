@@ -207,9 +207,23 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     if (!response) {
       return [];
     }
-    // console.log("response:", response);
+    let productsResponse = response;
+    if (defaultRequest.codigo_grupo === "01.10") {
+      // Filtrar productos por tags de busqueda para eliminar los que sean SATA/SSD/M.2
+      productsResponse = productsResponse.filter(
+        (product) =>
+          product.tags_de_busqueda?.includes("torre") ||
+          product.tags_de_busqueda?.includes("chasis") ||
+          product.tags_de_busqueda?.includes("tower") ||
+          product.tags_de_busqueda?.includes("mini-itx") ||
+          product.tags_de_busqueda?.includes("micro-atx") ||
+          product.tags_de_busqueda?.includes("mid tower") ||
+          product.tags_de_busqueda?.includes("full tower") ||
+          product.tags_de_busqueda?.includes("mini-itx")
+      );
+    }
 
-    const products = this.mapUnicomProduct(response);
+    const products = this.mapUnicomProduct(productsResponse);
 
     return products;
   }

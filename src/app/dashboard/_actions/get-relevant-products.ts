@@ -14,8 +14,6 @@ export const getRelevantProducts = async ({
 }): Promise<ProductType[]> => {
   const unicomAPIAdapter = new UnicomAPIProductAdapter();
 
-  // hacer una peticion una por una
-
   const productLists = await unicomAPIAdapter.getAll({
     request: {
       solo_articulos_destacados: false,

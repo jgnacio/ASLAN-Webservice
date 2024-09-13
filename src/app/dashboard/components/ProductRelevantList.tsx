@@ -197,7 +197,6 @@ export default function ProductRelevantList() {
       headerName: "Agregar",
       type: "actions",
       resizable: false,
-
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
         isPending ? (
@@ -244,7 +243,7 @@ export default function ProductRelevantList() {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full ">
       <div className="flex space-x-2 h-16 -mt-16 items-center w-full justify-end">
         <Select
           defaultValue="Notebooks"
@@ -266,7 +265,7 @@ export default function ProductRelevantList() {
               <SelectLabel>Categorias</SelectLabel>
               {defaultUnicomAPIRelevantCategories.map((category, index) => (
                 <SelectItem value={category.name} key={category.code + index}>
-                  {category.name}
+                  {category.nameES}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -279,26 +278,45 @@ export default function ProductRelevantList() {
       </div>
 
       {isLoadingGetProductsByPage ? (
-        <Spinner color="primary" />
+        <div className="flex justify-center items-center h-[200px]">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2 }}
+          >
+            <Spinner color="primary" />
+          </motion.div>
+        </div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            disableColumnSelector
-            disableRowSelectionOnClick
-            rowHeight={55}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 10 },
-              },
-            }}
-            pageSizeOptions={[10, 20]}
-          ></DataGrid>
+          {rows && rows.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, easings: "easeInOut" }}
+              className="flex justify-center items-center h-[200px]"
+            >
+              <p className="font-semibold">Realiza una busqueda!</p>
+            </motion.div>
+          ) : (
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              disableColumnSelector
+              disableRowSelectionOnClick
+              rowHeight={55}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 10 },
+                },
+              }}
+              pageSizeOptions={[10, 20]}
+            />
+          )}
         </motion.div>
       )}
     </div>
