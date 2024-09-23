@@ -5,6 +5,7 @@ export interface AslanWooAPIProductRequest {
   description: string;
   short_description: string;
   status: "draft" | "publish";
+  sku: string;
   categories: {
     id: number;
   }[];
