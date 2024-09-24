@@ -1,8 +1,11 @@
 "use client";
+import { useToast } from "@/components/ui/use-toast";
 import {
-  DocumentTypes,
-  DropShippingDelivery,
-} from "@/Resources/API/Unicom/UnicomAPIRequets";
+  document_types,
+  DropShippingDeliveryState,
+  regularDeliveryMethods,
+} from "@/Resources/API/Unicom/entities/PurchaseOrder/UnicomAPIPurchaseOrder";
+import { DocumentTypes } from "@/Resources/API/Unicom/UnicomAPIRequets";
 import {
   CalendarDate,
   getLocalTimeZone,
@@ -12,8 +15,6 @@ import {
   today,
 } from "@internationalized/date";
 import {
-  Accordion,
-  AccordionItem,
   Button,
   ButtonGroup,
   Calendar,
@@ -32,30 +33,24 @@ import { useEffect, useState } from "react";
 import { FaFileImage } from "react-icons/fa";
 import { FaClock } from "react-icons/fa6";
 import { sendPurchaseOrderRegistration } from "./_actions/send-purchase-order-registration";
-import { DropShippingDeliveryState } from "@/Resources/API/Unicom/entities/PurchaseOrder/UnicomAPIPurchaseOrder";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  document_types,
-  regularDeliveryMethods,
-} from "@/Resources/API/Unicom/entities/PurchaseOrder/UnicomAPIPurchaseOrder";
 
-import {
-  convertDateToCalendarDate,
-  convertDateToISOFormat,
-  converDateToTime,
-  convertCalendarDateToDate,
-} from "@/lib/functions/DateFunctions";
-import { Link } from "lucide-react";
-import { ToastAction } from "@/components/ui/toast";
-import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
+import { ToastAction } from "@/components/ui/toast";
+import {
+  converDateToTime,
+  convertCalendarDateToDate,
+  convertDateToCalendarDate,
+  convertDateToISOFormat,
+} from "@/lib/functions/DateFunctions";
+import { useRouter } from "next/navigation";
+import { getUserDataForDropshipping } from "./_actions/get-user-data-for-dropshipping";
 
 export default function PurchaseOrder() {
   let defaultDate = today(getLocalTimeZone());
@@ -68,6 +63,22 @@ export default function PurchaseOrder() {
   let isDateUnavailable = (date: DateValue) => date.compare(now) < 0;
   const { toast } = useToast();
   const router = useRouter();
+
+  const {
+    mutateAsync: server_getUserDataForDropshipping,
+    isPending: isPendingUserData,
+    isSuccess: isSuccessUserData,
+    isError: isErrorUserData,
+    data: userData,
+  } = useMutation({
+    mutationFn: getUserDataForDropshipping,
+    onSuccess: () => {
+      toast({
+        title: "Datos cargados",
+        description: "Los datos han sido cargados con éxito",
+      });
+    },
+  });
 
   const {
     mutateAsync: server_sendPurchaseOrderRegistration,
@@ -139,6 +150,8 @@ export default function PurchaseOrder() {
     forma_entrega: "",
     codigo_direccion: "",
   });
+
+  const [dropshippingDirecction, setDropshippingDirecction] = useState<any>({});
 
   const handleDocumentTypeChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -247,12 +260,31 @@ export default function PurchaseOrder() {
     }));
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const { value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
       forma_entrega: value,
     }));
+
+    if (value === "Entrega Dropshipping") {
+      await server_getUserDataForDropshipping();
+    }
+  };
+
+  const handleDropshippingDirecctionChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    console.log("Value:", value);
+
+    userData?.opciones_dropshipping?.forEach((option) => {
+      if (option.codigo_metodo_entrega_especial === Number(value)) {
+        setDropshippingDirecction(option);
+      }
+    });
   };
 
   const focusDate = (date: CalendarDate) => {
@@ -339,6 +371,18 @@ export default function PurchaseOrder() {
   useEffect(() => {
     console.log(data);
   }, [data]);
+
+  useEffect(() => {
+    if (userData) {
+      console.log(userData);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (dropshippingDirecction) {
+      console.log("dropshipping direccionts", dropshippingDirecction);
+    }
+  }, [dropshippingDirecction]);
 
   return (
     <Card className="w-full">
@@ -462,6 +506,32 @@ export default function PurchaseOrder() {
                   </SelectItem>
                 ))}
               </Select>
+              {formData.forma_entrega === "Entrega Dropshipping" &&
+                userData?.opciones_dropshipping && (
+                  <Select
+                    id="direcciones_entrega"
+                    label="Selecciona la direccion de entrega"
+                    className="max-w-xs"
+                    value={
+                      userData?.opciones_dropshipping[0].nombre_referencial
+                    }
+                    onChange={handleDropshippingDirecctionChange}
+                    isRequired
+                  >
+                    {userData.opciones_dropshipping.map((option) => (
+                      <SelectItem
+                        key={
+                          option.codigo_metodo_entrega_especial?.toString() ||
+                          ""
+                        }
+                        value={option.nombre_referencial}
+                      >
+                        {option.nombre_referencial}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
+
               {formData.forma_entrega === "Entrega Dropshipping" && (
                 <div className=" mt-4 grid lg:grid-cols-2 grid-cols-1 gap-4">
                   <Card>
