@@ -15,6 +15,8 @@ import {
   today,
 } from "@internationalized/date";
 import {
+  Accordion,
+  AccordionItem,
   Button,
   ButtonGroup,
   Calendar,
@@ -51,6 +53,8 @@ import {
 } from "@/lib/functions/DateFunctions";
 import { useRouter } from "next/navigation";
 import { getUserDataForDropshipping } from "./_actions/get-user-data-for-dropshipping";
+import SelectAvailableDateTime from "./components/SelectAvailableDateTime";
+import SelectAddressRegularCode from "./components/SelectAddressRegularCode";
 
 export default function PurchaseOrder() {
   let defaultDate = today(getLocalTimeZone());
@@ -122,7 +126,12 @@ export default function PurchaseOrder() {
     fecha_hora_entrega: convertCalendarDateToDate(defaultDate),
     forma_entrega: "",
   });
+  const [calendarDateTime, setCalendarDateTime] = useState<Date>(new Date());
   const [focusedDate, setFocusedDate] = useState(defaultDate);
+  const [billBase64, setBillBase64] = useState({
+    factura: "",
+    status: "",
+  });
 
   const [dropshippingData, setDropshippingData] =
     useState<DropShippingDeliveryState>({
@@ -151,7 +160,8 @@ export default function PurchaseOrder() {
     codigo_direccion: "",
   });
 
-  const [dropshippingDirecction, setDropshippingDirecction] = useState<any>({});
+  const [dropshippingDirecction, setDropshippingDirecction] =
+    useState<any>(null);
 
   const handleDocumentTypeChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -229,6 +239,13 @@ export default function PurchaseOrder() {
       ...prevRegularDeliveryData,
       forma_entrega: value,
     }));
+
+    if (value === "entrega_en_mostrador") {
+      setRegularDeliveryData((prevRegularDeliveryData) => ({
+        ...prevRegularDeliveryData,
+        codigo_direccion: "",
+      }));
+    }
   };
 
   // Función para manejar cambios en el calendario
@@ -269,9 +286,11 @@ export default function PurchaseOrder() {
       forma_entrega: value,
     }));
 
-    if (value === "Entrega Dropshipping") {
-      await server_getUserDataForDropshipping();
+    if (value === "Entrega Regular") {
+      setDropshippingDirecction(null);
     }
+
+    await server_getUserDataForDropshipping();
   };
 
   const handleDropshippingDirecctionChange = (
@@ -300,9 +319,12 @@ export default function PurchaseOrder() {
       data.forma_entrega = {
         entrega_dropshipping: { ...dropshippingData },
       };
-      data.forma_entrega.entrega_dropshipping.codigo_dropshipping = Math.floor(
-        Number(data.forma_entrega.entrega_dropshipping.codigo_dropshipping)
+      const code = Number(
+        dropshippingDirecction.codigo_metodo_entrega_especial
       );
+
+      data.forma_entrega.entrega_dropshipping.codigo_dropshipping = code;
+
       data.forma_entrega.entrega_dropshipping.latitud = Math.floor(
         Number(data.forma_entrega.entrega_dropshipping.latitud)
       );
@@ -310,42 +332,42 @@ export default function PurchaseOrder() {
         Number(data.forma_entrega.entrega_dropshipping.longitud)
       );
 
-      const fecha_entregaBuffer = data.fecha_hora_entrega as Date;
+      if (data.forma_entrega.entrega_dropshipping.latitud === 0) {
+        delete data.forma_entrega.entrega_dropshipping.latitud;
+      }
 
-      fecha_entregaBuffer.setHours(
-        (data.forma_entrega.entrega_dropshipping.hora_entrega as Time).hour,
-        (data.forma_entrega.entrega_dropshipping.hora_entrega as Time).minute,
-        (data.forma_entrega.entrega_dropshipping.hora_entrega as Time).second
-      );
+      if (data.forma_entrega.entrega_dropshipping.longitud === 0) {
+        delete data.forma_entrega.entrega_dropshipping.longitud;
+      }
 
-      data.forma_entrega.entrega_dropshipping.hora_entrega =
-        convertDateToISOFormat(fecha_entregaBuffer);
+      data.forma_entrega.entrega_dropshipping.factura_base64 =
+        billBase64.factura;
 
-      fecha_entregaBuffer.setHours(
-        (data.forma_entrega.entrega_dropshipping.hora_cierre as Time).hour,
-        (data.forma_entrega.entrega_dropshipping.hora_cierre as Time).minute,
-        (data.forma_entrega.entrega_dropshipping.hora_cierre as Time).second
-      );
+      if (data.forma_entrega.entrega_dropshipping.documento === "") {
+        delete data.forma_entrega.entrega_dropshipping.tipo_documento;
+      }
 
-      data.forma_entrega.entrega_dropshipping.hora_cierre =
-        convertDateToISOFormat(fecha_entregaBuffer);
-
-      fecha_entregaBuffer.setHours(
-        (data.forma_entrega.entrega_dropshipping.hora_fin as Time).hour,
-        (data.forma_entrega.entrega_dropshipping.hora_fin as Time).minute,
-        (data.forma_entrega.entrega_dropshipping.hora_fin as Time).second
-      );
-
-      data.forma_entrega.entrega_dropshipping.hora_fin =
-        convertDateToISOFormat(fecha_entregaBuffer);
+      // drop fecha_hora_entrega
+      delete data.fecha_hora_entrega;
     }
 
     // agregar los datos de entrega regular al objeto data, si es que no tiene forma de entrega dropshipping
     if (data.forma_entrega === "Entrega Regular") {
-      data.forma_entrega = regularDeliveryData;
+      console.log("RegularDeliveryData:", regularDeliveryData);
+      data.forma_entrega = {};
+      data.forma_entrega.entrega_regular = regularDeliveryData;
+      data.fecha_hora_entrega = convertDateToISOFormat(data.fecha_hora_entrega);
     }
 
-    data.fecha_hora_entrega = convertDateToISOFormat(data.fecha_hora_entrega);
+    // limpiar datos vacios de manera recursiva
+    const cleanData = (obj: any) => {
+      Object.keys(obj).forEach((key) => {
+        if (obj[key] && typeof obj[key] === "object") cleanData(obj[key]);
+        if (obj[key] === "" || obj[key] === null) delete obj[key];
+      });
+    };
+
+    cleanData(data);
 
     // TODO - Implementar la validacion de los datos del formulario
     valitadeSubmit(data);
@@ -364,25 +386,86 @@ export default function PurchaseOrder() {
     return;
   };
 
-  useEffect(() => {
-    console.log(formData);
-  }, [formData]);
+  const handleDropshippingDeliveryChangue = (value: string) => {
+    const valueNumber = Number(value);
+
+    const fecha_entrega =
+      dropshippingDirecction.proximas_franjas_horarias_de_entrega[valueNumber];
+    setDropshippingData((prevDropshippingData) => ({
+      ...prevDropshippingData,
+      hora_entrega: fecha_entrega.dia_hora_de_entrega,
+      hora_cierre: fecha_entrega.dia_hora_de_corte,
+      hora_fin: fecha_entrega.fin_dia_hora_entrega,
+    }));
+  };
+
+  const handleReadBillInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]; // Obtener el primer archivo (si existe)
+
+    if (file) {
+      // verificar el tipo de archivo si PDF o Imagen
+      const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+        "application/pdf",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Error al subir la factura",
+          description: "El archivo debe ser una imagen o un PDF",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader(); // Crear una instancia de FileReader
+
+      // Cuando la lectura se complete, obtendremos el Base64
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        console.log("Archivo en Base64:", base64String);
+        setBillBase64({
+          factura: base64String,
+          status: "loaded",
+        });
+      };
+
+      reader.onprogress = (event) => {
+        setBillBase64({
+          factura: "",
+          status: "loading",
+        });
+      };
+
+      reader.onerror = (event) => {
+        setBillBase64({
+          factura: "",
+          status: "error",
+        });
+      };
+
+      // Leer el archivo como Data URL (esto incluye el Base64)
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (dropshippingData) {
+  //     console.log("DropshippingData:", dropshippingData);
+  //   }
+  // }, [dropshippingData]);
+
+  // useEffect(() => {
+  //   if (calendarDateTime) {
+  //   }
+  // }, [calendarDateTime]);
 
   useEffect(() => {
-    console.log(data);
-  }, [data]);
-
-  useEffect(() => {
-    if (userData) {
-      console.log(userData);
+    if (isSuccessUserData) {
+      console.log("UserData:", userData);
     }
   }, [userData]);
-
-  useEffect(() => {
-    if (dropshippingDirecction) {
-      console.log("dropshipping direccionts", dropshippingDirecction);
-    }
-  }, [dropshippingDirecction]);
 
   return (
     <Card className="w-full">
@@ -395,93 +478,43 @@ export default function PurchaseOrder() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
-            <div className="w-full flex justify-center">
-              <Calendar
-                aria-label="Date"
-                id="fecha_hora_entrega"
-                className="flex flex-col min-w-[22rem] items-center "
-                showMonthAndYearPickers
-                value={convertDateToCalendarDate(formData.fecha_hora_entrega)}
-                onChange={handleCalendarChangeUpdate}
-                isDateUnavailable={isDateUnavailable}
-                focusedValue={focusedDate}
-                onFocusChange={(date) => setFocusedDate(date)}
-                //   focusedValue={formData.fecha_hora_entrega}
-                topContent={
-                  <ButtonGroup
-                    fullWidth
-                    className="px-3 pb-2 pt-3 bg-content1 [&>button]:text-default-500 [&>button]:border-default-200/60"
-                    radius="full"
-                    size="sm"
-                    variant="bordered"
-                  >
-                    <Button
-                      onPress={() => {
-                        handleCalendarChange(now);
-                        focusDate(now);
-                      }}
-                    >
-                      Hoy
-                    </Button>
-                    <Button
-                      onPress={() => {
-                        handleCalendarChange(nextWeek);
-                        focusDate(nextWeek);
-                      }}
-                    >
-                      Próxima semana
-                    </Button>
-                    <Button
-                      onPress={() => {
-                        handleCalendarChange(nextMonth);
-                        focusDate(nextMonth);
-                      }}
-                    >
-                      Próximo mes
-                    </Button>
-                  </ButtonGroup>
-                }
-              />
-            </div>
-            <div className="space-y-4 flex flex-col justify-center items-center">
-              <TimeInput
-                label="Hora de entrega"
-                description="Ingresa la hora de entrega"
-                className="max-w-xs"
-                id="hora_entrega"
-                isRequired
-                onChange={handleTimeChange}
-                defaultValue={converDateToTime(formData.fecha_hora_entrega)}
-                startContent={
-                  <FaClock className=" text-default-400 pointer-events-none flex-shrink-0" />
-                }
-              />
-              <Input
-                type="text"
-                id="codigo_promocion"
-                label="Codigo Promocion"
-                placeholder="Ingresa el codigo de promocion"
-                className="max-w-xs"
-                value={formData.codigo_promocion}
-                onChange={handleInputChange}
-              />
-              <Textarea
-                label="Comentarios"
-                id="comentarios"
-                placeholder="Ingresa tus comentarios (Opcional)"
-                className="max-w-xs"
-                value={formData.comentarios}
-                onChange={handleInputChange}
-              />
-              <Textarea
-                label="Comentarios DT"
-                id="comentarios_dt"
-                placeholder="Comentarios DT (Opcional)"
-                className="max-w-xs"
-                value={formData.comentarios_dt}
-                onChange={handleInputChange}
-              />
+          <div className="space-y-4 flex flex-wrap justify-evenly">
+            <Input
+              type="text"
+              id="codigo_promocion"
+              label="Codigo Promocion"
+              placeholder="Ingresa el codigo de promocion"
+              size="lg"
+              value={formData.codigo_promocion}
+              onChange={handleInputChange}
+            />
+            <div className="hover:shadow-md rounded-xl transition-all px-4 w-full ">
+              <Accordion>
+                <AccordionItem
+                  key="1"
+                  aria-label="Comentarios"
+                  title="Comentarios"
+                >
+                  <div className="flex justify-evenly items-center">
+                    <Textarea
+                      label="Comentarios"
+                      id="comentarios"
+                      placeholder="Ingresa tus comentarios (Opcional)"
+                      className="max-w-xs"
+                      value={formData.comentarios}
+                      onChange={handleInputChange}
+                    />
+                    <Textarea
+                      label="Comentarios DT"
+                      id="comentarios_dt"
+                      placeholder="Comentarios DT (Opcional)"
+                      className="max-w-xs"
+                      value={formData.comentarios_dt}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </AccordionItem>
+              </Accordion>
             </div>
           </div>
           <br />
@@ -492,277 +525,427 @@ export default function PurchaseOrder() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Select
-                id="forma_entrega"
-                label="Selecciona la forma de entrega"
-                className="max-w-xs"
-                value={formData.forma_entrega}
-                onChange={handleSelectChange}
-                isRequired
-              >
-                {deliveryMethods.map((method) => (
-                  <SelectItem key={method} value={method}>
-                    {method}
-                  </SelectItem>
-                ))}
-              </Select>
+              <div className="space-x-4 flex items-center">
+                <Select
+                  id="forma_entrega"
+                  label="Selecciona la forma de entrega"
+                  className="max-w-xs"
+                  value={formData.forma_entrega}
+                  onChange={handleSelectChange}
+                  isRequired
+                  required
+                >
+                  {deliveryMethods.map((method) => (
+                    <SelectItem key={method} value={method}>
+                      {method}
+                    </SelectItem>
+                  ))}
+                </Select>
+                {formData.forma_entrega === "Entrega Dropshipping" &&
+                  userData?.opciones_dropshipping && (
+                    <Select
+                      id="direcciones_entrega"
+                      label="Selecciona la direccion de entrega"
+                      className="max-w-xs"
+                      value={
+                        userData?.opciones_dropshipping[0].nombre_referencial
+                      }
+                      onChange={handleDropshippingDirecctionChange}
+                      isRequired
+                      required
+                    >
+                      {userData.opciones_dropshipping.map((option) => (
+                        <SelectItem
+                          key={
+                            option.codigo_metodo_entrega_especial?.toString() ||
+                            ""
+                          }
+                          value={option.nombre_referencial}
+                        >
+                          {option.nombre_referencial}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  )}
+              </div>
+
+              {/* {dropshippingDirecction && (
+                <pre>{JSON.stringify(dropshippingDirecction, null, 2)}</pre>
+              )} */}
+
               {formData.forma_entrega === "Entrega Dropshipping" &&
-                userData?.opciones_dropshipping && (
-                  <Select
-                    id="direcciones_entrega"
-                    label="Selecciona la direccion de entrega"
-                    className="max-w-xs"
-                    value={
-                      userData?.opciones_dropshipping[0].nombre_referencial
-                    }
-                    onChange={handleDropshippingDirecctionChange}
-                    isRequired
-                  >
-                    {userData.opciones_dropshipping.map((option) => (
-                      <SelectItem
-                        key={
-                          option.codigo_metodo_entrega_especial?.toString() ||
-                          ""
-                        }
-                        value={option.nombre_referencial}
-                      >
-                        {option.nombre_referencial}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                )}
-
-              {formData.forma_entrega === "Entrega Dropshipping" && (
-                <div className=" mt-4 grid lg:grid-cols-2 grid-cols-1 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-center">
-                        Informacion de la entrega
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-center flex-col space-y-4 ">
-                      <Input
-                        type="number"
-                        id="codigo_dropshipping"
-                        label="Codigo Dropshipping"
-                        placeholder="Ingresa el codigo Dropshipping"
-                        className="max-w-xs"
-                        isRequired
-                        value={dropshippingData.codigo_dropshipping.toString()}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <TimeInput
-                        label="Hora de entrega (Dropshipping)"
-                        description="Selecciona la hora de entrega"
-                        id="hora_entrega_dropshipping"
-                        className="max-w-xs"
-                        isRequired
-                        onChange={(value) =>
-                          handleDropshippingTimeChange(value, "hora_entrega")
-                        }
-                        defaultValue={dropshippingData.hora_entrega}
-                        startContent={
-                          <FaClock className=" text-default-400 pointer-events-none flex-shrink-0" />
-                        }
-                      />
-                      <TimeInput
-                        label="Hora de cierre"
-                        description="Selecciona la hora de cierre"
-                        className="max-w-xs"
-                        isRequired
-                        onChange={(value) =>
-                          handleDropshippingTimeChange(value, "hora_cierre")
-                        }
-                        defaultValue={dropshippingData.hora_cierre}
-                        startContent={
-                          <FaClock className=" text-default-400 pointer-events-none flex-shrink-0" />
-                        }
-                      />
-                      <TimeInput
-                        label="Hora fin"
-                        description="Selecciona la hora fin"
-                        className="max-w-xs"
-                        isRequired
-                        onChange={(value) =>
-                          handleDropshippingTimeChange(value, "hora_fin")
-                        }
-                        defaultValue={dropshippingData.hora_fin}
-                        startContent={
-                          <FaClock className=" text-default-400 pointer-events-none flex-shrink-0" />
-                        }
-                      />
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-center">
-                        Informacion del destinatario
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-center flex-col space-y-4">
-                      <Input
-                        type="text"
-                        id="nombre_destinatario"
-                        label="Nombre del destinatario"
-                        placeholder="Ingresa el nombre del destinatario"
-                        className="max-w-xs"
-                        value={dropshippingData.nombre_destinatario}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Select
-                        id="document_type"
-                        label="Selecciona el tipo de documento"
-                        className="max-w-xs"
-                        value={dropshippingData.tipo_documento}
-                        onChange={handleDocumentTypeChange}
-                        isRequired
-                      >
-                        {document_types.map((document) => (
-                          <SelectItem
-                            key={document.value}
-                            value={document.value}
-                          >
-                            {document.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
-
-                      {dropshippingData.tipo_documento ? (
+                dropshippingDirecction && (
+                  <div className=" mt-4 grid lg:grid-cols-2 grid-cols-1 gap-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-center">
+                          Informacion de la entrega
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex items-center justify-center flex-col space-y-4 ">
                         <Input
-                          type="text"
-                          id="documento"
-                          label="Documento"
-                          placeholder="Ingresa el documento"
+                          type="number"
+                          id="codigo_dropshipping"
+                          label="Codigo Dropshipping"
+                          placeholder="Ingresa el codigo Dropshipping"
                           className="max-w-xs"
-                          value={dropshippingData.documento}
+                          isRequired
+                          required
+                          isDisabled
+                          value={
+                            dropshippingDirecction
+                              ? dropshippingDirecction.codigo_metodo_entrega_especial
+                              : dropshippingData.codigo_dropshipping.toString()
+                          }
                           onChange={handleDropshippingInputChange}
                         />
-                      ) : (
-                        ""
-                      )}
-                      <Input
-                        type="text"
-                        id="email"
-                        label="Email"
-                        placeholder="Ingresa el email"
-                        className="max-w-xs"
-                        value={dropshippingData.email}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Input
-                        type="number"
-                        id="tel"
-                        label="Telefono"
-                        placeholder="Ingresa el telefono"
-                        className="max-w-xs"
-                        value={dropshippingData.tel}
-                        onChange={handleDropshippingInputChange}
-                      />
-                    </CardContent>
-                  </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-center">
-                        Informacion de la direccion
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex items-center justify-center flex-col space-y-4">
-                      <Input
-                        type="text"
-                        id="direccion"
-                        label="Direccion"
-                        placeholder="Ingresa la direccion"
-                        className="max-w-xs"
-                        value={dropshippingData.direccion}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Input
-                        type="text"
-                        id="apartamento"
-                        label="Apartamento"
-                        placeholder="Ingresa la direccion del apartamento"
-                        className="max-w-xs"
-                        value={dropshippingData.apartamento}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Input
-                        type="text"
-                        id="ciudad"
-                        label="Ciudad"
-                        placeholder="Ingresa la Ciudad"
-                        className="max-w-xs"
-                        value={dropshippingData.ciudad}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Input
-                        type="text"
-                        id="departamento"
-                        label="Departamento"
-                        placeholder="Ingresa el departamento"
-                        className="max-w-xs"
-                        value={dropshippingData.departamento}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Input
-                        type="text"
-                        id="codpostal"
-                        label="Codigo Postal"
-                        placeholder="Ingresa el codigo postal"
-                        className="max-w-xs"
-                        value={dropshippingData.codpostal}
-                        onChange={handleDropshippingInputChange}
-                      />
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-center">
-                        Informacion Adicional
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-start  space-y-8">
-                      <Switch
-                        isSelected={dropshippingData.enviar_qr_a_consumidor}
-                        onValueChange={handleDropshippingQrSwitchChange}
-                      >
-                        Enviar QR a consumidor
-                      </Switch>
-                      <Input
-                        type="text"
-                        id="operador_logistico"
-                        label="Operador Logistico"
-                        placeholder="Ingresa el operador logistico"
-                        className="max-w-xs"
-                        value={dropshippingData.operador_logistico}
-                        onChange={handleDropshippingInputChange}
-                      />
-                      <Input
-                        id="etiqueta_base64"
-                        type="file"
-                        label="Subir Etiqueta"
-                        className="max-w-xs"
-                        startContent={
-                          <FaFileImage className=" text-default-400 pointer-events-none  flex-shrink-0 " />
-                        }
-                      />
-                      <Input
-                        id="factura_base64"
-                        type="file"
-                        label="Subir Factura"
-                        className="max-w-xs"
-                        startContent={
-                          <FaFileImage className=" text-default-400 pointer-events-none  flex-shrink-0 " />
-                        }
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+                        {/* <CalendarPickDate
+                          options={{
+                            available_dates:
+                              dropshippingDirecction.proximas_franjas_horarias_de_entrega.map(
+                                (elements: any) => {
+                                  return elements.dia_hora_de_corte;
+                                }
+                              ),
+                          }}
+                          calendarDateTime={calendarDateTime}
+                          setCalendarDateTime={setCalendarDateTime}
+                        /> */}
+                        <SelectAvailableDateTime
+                          available_hours={
+                            dropshippingDirecction.proximas_franjas_horarias_de_entrega
+                          }
+                          onChange={handleDropshippingDeliveryChangue}
+                          id="hora_entrega"
+                          label="Fecha de entrega"
+                          isRequired={true}
+                        />
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-center">
+                          Informacion del destinatario
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex items-center justify-center flex-col space-y-4">
+                        {dropshippingDirecction &&
+                          dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre ===
+                            ("r_requerido" || "r_condicional") && (
+                            <Input
+                              isRequired
+                              required
+                              type="text"
+                              id="nombre_destinatario"
+                              label="Nombre del destinatario"
+                              placeholder="Ingresa el nombre del destinatario"
+                              className="max-w-xs"
+                              value={dropshippingData.nombre_destinatario}
+                              onChange={handleDropshippingInputChange}
+                            />
+                          )}
+
+                        {dropshippingDirecction &&
+                          dropshippingDirecction?.informacion_requerida
+                            .requiere_documento ===
+                            ("r_requerido" || "r_condicional") && (
+                            <>
+                              <Select
+                                id="document_type"
+                                label="Selecciona el tipo de documento"
+                                className="max-w-xs"
+                                value={dropshippingData.tipo_documento}
+                                onChange={handleDocumentTypeChange}
+                                isRequired
+                                required
+                              >
+                                {document_types.map((document) => (
+                                  <SelectItem
+                                    key={document.value}
+                                    value={document.value}
+                                  >
+                                    {document.label}
+                                  </SelectItem>
+                                ))}
+                              </Select>
+
+                              {dropshippingData.tipo_documento ? (
+                                <Input
+                                  type="text"
+                                  id="documento"
+                                  label="Documento"
+                                  placeholder="Ingresa el documento"
+                                  className="max-w-xs"
+                                  isRequired
+                                  required
+                                  disabled={!dropshippingData.tipo_documento}
+                                  value={dropshippingData.documento}
+                                  onChange={handleDropshippingInputChange}
+                                />
+                              ) : (
+                                ""
+                              )}
+                            </>
+                          )}
+
+                        <Input
+                          type="email"
+                          id="email"
+                          label="Email"
+                          placeholder="Ingresa el email"
+                          className="max-w-xs"
+                          isRequired={
+                            dropshippingDirecction &&
+                            dropshippingDirecction.informacion_requerida
+                              .requiere_email ==
+                              ("r_requerido" || "r_condicional")
+                          }
+                          required={
+                            dropshippingDirecction &&
+                            dropshippingDirecction.informacion_requerida
+                              .requiere_email ==
+                              ("r_requerido" || "r_condicional")
+                          }
+                          value={dropshippingData.email}
+                          onChange={handleDropshippingInputChange}
+                        />
+
+                        {dropshippingDirecction &&
+                          dropshippingDirecction?.informacion_requerida
+                            .requiere_telefono ===
+                            ("r_requerido" || "r_condicional") && (
+                            <Input
+                              type="number"
+                              id="tel"
+                              label="Telefono"
+                              placeholder="Ingresa el telefono"
+                              className="max-w-xs"
+                              isRequired
+                              required
+                              value={dropshippingData.tel}
+                              onChange={handleDropshippingInputChange}
+                            />
+                          )}
+                      </CardContent>
+                    </Card>
+
+                    {dropshippingDirecction &&
+                      dropshippingDirecction?.informacion_requerida
+                        .requiere_direccion ===
+                        ("r_requerido" || "r_condicional") && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-center">
+                              Informacion de la direccion
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="flex items-center justify-center flex-col space-y-4">
+                            <Input
+                              type="text"
+                              id="direccion"
+                              label="Direccion"
+                              placeholder="Ingresa la direccion"
+                              className="max-w-xs"
+                              isRequired
+                              required
+                              value={dropshippingData.direccion}
+                              onChange={handleDropshippingInputChange}
+                            />
+                            <Input
+                              type="text"
+                              id="apartamento"
+                              label="Apartamento"
+                              placeholder="Ingresa la direccion del apartamento"
+                              className="max-w-xs"
+                              value={dropshippingData.apartamento}
+                              onChange={handleDropshippingInputChange}
+                            />
+                            <Input
+                              type="text"
+                              id="ciudad"
+                              label="Ciudad"
+                              placeholder="Ingresa la Ciudad"
+                              className="max-w-xs"
+                              isRequired
+                              required
+                              value={dropshippingData.ciudad}
+                              onChange={handleDropshippingInputChange}
+                            />
+                            <Input
+                              type="text"
+                              id="departamento"
+                              label="Departamento"
+                              placeholder="Ingresa el departamento"
+                              className="max-w-xs"
+                              isRequired
+                              required
+                              value={dropshippingData.departamento}
+                              onChange={handleDropshippingInputChange}
+                            />
+                            <Input
+                              type="text"
+                              id="codpostal"
+                              label="Codigo Postal"
+                              placeholder="Ingresa el codigo postal"
+                              className="max-w-xs"
+                              isRequired
+                              required
+                              value={dropshippingData.codpostal}
+                              onChange={handleDropshippingInputChange}
+                            />
+                          </CardContent>
+                        </Card>
+                      )}
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-center">
+                          Informacion Adicional
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex flex-col items-center justify-start  space-y-8">
+                        {dropshippingDirecction &&
+                          dropshippingDirecction?.informacion_requerida
+                            .requiere_envio_qr ===
+                            ("r_requerido" || "r_condicional") && (
+                            <Switch
+                              required
+                              isSelected={
+                                dropshippingData.enviar_qr_a_consumidor
+                              }
+                              onValueChange={handleDropshippingQrSwitchChange}
+                            >
+                              Enviar QR a consumidor
+                            </Switch>
+                          )}
+                        {dropshippingDirecction?.informacion_requerida
+                          .requiere_operador_logistico ===
+                          ("r_requerido" || "r_condicional") && (
+                          <Input
+                            type="text"
+                            id="operador_logistico"
+                            label="Operador Logistico"
+                            placeholder="Ingresa el operador logistico"
+                            className="max-w-xs"
+                            value={dropshippingData.operador_logistico}
+                            onChange={handleDropshippingInputChange}
+                          />
+                        )}
+
+                        {dropshippingDirecction &&
+                          dropshippingDirecction?.informacion_requerida
+                            .requiere_imagen_etiqueta ===
+                            ("r_requerido" || "r_condicional") && (
+                            <Input
+                              required
+                              id="etiqueta_base64"
+                              type="file"
+                              label="Subir Etiqueta"
+                              className="max-w-xs"
+                              startContent={
+                                <FaFileImage className=" text-default-400 pointer-events-none  flex-shrink-0 " />
+                              }
+                            />
+                          )}
+                        {dropshippingDirecction &&
+                          dropshippingDirecction?.informacion_requerida
+                            .requiere_imagen_factura ===
+                            ("r_requerido" || "r_condicional") && (
+                            <Input
+                              required
+                              id="factura_base64"
+                              type="file"
+                              label="Subir Factura"
+                              className="max-w-xs"
+                              startContent={
+                                <FaFileImage className=" text-default-400 pointer-events-none  flex-shrink-0 " />
+                              }
+                              onChange={handleReadBillInput}
+                              isDisabled={billBase64.status === "loading"}
+                              endContent={
+                                billBase64.status === "loading" ? (
+                                  <Spinner size="sm" />
+                                ) : (
+                                  ""
+                                )
+                              }
+                            />
+                          )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               <br />
-              {formData.forma_entrega === "Entrega Regular" && (
+              {formData.forma_entrega === "Entrega Regular" && userData && (
                 <div className=" mt-4 grid lg:grid-cols-2 grid-cols-1 gap-4">
+                  <div className="w-full flex justify-center flex-col items-center space-y-4">
+                    <Calendar
+                      aria-label="Date"
+                      id="fecha_hora_entrega"
+                      className="flex flex-col min-w-[22rem] items-center "
+                      showMonthAndYearPickers
+                      value={convertDateToCalendarDate(
+                        formData.fecha_hora_entrega
+                      )}
+                      onChange={handleCalendarChangeUpdate}
+                      isDateUnavailable={isDateUnavailable}
+                      focusedValue={focusedDate}
+                      onFocusChange={(date) => setFocusedDate(date)}
+                      //   focusedValue={formData.fecha_hora_entrega}
+                      topContent={
+                        <ButtonGroup
+                          fullWidth
+                          className="px-3 pb-2 pt-3 bg-content1 [&>button]:text-default-500 [&>button]:border-default-200/60"
+                          radius="full"
+                          size="sm"
+                          variant="bordered"
+                        >
+                          <Button
+                            onPress={() => {
+                              handleCalendarChange(now);
+                              focusDate(now);
+                            }}
+                          >
+                            Hoy
+                          </Button>
+                          <Button
+                            onPress={() => {
+                              handleCalendarChange(nextWeek);
+                              focusDate(nextWeek);
+                            }}
+                          >
+                            Próxima semana
+                          </Button>
+                          <Button
+                            onPress={() => {
+                              handleCalendarChange(nextMonth);
+                              focusDate(nextMonth);
+                            }}
+                          >
+                            Próximo mes
+                          </Button>
+                        </ButtonGroup>
+                      }
+                    />
+                    <TimeInput
+                      label="Hora de entrega"
+                      description="Ingresa la hora de entrega"
+                      className="max-w-xs"
+                      id="hora_entrega"
+                      isRequired
+                      onChange={handleTimeChange}
+                      defaultValue={converDateToTime(
+                        formData.fecha_hora_entrega
+                      )}
+                      startContent={
+                        <FaClock className=" text-default-400 pointer-events-none flex-shrink-0" />
+                      }
+                    />
+                  </div>
+
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-center">Entrega</CardTitle>
@@ -773,9 +956,9 @@ export default function PurchaseOrder() {
                         label="Forma en que se solicita la entrega"
                         className="max-w-xs"
                         value={regularDeliveryData.forma_entrega}
-                        defaultSelectedKeys={["entrega_en_mostrador"]}
                         onChange={handleRegularSelectChange}
                         isRequired
+                        required
                       >
                         {regularDeliveryMethods.map((method) => (
                           <SelectItem key={method.value} value={method.value}>
@@ -783,15 +966,14 @@ export default function PurchaseOrder() {
                           </SelectItem>
                         ))}
                       </Select>
-                      <Input
-                        type="number"
-                        id="codigo_direccion"
-                        label="Codigo Direccion"
-                        placeholder="Ingresa el codigo de direccion"
-                        className="max-w-xs"
-                        value={regularDeliveryData.codigo_direccion}
-                        onChange={handleRegularInputChange}
-                      />
+                      {regularDeliveryData.forma_entrega !==
+                        "entrega_en_mostrador" && (
+                        <SelectAddressRegularCode
+                          id="codigo_direccion"
+                          label="Selecciona la direccion"
+                          addresses={userData.direcciones_entrega || []}
+                        />
+                      )}
                     </CardContent>
                   </Card>
                 </div>
