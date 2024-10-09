@@ -1,5 +1,5 @@
 "use client";
-import { Check, ImagePlus, PlusIcon } from "lucide-react";
+import { Check, ImagePlus, PartyPopper, PlusIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -35,7 +36,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -49,7 +52,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { ProductType } from "@/domain/product/entities/Product";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
 import { validateFormData } from "@/lib/Utils/validation";
@@ -62,6 +65,16 @@ import { publishProduct } from "../_actions/publish-product";
 import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 import { FormPublishProduct } from "./types/formTypes";
 import { imageListProps, imageProps } from "./types/imageTypes";
+import { getCachedProducts } from "../_actions/getCachedProducts";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import ListProductModular from "@/app/dashboard/components/ListProductModular";
+import { makeProductRelation } from "../_actions/make-relation";
+import AddProductRelation from "./AddProductRelation";
+import { ProductTypeWithProvider } from "@/Resources/API/Unicom/entities/Product/UnicomProductInterfaces";
+import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
+import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
+import { v4 as uuidv4 } from "uuid";
 
 export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
@@ -73,9 +86,30 @@ export function ProductEdit({ product }: { product: ProductType }) {
   });
   const [file, setFile] = useState<imageListProps | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [productToAdd, setProductToAdd] =
+    useState<ProductTypeWithProvider | null>(null);
+  const [category, setCategory] = useState<UnicomAPICategory>();
   const [contentDescripcion, serContentDescripcion] = useState<string>(
     product.description
   );
+
+  const [findedProducts, setFindedProducts] = useState<
+    ProductTypeWithProvider[] | []
+  >([
+    {
+      ...product,
+      provider: "Unicom",
+    },
+  ]);
+
+  const [productsSelected, setProductsSelected] = useState<
+    ProductTypeWithProvider[] | []
+  >([
+    {
+      ...product,
+      provider: "Unicom",
+    },
+  ]);
 
   const [productState, setProductState] = useState<FormPublishProduct>({
     ...product,
@@ -102,6 +136,55 @@ export function ProductEdit({ product }: { product: ProductType }) {
       toast({
         title: "Error",
         description: "Hubo un error al publicar el producto.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const {
+    mutateAsync: server_getCachedProducts,
+    isError: isErrorGetCachedProducts,
+    isSuccess: isSuccessGetCachedProducts,
+    isPending: isPendingGetCachedProducts,
+  } = useMutation({
+    mutationFn: () => getCachedProducts(),
+    onSuccess: () => {
+      console.log("Productos Obtenidos");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Hubo un error al buscar el producto.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const {
+    mutateAsync: server_makeProductRelation,
+    isError: isErrorMakeProductRelation,
+    isSuccess: isSuccessMakeProductRelation,
+    isPending: isPendingMakeProductRelation,
+  } = useMutation({
+    mutationFn: ({
+      productToPublish,
+      productList,
+    }: {
+      productToPublish: ProductType;
+      productList: ProductTypeWithProvider[];
+    }) => makeProductRelation({ productToPublish, productList }),
+
+    onSuccess: () => {
+      toast({
+        title: "Producto relacionado",
+        description: "El producto fue relacionado con éxito.",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Hubo un error al relacionar el producto.",
         variant: "destructive",
       });
     },
@@ -259,20 +342,33 @@ export function ProductEdit({ product }: { product: ProductType }) {
           src?: string;
         }[];
       }
+      console.log(productState);
+
+      const newProductStateBufferForRelation = productState;
+
+      // Eliminar la key images
+      newProductStateBufferForRelation.images = [];
+
+      const productRelated = await server_makeProductRelation({
+        productToPublish: newProductStateBufferForRelation,
+        productList: productsSelected,
+      });
       const newProductStateBuffer = {
         ...productState,
         images: cleanImagesIds, // Aseguramos que solo se envían objetos válidos
+        sku: productRelated.SKU,
       };
-      const { errors, data } = validateFormData(
-        schemaPublishProduct,
-        newProductStateBuffer
-      );
+      // const { errors, data } = validateFormData(
+      //   schemaPublishProduct,
+      //   newProductStateBuffer
+      // );
 
-      if (errors) {
-        return;
-      }
-      setProductState(data);
-      await server_publishProduct(data);
+      // if (errors) {
+      //   return;
+      // }
+      setProductState(newProductStateBuffer);
+
+      await server_publishProduct(newProductStateBuffer);
       setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
@@ -303,6 +399,91 @@ export function ProductEdit({ product }: { product: ProductType }) {
       [id]: value,
     });
   };
+
+  const handleFindProduct = async () => {
+    // Buscar el producto en la base de datos de ASLAN
+    // Buscar el producto en los proveedores
+    const cachedProducts = await server_getCachedProducts();
+    const allProductsList = cachedProducts.data;
+
+    let similarProducts = [] as ProductType[];
+    let identifiedProducts = [] as ProductType[];
+
+    // Buscar productos similares
+    const titleSplit = product.title.split(" ");
+
+    for (const product of allProductsList) {
+      // Si el producto es el mismo, no lo añadas
+      if (
+        product.title === productState.title &&
+        product.sku === productState.sku &&
+        product.partNumber === productState.partNumber
+      ) {
+        continue;
+      }
+
+      if (product.sku === productState.sku) {
+        identifiedProducts.push(product);
+      } else if (product.title === productState.title) {
+        similarProducts.push(product);
+      } else {
+        const titleSplitProduct = product.title.split(" ");
+        const similar = titleSplit.filter((word) =>
+          titleSplitProduct.includes(word)
+        );
+        if (similar.length > 4) {
+          similarProducts.push(product);
+        }
+      }
+    }
+
+    // if (identifiedProducts.length > 0) {
+    //   setFindedProducts(identifiedProducts);
+    // }
+  };
+
+  useEffect(() => {
+    if (productsSelected) {
+      console.log(productsSelected);
+    }
+  }, [productsSelected]);
+
+  const handleChangeProductToAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+
+    if (id === "partNumber") {
+      setProductToAdd((prevState: any) => {
+        return {
+          ...prevState,
+          [id]: [{ partNumber: value }],
+        };
+      });
+      return;
+    }
+
+    if (id === "stock" || id === "price") {
+      setProductToAdd((prevState: any) => {
+        return {
+          ...prevState,
+          [id]: isNaN(parseFloat(value)) ? 0 : parseFloat(value),
+        };
+      });
+      return;
+    } else {
+      setProductToAdd((prevState: any) => {
+        return {
+          ...prevState,
+          [id]: value,
+        };
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (productToAdd) {
+      console.log(productToAdd);
+    }
+  }, [productToAdd]);
 
   return (
     <div className="mx-auto grid max-w-[70vw] flex-1 auto-rows-max gap-4">
@@ -432,6 +613,217 @@ export function ProductEdit({ product }: { product: ProductType }) {
 
           <Card x-chunk="dashboard-07-chunk-1">
             <CardHeader>
+              <CardTitle>Relacionar Producto</CardTitle>
+              <CardDescription>
+                Busca el producto en la base de datos de ASLAN y en los
+                proveedores.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button onClick={handleFindProduct} variant="outline">
+                    Relacionar Producto
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[80vw]">
+                  <DialogHeader>
+                    <DialogTitle>Relacionar el Producto</DialogTitle>
+                    <DialogDescription>
+                      Este panel te permite relacionar el producto con otros
+                      proveedores que aun no estan vinculados.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <h3>Productos Identificados</h3>
+                    {isPendingGetCachedProducts ? (
+                      <Spinner size="sm" color="primary" />
+                    ) : (
+                      <ListProductModular
+                        productsRows={findedProducts}
+                        setProductRows={setFindedProducts}
+                        productsSelected={productsSelected}
+                        setProductsSelected={setProductsSelected}
+                      />
+                    )}
+                    {/* <AddProductRelation /> */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const id = uuidv4();
+                        setProductsSelected((prevState: any) => {
+                          return [
+                            ...prevState,
+                            {
+                              id: id,
+                              ...productToAdd,
+                            },
+                          ];
+                        });
+                        setFindedProducts((prevState: any) => {
+                          return [
+                            ...prevState,
+                            {
+                              id: id,
+                              ...productToAdd,
+                            },
+                          ];
+                        });
+
+                        // clear imputs
+                        setProductToAdd(null);
+                      }}
+                    >
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Agregar Producto</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex ">
+                            <Input
+                              id="title"
+                              value={productToAdd?.title}
+                              onChange={handleChangeProductToAdd}
+                              type="text"
+                              placeholder="Producto"
+                            />
+                            <Input
+                              id="sku"
+                              value={productToAdd?.sku}
+                              onChange={handleChangeProductToAdd}
+                              type="text"
+                              placeholder="SKU"
+                            />
+                            <Input
+                              id="partNumber"
+                              value={
+                                productToAdd?.partNumber
+                                  ? productToAdd?.partNumber[0].partNumber
+                                  : ""
+                              }
+                              onChange={handleChangeProductToAdd}
+                              type="text"
+                              placeholder="Part Number"
+                            />
+                            <Input
+                              id="provider"
+                              value={productToAdd?.provider}
+                              onChange={handleChangeProductToAdd}
+                              type="text"
+                              placeholder="Proveedor"
+                            />
+                            <Input
+                              id="marca"
+                              value={productToAdd?.marca}
+                              onChange={handleChangeProductToAdd}
+                              type="text"
+                              placeholder="Marca"
+                            />
+                            <Select
+                              defaultValue="Notebooks"
+                              onValueChange={(value) => {
+                                const category =
+                                  defaultUnicomAPIRelevantCategories.find(
+                                    (category) => category.name === value
+                                  );
+                                if (category) {
+                                  setCategory(category);
+                                  console.log("category", category);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a Category" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-[20rem]">
+                                <SelectGroup>
+                                  <SelectLabel>Categorias</SelectLabel>
+                                  {defaultUnicomAPIRelevantCategories.map(
+                                    (category, index) => (
+                                      <SelectItem
+                                        value={category.name}
+                                        key={category.code + index}
+                                      >
+                                        {category.nameES}
+                                      </SelectItem>
+                                    )
+                                  )}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex">
+                            <Input
+                              id="stock"
+                              value={productToAdd?.stock}
+                              onChange={handleChangeProductToAdd}
+                              type="number"
+                              placeholder="Stock"
+                            />
+                            <Input
+                              id="price"
+                              value={
+                                isNaN(productToAdd?.price ?? 0)
+                                  ? "0"
+                                  : (productToAdd?.price ?? 0).toString()
+                              }
+                              onChange={handleChangeProductToAdd}
+                              type="text"
+                              placeholder="Precio"
+                            />
+                          </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button type="submit">Agregar</Button>
+                        </CardFooter>
+                      </Card>
+                    </form>
+
+                    <p>
+                      Si el Producto{" "}
+                      <span className="font-bold">ya esta publicado</span>{" "}
+                      Editarlo desde el{" "}
+                      <span className="font-bold">
+                        Administrador de Productos
+                      </span>
+                      .
+                    </p>
+                  </div>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button
+                        onClick={() => {
+                          setProductsSelected([
+                            {
+                              ...product,
+                              provider: "Unicom",
+                            },
+                          ]);
+                        }}
+                        variant="destructive"
+                      >
+                        Cancelar
+                      </Button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                      <Button
+                        disabled={
+                          isPendingGetCachedProducts ||
+                          isErrorGetCachedProducts ||
+                          productsSelected.length === 0
+                        }
+                      >
+                        Seleccionar
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+
+          <Card x-chunk="dashboard-07-chunk-1">
+            <CardHeader>
               <CardTitle>Identificadores</CardTitle>
               <CardDescription>
                 Modifica los identificadores del producto antes de publicarlo en
@@ -439,13 +831,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Label htmlFor="partNumber">SKU Aslan</Label>
-              <Input
-                id="partNumberToSend"
-                type="text"
-                onChange={handleProductChange}
-                value={productState.partNumberToSend}
-              />
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -634,7 +1019,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="">SKU</TableHead>
                     <TableHead className="w-[20rem]">
                       Precio a Publicar
                     </TableHead>
@@ -642,10 +1026,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="font-semibold flex-wrap">
-                      {product.sku}
-                    </TableCell>
-
                     <TableCell className="flex items-center gap-4 flex-1">
                       <Label htmlFor="price" className="sr-only">
                         Precio a Publicar

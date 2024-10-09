@@ -18,7 +18,7 @@ export class AslanWooAPIPublishProductAdapter {
       categories: [],
       images: product.images,
       status: "draft",
-      sku: product.partNumberToSend || "",
+      sku: product.sku || "",
     };
 
     await wooAPI.post("products", productMapped as any);

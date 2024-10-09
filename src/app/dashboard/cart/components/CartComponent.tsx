@@ -106,16 +106,9 @@ export default function CartComponent() {
     try {
       await server_removeProductOnCart({ id });
       await server_getCart();
-      console.log("###############Antes");
-      console.log("rows", rows);
-      console.log("id", id);
-      console.log("cart", dataCart);
+
       const newRows = rows.filter((row: any) => row.sku !== id);
       setRows(newRows);
-      console.log("###############DESPUES");
-      console.log("rows", rows);
-      console.log("id", id);
-      console.log("cart", dataCart);
     } catch (error) {
       console.log(error);
     }

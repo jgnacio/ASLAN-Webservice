@@ -631,10 +631,11 @@ export default function PurchaseOrder() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="flex items-center justify-center flex-col space-y-4">
-                        {dropshippingDirecction &&
+                        {(dropshippingDirecction &&
                           dropshippingDirecction?.informacion_requerida
-                            .requiere_nombre ===
-                            ("r_requerido" || "r_condicional") && (
+                            .requiere_nombre === "r_requerido") ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
                             <Input
                               isRequired
                               required
@@ -646,12 +647,13 @@ export default function PurchaseOrder() {
                               value={dropshippingData.nombre_destinatario}
                               onChange={handleDropshippingInputChange}
                             />
-                          )}
+                          ))}
 
-                        {dropshippingDirecction &&
+                        {(dropshippingDirecction &&
                           dropshippingDirecction?.informacion_requerida
-                            .requiere_documento ===
-                            ("r_requerido" || "r_condicional") && (
+                            .requiere_documento === "r_requerido") ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
                             <>
                               <Select
                                 id="document_type"
@@ -689,7 +691,7 @@ export default function PurchaseOrder() {
                                 ""
                               )}
                             </>
-                          )}
+                          ))}
 
                         <Input
                           type="email"
@@ -698,25 +700,28 @@ export default function PurchaseOrder() {
                           placeholder="Ingresa el email"
                           className="max-w-xs"
                           isRequired={
-                            dropshippingDirecction &&
-                            dropshippingDirecction.informacion_requerida
-                              .requiere_email ==
-                              ("r_requerido" || "r_condicional")
+                            (dropshippingDirecction &&
+                              dropshippingDirecction.informacion_requerida
+                                .requiere_email == "r_requerido") ||
+                            dropshippingDirecction?.informacion_requerida
+                              .requiere_nombre === "r_condicional"
                           }
                           required={
-                            dropshippingDirecction &&
-                            dropshippingDirecction.informacion_requerida
-                              .requiere_email ==
-                              ("r_requerido" || "r_condicional")
+                            (dropshippingDirecction &&
+                              dropshippingDirecction.informacion_requerida
+                                .requiere_email == "r_requerido") ||
+                            dropshippingDirecction?.informacion_requerida
+                              .requiere_nombre === "r_condicional"
                           }
                           value={dropshippingData.email}
                           onChange={handleDropshippingInputChange}
                         />
 
-                        {dropshippingDirecction &&
+                        {(dropshippingDirecction &&
                           dropshippingDirecction?.informacion_requerida
-                            .requiere_telefono ===
-                            ("r_requerido" || "r_condicional") && (
+                            .requiere_telefono === "r_requerido") ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
                             <Input
                               type="number"
                               id="tel"
@@ -728,14 +733,15 @@ export default function PurchaseOrder() {
                               value={dropshippingData.tel}
                               onChange={handleDropshippingInputChange}
                             />
-                          )}
+                          ))}
                       </CardContent>
                     </Card>
 
-                    {dropshippingDirecction &&
+                    {(dropshippingDirecction &&
                       dropshippingDirecction?.informacion_requerida
-                        .requiere_direccion ===
-                        ("r_requerido" || "r_condicional") && (
+                        .requiere_direccion === "r_requerido") ||
+                      (dropshippingDirecction?.informacion_requerida
+                        .requiere_nombre === "r_condicional" && (
                         <Card>
                           <CardHeader>
                             <CardTitle className="text-center">
@@ -798,7 +804,7 @@ export default function PurchaseOrder() {
                             />
                           </CardContent>
                         </Card>
-                      )}
+                      ))}
 
                     <Card>
                       <CardHeader>
@@ -807,10 +813,11 @@ export default function PurchaseOrder() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="flex flex-col items-center justify-start  space-y-8">
-                        {dropshippingDirecction &&
+                        {(dropshippingDirecction &&
                           dropshippingDirecction?.informacion_requerida
-                            .requiere_envio_qr ===
-                            ("r_requerido" || "r_condicional") && (
+                            .requiere_envio_qr === "r_requerido") ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
                             <Switch
                               required
                               isSelected={
@@ -820,25 +827,27 @@ export default function PurchaseOrder() {
                             >
                               Enviar QR a consumidor
                             </Switch>
-                          )}
+                          ))}
                         {dropshippingDirecction?.informacion_requerida
-                          .requiere_operador_logistico ===
-                          ("r_requerido" || "r_condicional") && (
-                          <Input
-                            type="text"
-                            id="operador_logistico"
-                            label="Operador Logistico"
-                            placeholder="Ingresa el operador logistico"
-                            className="max-w-xs"
-                            value={dropshippingData.operador_logistico}
-                            onChange={handleDropshippingInputChange}
-                          />
-                        )}
+                          .requiere_operador_logistico === "r_requerido" ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
+                            <Input
+                              type="text"
+                              id="operador_logistico"
+                              label="Operador Logistico"
+                              placeholder="Ingresa el operador logistico"
+                              className="max-w-xs"
+                              value={dropshippingData.operador_logistico}
+                              onChange={handleDropshippingInputChange}
+                            />
+                          ))}
 
-                        {dropshippingDirecction &&
+                        {(dropshippingDirecction &&
                           dropshippingDirecction?.informacion_requerida
-                            .requiere_imagen_etiqueta ===
-                            ("r_requerido" || "r_condicional") && (
+                            .requiere_imagen_etiqueta === "r_requerido") ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
                             <Input
                               required
                               id="etiqueta_base64"
@@ -849,11 +858,12 @@ export default function PurchaseOrder() {
                                 <FaFileImage className=" text-default-400 pointer-events-none  flex-shrink-0 " />
                               }
                             />
-                          )}
-                        {dropshippingDirecction &&
+                          ))}
+                        {(dropshippingDirecction &&
                           dropshippingDirecction?.informacion_requerida
-                            .requiere_imagen_factura ===
-                            ("r_requerido" || "r_condicional") && (
+                            .requiere_imagen_factura === "r_requerido") ||
+                          (dropshippingDirecction?.informacion_requerida
+                            .requiere_nombre === "r_condicional" && (
                             <Input
                               required
                               id="factura_base64"
@@ -873,7 +883,7 @@ export default function PurchaseOrder() {
                                 )
                               }
                             />
-                          )}
+                          ))}
                       </CardContent>
                     </Card>
                   </div>

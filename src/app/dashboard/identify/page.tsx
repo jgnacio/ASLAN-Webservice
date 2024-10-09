@@ -1,145 +1,147 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProductType } from "@/domain/product/entities/Product";
-import { extractPartNumber } from "@/lib/functions/ProductFunctions";
-import { AslanWooAPIProduct } from "@/Resources/API/ASLAN/entities/AslanWooAPIProduct";
-import { GridRenderCellParams } from "@mui/x-data-grid";
+import { useToast } from "@/components/ui/use-toast";
+import { Tooltip } from "@mui/material";
+import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import { Button } from "@nextui-org/button";
-import { Spinner } from "@nextui-org/spinner";
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { getProductsByPage } from "../_actions/get-product-by-page";
-import { getAslanProducts } from "./_actions/get-aslan-products";
-import ListSameProduct from "./components/ListSameProducts";
+import { useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
+import { useEffect } from "react";
+import { getProductsAdministrated } from "./_actions/get-product-administrated";
 
 export default function Page() {
-  const [productList, setProductList] = useState<AslanWooAPIProduct[]>([]);
-  const [unicomProducts, setUnicomProducts] = useState<ProductType[]>([]);
-  const [comparisonList, setComparisonList] = useState<any>([]);
+  const { toast } = useToast();
 
   const {
-    data,
-    isError,
-    isSuccess,
-    isPending,
-    mutateAsync: server_getAslanProducts,
-  } = useMutation({
-    mutationFn: ({ page, per_page }: { page: number; per_page: number }) =>
-      getAslanProducts(page, per_page),
+    data: dataAslanPublishedFromAdmin,
+    isError: isErrorAslanPublishedFromAdmin,
+    isSuccess: isSuccessAslanPublishedFromAdmin,
+    isLoading: isLoadingAslanPublishedFromAdmin,
+  } = useQuery({
+    queryKey: ["product-aslan-administrated-products"],
+    queryFn: () => getProductsAdministrated(),
   });
 
-  const {
-    data: dataUnicomProducts,
-    isError: isErrorUnicomProducts,
-    isSuccess: isSuccessUnicomProducts,
-    isPending: isPendingUnicomProducts,
-    mutateAsync: server_getAllUnicomProducts,
-  } = useMutation({
-    mutationFn: ({ page }: { page: number }) => getProductsByPage({ page }),
-  });
-
-  const handleGetProducts = async () => {
-    // get all products iterating
-    let page = 1;
-    let per_page = 100;
-    let response: any[] = []; // Define la variable response fuera del bucle
-
-    do {
-      // Obtén los productos de la página actual
-      response = await server_getAslanProducts({ page, per_page });
-
-      // Verifica si la respuesta contiene productos
-      if (response.length === 0) {
-        console.log("No se encontraron más productos.");
-        break; // Sale del bucle si no hay más productos
-      }
-
-      // Realizar el guardado de PartNumber
-      const productListWithPartNumbers = response.map((product) => {
-        return {
-          ...product,
-          partNumber: extractPartNumber(product.description),
-        };
-      });
-
-      // Añade los productos de la respuesta al array principal
-      setProductList((prev: any) => [...prev, ...productListWithPartNumbers]);
-
-      // Incrementa el número de página
-      page++;
-    } while (response.length === per_page); // Continúa mientras la respuesta tenga el número máximo de productos por página
-  };
-
-  const handleGetUnicomProducts = async () => {
-    let page = 1;
-    let response: any[] = [];
-
-    do {
-      response = await server_getAllUnicomProducts({ page });
-
-      if (response.length === 0) {
-        console.log("No se encontraron más productos.");
-        break;
-      }
-
-      setUnicomProducts((prev: any) => [...prev, ...response]);
-
-      page++;
-    } while (response.length >= 190);
-  };
+  // const {
+  //   data: dataAslanPublishedFromAdmin,
+  //   isError: isErrorAslanPublishedFromAdmin,
+  //   isSuccess: isSuccessAslanPublishedFromAdmin,
+  //   isLoading: isLoadingAslanPublishedFromAdmin,
+  // } = useQuery({
+  //   queryKey: ["product-aslan-published-relatons"],
+  //   queryFn: () => getRelations(),
+  // });
 
   const columns = [
-    { field: "id", headerName: "ID" },
-    { field: "name", headerName: "Name", flex: 1 },
-    { field: "price", headerName: "Price" },
+    { field: "skuInterno", headerName: "SKU Interno", width: 150 },
+    { field: "title", headerName: "Product", flex: 1 },
     {
-      field: "part_number",
-      headerName: "Part Number",
-      renderCell: (params: GridRenderCellParams) =>
-        params.row.description && <div>{params.row.partNumber}</div>,
-      flex: 1,
+      field: "partNumber",
+      headerName: "Identificadores",
+      width: 300,
+      renderCell: (params: GridRenderCellParams) => (
+        <div>
+          <Tooltip
+            title={
+              <div>
+                {params.row.relations.map((relation: any, index: number) => (
+                  <div
+                    key={index}
+                    className="flex text-lg space-x-2 items-center w-full"
+                  >
+                    <a
+                      target="_blank"
+                      href={`https://www.unicom.com.uy/Producto?id=${relation.sku_provider}`}
+                    >
+                      <Button variant="solid" color="secondary">
+                        <Search /> SKU
+                      </Button>
+                    </a>
+                    <a
+                      target="_blank"
+                      href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${relation.PartNumber}`}
+                    >
+                      <Button variant="solid" color="secondary">
+                        <Search /> PartNumber
+                      </Button>{" "}
+                    </a>
+                    {relation.name && (
+                      <span className="rounded-xl overflow-hidden">
+                        {relation.name === "Unicom" && (
+                          <img src="https://assets.apidog.com/app/project-icon/custom/20240326/d9d73462-4e88-42d7-ae58-e5b33d38c626.jpeg"></img>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            }
+          >
+            <div>
+              {params.row.relations.map((relation: any) => {
+                return (
+                  <span key={relation.ID_Provider}>
+                    {relation.PartNumber}/
+                    {relation.ID_Provider === 1 && "Unicom"},
+                  </span>
+                );
+              })}
+            </div>
+          </Tooltip>
+        </div>
+      ),
     },
+    { field: "price", headerName: "Price" },
   ];
 
   const unicomColumns = [
-    { field: "id", headerName: "ID" },
-    { field: "title", headerName: "Name", flex: 1 },
+    {
+      field: "title",
+      headerName: "Product",
+      flex: 1,
+
+      renderCell: (params: GridRenderCellParams) => (
+        <div>{params.row.title}</div>
+      ),
+    },
     { field: "price", headerName: "Price" },
     {
-      field: "part_number",
+      field: "partNumber",
       headerName: "Part Number",
-      renderCell: (params: GridRenderCellParams) =>
-        params.row.partNumber && (
-          <div>{params.row.partNumber[0].partNumber}</div>
-        ),
+
       flex: 1,
     },
   ];
+
+  useEffect(() => {
+    if (dataAslanPublishedFromAdmin) {
+      console.log(dataAslanPublishedFromAdmin);
+    }
+  }, [dataAslanPublishedFromAdmin]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Identificar Productos</CardTitle>
+        <CardTitle>Productos Administrados</CardTitle>
       </CardHeader>
       <CardContent>
-        <Button
-          isDisabled={isPending || isPendingUnicomProducts}
-          onClick={() => {
-            handleGetProducts();
-            handleGetUnicomProducts();
-          }}
-        >
-          {isPending || isPendingUnicomProducts ? (
-            <Spinner />
-          ) : (
-            "Comenzar Identificacion"
-          )}
-        </Button>
         <div>
-          <ListSameProduct
-            comparisonListAslan={productList}
-            comparisonListB={unicomProducts}
-          />
+          {dataAslanPublishedFromAdmin && (
+            <DataGrid
+              rows={dataAslanPublishedFromAdmin}
+              columns={columns}
+              disableRowSelectionOnClick
+              // checkboxSelection
+              //  onRowSelectionModelChange={handleSelectionChange}
+              rowHeight={45}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 10 },
+                },
+              }}
+              pageSizeOptions={[10, 20]}
+            />
+          )}
         </div>
       </CardContent>
     </Card>

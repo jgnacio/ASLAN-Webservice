@@ -3,8 +3,8 @@ import fs from "fs";
 import FormData from "form-data";
 
 const WP_URL = process.env.WP_URL || "";
-const WP_USERNAME = process.env.WP_REST_API_USER || "";
-const WP_PASSWORD = process.env.WP_REST_API_PASSWORD || "";
+const WP_REST_API_USER = process.env.WP_REST_API_USER || "";
+const WP_REST_API_PASSWORD = process.env.WP_REST_API_PASSWORD || "";
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 interface WPConfig {
@@ -85,8 +85,8 @@ class WordPressRestAPIEntity {
 
 const wpConfig: WPConfig = {
   url: WP_URL,
-  username: WP_USERNAME,
-  password: WP_PASSWORD,
+  username: WP_REST_API_USER,
+  password: WP_REST_API_PASSWORD,
 };
 
 const wpRAPI = WordPressRestAPIEntity.getInstance(wpConfig);

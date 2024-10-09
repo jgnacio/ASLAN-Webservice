@@ -2,7 +2,7 @@
 import WooCommerceRestApi, { WooRestApiOptions } from "woocommerce-rest-ts-api";
 
 const opt: WooRestApiOptions = {
-  url: "http://2024-08-24-00-00-00-aslansto.local/",
+  url: process.env.WP_URL || "",
   consumerKey: process.env.WC_CONSUMER_KEY || "",
   consumerSecret: process.env.WC_CONSUMER_SECRET || "",
   version: "wc/v3",
