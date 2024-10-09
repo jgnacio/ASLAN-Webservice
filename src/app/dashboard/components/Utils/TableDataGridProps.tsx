@@ -124,5 +124,8 @@ export const columnsDataGridProductList: GridColDef[] = [
       ) : (
         <span className="text-muted-foreground">N/A</span>
       ),
+    valueGetter: (value, row) => {
+      return `${row.partNumber[0].partNumber || ""}`;
+    },
   },
 ];

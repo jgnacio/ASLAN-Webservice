@@ -1,6 +1,11 @@
 "use client";
 import { ProductType } from "@/domain/product/entities/Product";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridRenderCellParams,
+  GridValueGetter,
+} from "@mui/x-data-grid";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -137,6 +142,12 @@ export default function ProductFeaturedList() {
         ) : (
           <span className="text-muted-foreground">N/A</span>
         ),
+
+      valueGetter: (value, row) => {
+        return `${row.partNumber[0].partNumber || ""}`;
+      },
+
+      filterable: true,
     },
     {
       field: "edit",
