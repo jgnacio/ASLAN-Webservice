@@ -143,7 +143,7 @@ export default function ResentSales() {
           ) {
             console.log("Hay stock en Unicom");
             // Actualizar stock en Aslan
-            server_productBackToTheCatalog(resultAslan.id);
+            // server_productBackToTheCatalog(resultAslan.id);
             actualStatus = "publish";
           }
           setProductsUpdated((prev) => [
