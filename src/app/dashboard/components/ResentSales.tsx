@@ -8,18 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Button } from "@nextui-org/button";
-import { Spinner } from "@nextui-org/spinner";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getProductsAdministrated } from "../identify/_actions/get-product-administrated";
-import { getProductAslanBySku } from "../_actions/get-aslan-product-by-sku";
-import { getProductBySku } from "../product/_actions/get-product-by-sku";
-import { useState } from "react";
-import { removeFromTheCalalog } from "../_actions/remove-product-from-catalog";
-import { productBackToTheCatalog } from "../_actions/product-back-to-the-catalog";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -27,13 +18,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { SquareArrowUpRight } from "lucide-react";
-import ListProductModular from "./ListProductModular";
-import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 import { ProductsUpdatedDashboard } from "@/Resources/API/entitites/ProductsUpdated";
-import { DialogClose } from "@radix-ui/react-dialog";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Button } from "@nextui-org/button";
+import { Spinner } from "@nextui-org/spinner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { SquareArrowUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { getProductAslanBySku } from "../_actions/get-aslan-product-by-sku";
+import { getOffersProductsByPage } from "../_actions/get-offer-products";
+import { productBackToTheCatalog } from "../_actions/product-back-to-the-catalog";
+import { removeFromTheCalalog } from "../_actions/remove-product-from-catalog";
+import { getProductsAdministrated } from "../identify/_actions/get-product-administrated";
+import { getProductBySku } from "../product/_actions/get-product-by-sku";
+import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 
 export default function ResentSales() {
+  const router = useRouter();
   const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [productsUpdated, setProductsUpdated] = useState<
     ProductsUpdatedDashboard[]
@@ -88,6 +90,16 @@ export default function ResentSales() {
     data: dataProductBackToTheCatalog,
   } = useMutation({
     mutationFn: (productId: number) => productBackToTheCatalog(productId),
+  });
+
+  const {
+    isLoading: isLoadingOffersProductsByPage,
+    isSuccess: isSuccessOffersProductsByPage,
+    isError: isErrorOffersProductsByPage,
+    data: dataOffersProductsByPage,
+  } = useQuery({
+    queryKey: ["offers-products"],
+    queryFn: () => getOffersProductsByPage({ page: 1 }),
   });
 
   const columns: GridColDef[] = [
@@ -188,17 +200,17 @@ export default function ResentSales() {
                 {dataProductsAdminstrated?.length || <Spinner size="sm" />}
               </div>
               <div className="flex items-center space-x-4">
-                <p className="text-xs text-muted-foreground">
-                  {loadingPercentage !== 0
-                    ? `${loadingPercentage}%  ${productsUpdated.length}/${dataProductsAdminstrated.length}`
-                    : ""}
-                </p>
-                {productsUpdated.length > 0 && (
+                {loadingPercentage !== 0 ? (
+                  <p className="text-xs text-muted-foreground">{`${loadingPercentage}%  ${productsUpdated.length}/${dataProductsAdminstrated.length}
+                     `}</p>
+                ) : (
+                  ""
+                )}
+                {productsUpdated.length > 0 ? (
                   <Dialog>
-                    <DialogTrigger asChild>
-                      <Button size="sm" color="secondary" isIconOnly>
-                        <SquareArrowUpRight size={20} />
-                      </Button>
+                    <DialogTrigger className="flex text-sm">
+                      Productos Actualizados
+                      <SquareArrowUpRight size={20} />
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[80vw] sm:max-h-[80vh]">
                       <DialogHeader>
@@ -217,6 +229,17 @@ export default function ResentSales() {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+                ) : (
+                  <Button
+                    isDisabled={isLoadingProductsAdminstrated || isLoading}
+                    size="sm"
+                    onClick={() => {
+                      router.push("/dashboard/identify");
+                    }}
+                    color="secondary"
+                  >
+                    Ver Productos
+                  </Button>
                 )}
               </div>
             </div>
@@ -240,10 +263,25 @@ export default function ResentSales() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">65</div>
-            <p className="text-xs text-muted-foreground">
-              +180.1% desde el mes pasado
-            </p>
+            <div className="text-2xl font-bold">
+              {isLoadingOffersProductsByPage ? (
+                <Spinner size="sm" />
+              ) : (
+                dataOffersProductsByPage?.length
+              )}
+            </div>
+            {dataOffersProductsByPage && (
+              <div className="flex items-center">
+                <p className="text-xs text-muted-foreground">
+                  {/* Porcentaje de productos en proveedores en oferta */}
+                  {(dataOffersProductsByPage.length /
+                    (dataOffersProductsByPage.length + 0 + 0)) *
+                    100}
+                  %
+                </p>
+                <span className="text-blue-500 text-xs">Unicom</span>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card x-chunk="dashboard-01-chunk-2">
