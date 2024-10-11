@@ -5,7 +5,7 @@ import axios from "axios";
 export const getProductsAdministrated = async () => {
   const response = await axios
     .get(
-      `https://product-sku-internal-service-207026078475.us-west1.run.app/api/products`
+      `https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/products`
     )
     .then((response) => response.data)
     .catch((error) => {

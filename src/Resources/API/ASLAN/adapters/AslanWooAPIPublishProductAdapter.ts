@@ -25,4 +25,36 @@ export class AslanWooAPIPublishProductAdapter {
 
     // console.log(response);
   }
+
+  public static async getProductBySku(sku: string): Promise<any> {
+    try {
+      const product = await AslanWooAPI.getProductBySku(sku);
+
+      return product;
+    } catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  public static async removeFromTheCalalog(productId: number) {
+    const wooAPI = AslanWooAPI.getInstance() as any;
+
+    const productMapped = {
+      id: productId,
+      status: "draft",
+    };
+
+    await wooAPI.put(`products/${productId}`, productMapped as any);
+  }
+
+  public static async productBackToTheCatalog(productId: number) {
+    const wooAPI = AslanWooAPI.getInstance() as any;
+
+    const productMapped = {
+      id: productId,
+      status: "publish",
+    };
+
+    await wooAPI.put(`products/${productId}`, productMapped as any);
+  }
 }

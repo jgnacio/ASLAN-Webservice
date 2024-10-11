@@ -17,4 +17,26 @@ export class AslanWooAPI {
     }
     return AslanWooAPI.instance;
   }
+
+  public static async getProductBySku(sku: string): Promise<any> {
+    try {
+      const api = AslanWooAPI.getInstance();
+      const response = await api.get("products", {
+        sku, // Parámetro de búsqueda por SKU
+      });
+
+      const exactProduct = response.data.find(
+        (product: any) => product.sku === sku
+      );
+
+      if (!exactProduct) {
+        throw new Error(`No product found with SKU: ${sku}`);
+      }
+
+      return exactProduct;
+    } catch (error) {
+      console.error(`Error fetching product with SKU ${sku}:`, error);
+      throw new Error("Error fetching product by SKU");
+    }
+  }
 }

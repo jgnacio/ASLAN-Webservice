@@ -28,7 +28,7 @@ export const makeProductRelation = async ({
   };
   const product = await axios
     .post(
-      "https://product-sku-internal-service-207026078475.us-west1.run.app/api/products",
+      "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/products",
       body,
       { headers }
     )
@@ -43,7 +43,7 @@ export const makeProductRelation = async ({
 
   const providersOnSkuInternalService = await axios
     .get(
-      "https://product-sku-internal-service-207026078475.us-west1.run.app/api/providers"
+      "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/providers"
     )
     .then((response) => response.data.data)
     .catch((error) => {
@@ -101,7 +101,7 @@ export const makeProductRelation = async ({
     console.log(
       await axios
         .post(
-          "https://product-sku-internal-service-207026078475.us-west1.run.app/api/relationProducts",
+          "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/relationProducts",
           relation,
           { headers }
         )

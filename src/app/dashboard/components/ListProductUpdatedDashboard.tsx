@@ -41,44 +41,26 @@ import { Checkbox } from "@nextui-org/checkbox";
 
 import { useToast } from "@/components/ui/use-toast";
 import { columnsDataGridProductList } from "./Utils/TableDataGridProps";
-export default function ListProductModular({
+import { ProductsUpdatedDashboard } from "@/Resources/API/entitites/ProductsUpdated";
+import { columsListProductUpdatedDashboard } from "./Utils/columsListProductUpdatedDashboard";
+export default function ListProductUpdatedDashboard({
   productsRows = [],
-  setProductRows,
-  productsSelected = [],
-  setProductsSelected,
-  isSelectable = true,
 }: {
-  productsRows: ProductType[];
-  setProductRows: Function;
-  productsSelected: ProductType[];
-  setProductsSelected: Function;
-  isSelectable?: boolean;
+  productsRows: ProductsUpdatedDashboard[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
   // Memoriza las columnas para evitar recalcularlas en cada render
   const memoizedColumns = useMemo(() => {
-    const columns = [...columnsDataGridProductList];
+    const columns = [...columsListProductUpdatedDashboard];
     return columns;
   }, []); // Se ejecuta solo una vez
-
-  const handleSelectionChange = (newSelection: GridRowSelectionModel) => {
-    setProductsSelected(newSelection); // Actualiza los IDs seleccionados
-
-    // Obtén los productos seleccionados basados en los IDs
-    const selectedItems = productsRows.filter((product) =>
-      newSelection.includes(product.id)
-    );
-    setProductsSelected(selectedItems); // Actualiza el estado con los productos seleccionados
-  };
 
   return (
     <DataGrid
       rows={productsRows}
-      columns={columnsDataGridProductList}
+      columns={memoizedColumns}
       disableRowSelectionOnClick
-      checkboxSelection={isSelectable}
-      onRowSelectionModelChange={handleSelectionChange}
       rowHeight={45}
       initialState={{
         pagination: {

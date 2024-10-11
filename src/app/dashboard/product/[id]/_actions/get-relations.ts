@@ -5,7 +5,7 @@ import axios from "axios";
 export const getRelations = async () => {
   const response = await axios
     .get(
-      "https://product-sku-internal-service-207026078475.us-west1.run.app/api/relationProducts"
+      "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/relationProducts"
     )
     .then((response) => response.data)
     .catch((error) => {

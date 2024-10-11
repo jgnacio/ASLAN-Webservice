@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect } from "react";
 import { getProductsAdministrated } from "./_actions/get-product-administrated";
+import { Spinner } from "@nextui-org/spinner";
 
 export default function Page() {
   const { toast } = useToast();
@@ -79,11 +80,9 @@ export default function Page() {
           >
             <div>
               {params.row.relations.map((relation: any) => {
+                console.log(relation);
                 return (
-                  <span key={relation.ID_Provider}>
-                    {relation.PartNumber}/
-                    {relation.ID_Provider === 1 && "Unicom"},
-                  </span>
+                  <span key={relation.ID_Provider}>{relation.PartNumber}</span>
                 );
               })}
             </div>
@@ -126,7 +125,7 @@ export default function Page() {
       </CardHeader>
       <CardContent>
         <div>
-          {dataAslanPublishedFromAdmin && (
+          {dataAslanPublishedFromAdmin ? (
             <DataGrid
               rows={dataAslanPublishedFromAdmin}
               columns={columns}
@@ -141,6 +140,8 @@ export default function Page() {
               }}
               pageSizeOptions={[10, 20]}
             />
+          ) : (
+            <Spinner className="h-12 w-12" />
           )}
         </div>
       </CardContent>
