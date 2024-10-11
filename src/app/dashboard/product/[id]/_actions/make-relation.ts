@@ -4,6 +4,8 @@ import { ProductType } from "@/domain/product/entities/Product";
 import { ProductTypeWithProvider } from "@/Resources/API/Unicom/entities/Product/UnicomProductInterfaces";
 import axios from "axios";
 
+const SKU_INTERNAL_SERVICE_URL = process.env.SKU_INTERNAL_SERVICE_URL;
+
 export const makeProductRelation = async ({
   productToPublish,
   productList,
@@ -27,11 +29,7 @@ export const makeProductRelation = async ({
     "Content-Type": "application/json",
   };
   const product = await axios
-    .post(
-      "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/products",
-      body,
-      { headers }
-    )
+    .post(`${SKU_INTERNAL_SERVICE_URL}/api/products`, body, { headers })
     .then((response) => response.data.data)
     .catch((error) => {
       console.log("Error:", error);
@@ -42,9 +40,7 @@ export const makeProductRelation = async ({
   }
 
   const providersOnSkuInternalService = await axios
-    .get(
-      "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/providers"
-    )
+    .get(`${SKU_INTERNAL_SERVICE_URL}/api/providers`)
     .then((response) => response.data.data)
     .catch((error) => {
       console.log("Error:", error);
@@ -100,11 +96,9 @@ export const makeProductRelation = async ({
   for (const relation of bodyRelations) {
     console.log(
       await axios
-        .post(
-          "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/relationProducts",
-          relation,
-          { headers }
-        )
+        .post(`${SKU_INTERNAL_SERVICE_URL}/api/relationProducts`, relation, {
+          headers,
+        })
         .then((response) => response.data)
         .catch((error) => {
           console.log("Error:", error);

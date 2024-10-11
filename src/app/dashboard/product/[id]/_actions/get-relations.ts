@@ -2,11 +2,11 @@
 
 import axios from "axios";
 
+const SKU_INTERNAL_SERVICE_URL = process.env.SKU_INTERNAL_SERVICE_URL;
+
 export const getRelations = async () => {
   const response = await axios
-    .get(
-      "https://product-sku-internal-service-test-207026078475.us-west1.run.app/api/relationProducts"
-    )
+    .get(`${SKU_INTERNAL_SERVICE_URL}/api/relationProducts`)
     .then((response) => response.data)
     .catch((error) => {
       throw new Error(error);
