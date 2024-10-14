@@ -51,12 +51,17 @@ import {
   convertDateToCalendarDate,
   convertDateToISOFormat,
 } from "@/lib/functions/DateFunctions";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { getUserDataForDropshipping } from "./_actions/get-user-data-for-dropshipping";
 import SelectAvailableDateTime from "./components/SelectAvailableDateTime";
 import SelectAddressRegularCode from "./components/SelectAddressRegularCode";
+import { useAuth } from "@clerk/nextjs";
 
 export default function PurchaseOrder() {
+  const { userId } = useAuth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
   let defaultDate = today(getLocalTimeZone());
   let { locale } = useLocale();
 

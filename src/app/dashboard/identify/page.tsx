@@ -10,8 +10,14 @@ import { useEffect } from "react";
 import { getProductsAdministrated } from "./_actions/get-product-administrated";
 import { Spinner } from "@nextui-org/spinner";
 import { columnsListProductsAdministrated } from "../components/Utils/columsListProductsAdministrated";
+import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 export default function Page() {
+  const { userId } = useAuth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
   const { toast } = useToast();
 
   const {
