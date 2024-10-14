@@ -1,4 +1,5 @@
 import wpRAPI from "../entities/AslanWPAPI";
+import { AslanWooAPI } from "../entities/AslanWooAPI";
 
 export class AslanAPIProductsAdapter {
   constructor() {}
@@ -8,6 +9,16 @@ export class AslanAPIProductsAdapter {
       const products = await wpRAPI.getProducts(page, per_page);
 
       return products;
+    } catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  public async getOrders(status?: string): Promise<any> {
+    try {
+      const orders = await AslanWooAPI.getOrders(status);
+
+      return orders;
     } catch (error: any) {
       console.error(error);
     }

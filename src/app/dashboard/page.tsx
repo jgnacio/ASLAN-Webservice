@@ -30,7 +30,7 @@ export default function Dashboard() {
       exit={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="flex justify-end items-center h-16 spa">
+      <div className="flex justify-end items-center h-16 -mt-12">
         <span className="font-light text-gray-500">
           Conexión a API ASLAN Woocommerce. Status:{" "}
         </span>

@@ -23,9 +23,9 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { SquareArrowUpRight } from "lucide-react";
+import { Layers, Package, Package2, SquareArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getProductAslanBySku } from "../_actions/get-aslan-product-by-sku";
 import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import { productBackToTheCatalog } from "../_actions/product-back-to-the-catalog";
@@ -33,6 +33,8 @@ import { removeFromTheCalalog } from "../_actions/remove-product-from-catalog";
 import { getProductsAdministrated } from "../identify/_actions/get-product-administrated";
 import { getProductBySku } from "../product/_actions/get-product-by-sku";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
+import { getOrdersWoocomerce } from "../_actions/get-orders-woocomerce";
+import ListOrders from "./ListOrders";
 
 export default function ResentSales() {
   const router = useRouter();
@@ -93,6 +95,16 @@ export default function ResentSales() {
   });
 
   const {
+    data: dataOrdersAslan,
+    isLoading: isLoadingOrdersAslan,
+    isSuccess: isSuccessOrdersAslan,
+    isError: isErrorOrdersAslan,
+  } = useQuery({
+    queryKey: ["orders-woocomerce"],
+    queryFn: () => getOrdersWoocomerce(),
+  });
+
+  const {
     isLoading: isLoadingOffersProductsByPage,
     isSuccess: isSuccessOffersProductsByPage,
     isError: isErrorOffersProductsByPage,
@@ -121,6 +133,12 @@ export default function ResentSales() {
       flex: 1,
     },
   ];
+
+  useEffect(() => {
+    if (isSuccessOrdersAslan) {
+      console.log(dataOrdersAslan);
+    }
+  }, [dataOrdersAslan]);
 
   const handleUpdateStock = async () => {
     setLoadingPercentage(0);
@@ -237,8 +255,9 @@ export default function ResentSales() {
                       router.push("/dashboard/identify");
                     }}
                     color="secondary"
+                    isIconOnly
                   >
-                    Ver Productos
+                    <Layers />
                   </Button>
                 )}
               </div>
@@ -313,84 +332,7 @@ export default function ResentSales() {
             <DataGrid rows={[]} columns={columns} />
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-5">
-          <CardHeader>
-            <CardTitle>Ultimas Ventas</CardTitle>
-            <CardDescription>
-              Lista de las ultimas ventas realizadas. (Datos Ficticios) luego se
-              conectara a la base de datos de ASLAN
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-8">
-            <div className="flex items-center gap-4">
-              <Avatar className="hidden h-9 w-9 sm:flex">
-                <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                <AvatarFallback>OM</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  Olivia Martin
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  olivia.martin@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+$1,999.00</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Avatar className="hidden h-9 w-9 sm:flex">
-                <AvatarImage src="/avatars/02.png" alt="Avatar" />
-                <AvatarFallback>JL</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">Jackson Lee</p>
-                <p className="text-sm text-muted-foreground">
-                  jackson.lee@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+$39.00</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Avatar className="hidden h-9 w-9 sm:flex">
-                <AvatarImage src="/avatars/03.png" alt="Avatar" />
-                <AvatarFallback>IN</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">
-                  Isabella Nguyen
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  isabella.nguyen@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+$299.00</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Avatar className="hidden h-9 w-9 sm:flex">
-                <AvatarImage src="/avatars/04.png" alt="Avatar" />
-                <AvatarFallback>WK</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">William Kim</p>
-                <p className="text-sm text-muted-foreground">will@email.com</p>
-              </div>
-              <div className="ml-auto font-medium">+$99.00</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Avatar className="hidden h-9 w-9 sm:flex">
-                <AvatarImage src="/avatars/05.png" alt="Avatar" />
-                <AvatarFallback>SD</AvatarFallback>
-              </Avatar>
-              <div className="grid gap-1">
-                <p className="text-sm font-medium leading-none">Sofia Davis</p>
-                <p className="text-sm text-muted-foreground">
-                  sofia.davis@email.com
-                </p>
-              </div>
-              <div className="ml-auto font-medium">+$39.00</div>
-            </div>
-          </CardContent>
-        </Card>
+        <ListOrders wooOrders={dataOrdersAslan} />
       </div>
     </div>
   );
