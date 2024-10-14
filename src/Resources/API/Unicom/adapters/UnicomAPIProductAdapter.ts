@@ -281,8 +281,6 @@ export class UnicomAPIProductAdapter implements IProductRepository {
 
     const cleanedResponse = flatResponse.filter((item: any) => item !== null);
 
-    console.log("cleanedResponse", cleanedResponse);
-
     const products = this.mapUnicomProduct(cleanedResponse as Product[]);
 
     return products;

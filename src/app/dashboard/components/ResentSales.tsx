@@ -134,12 +134,6 @@ export default function ResentSales() {
     },
   ];
 
-  useEffect(() => {
-    if (isSuccessOrdersAslan) {
-      console.log(dataOrdersAslan);
-    }
-  }, [dataOrdersAslan]);
-
   const handleUpdateStock = async () => {
     setLoadingPercentage(0);
     setProductsUpdated([]);
@@ -161,7 +155,6 @@ export default function ResentSales() {
             resultUnicom.availability !== "in_stock" &&
             resultAslan.status !== "draft"
           ) {
-            console.log("No hay stock en Unicom");
             // Actualizar stock en Aslan
             server_removeProductFromCatalog(resultAslan.id);
             actualStatus = "draft";
@@ -171,7 +164,6 @@ export default function ResentSales() {
             resultUnicom.availability === "in_stock" &&
             resultAslan.status === "draft"
           ) {
-            console.log("Hay stock en Unicom");
             // Actualizar stock en Aslan
             // server_productBackToTheCatalog(resultAslan.id);
             actualStatus = "publish";
