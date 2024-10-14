@@ -215,7 +215,11 @@ export default function ResentSales() {
           <CardContent className="flex justify-between">
             <div className="flex flex-col justify-center">
               <div className="text-2xl font-bold">
-                {dataProductsAdminstrated?.length || <Spinner size="sm" />}
+                {!dataProductsAdminstrated ? (
+                  <Spinner size="sm" />
+                ) : (
+                  dataProductsAdminstrated.length
+                )}
               </div>
               <div className="flex items-center space-x-4">
                 {loadingPercentage !== 0 ? (
