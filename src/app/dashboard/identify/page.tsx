@@ -14,10 +14,6 @@ import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 export default function Page() {
-  const { userId } = useAuth();
-  if (!userId) {
-    redirect("/sign-in");
-  }
   const { toast } = useToast();
 
   const {

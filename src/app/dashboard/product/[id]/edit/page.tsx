@@ -6,14 +6,8 @@ import { getProductBySku } from "../../_actions/get-product-by-sku";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@nextui-org/spinner";
 import { useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
 
 export default function EditProduct({ params }: { params: { id: string } }) {
-  const { userId } = useAuth();
-  if (!userId) {
-    redirect("/sign-in");
-  }
   const {
     data: product,
     isLoading,

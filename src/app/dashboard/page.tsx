@@ -12,10 +12,6 @@ import { Badge } from "@nextui-org/react";
 import { Check, Dot } from "lucide-react";
 
 export default function Dashboard() {
-  const { userId } = useAuth();
-  if (!userId) {
-    redirect("/sign-in");
-  }
   const { toast } = useToast();
 
   const { isSuccess, isLoading, isError } = useQuery({

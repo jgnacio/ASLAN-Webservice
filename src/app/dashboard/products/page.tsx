@@ -16,10 +16,6 @@ import { redirect } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 
 export default function Products() {
-  const { userId } = useAuth();
-  if (!userId) {
-    redirect("/sign-in");
-  }
   return (
     <motion.div
       initial={{ opacity: 0, y: -50 }}

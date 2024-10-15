@@ -58,10 +58,6 @@ import SelectAddressRegularCode from "./components/SelectAddressRegularCode";
 import { useAuth } from "@clerk/nextjs";
 
 export default function PurchaseOrder() {
-  const { userId } = useAuth();
-  if (!userId) {
-    redirect("/sign-in");
-  }
   let defaultDate = today(getLocalTimeZone());
   let { locale } = useLocale();
 

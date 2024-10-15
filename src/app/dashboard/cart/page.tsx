@@ -5,11 +5,6 @@ import { redirect } from "next/navigation";
 import CartComponent from "./components/CartComponent";
 
 export default function Cart() {
-  const { userId } = useAuth();
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: -50 }}
