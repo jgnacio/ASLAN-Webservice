@@ -1,62 +1,31 @@
 "use client";
 import { ProductType } from "@/domain/product/entities/Product";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  GridValueGetter,
-} from "@mui/x-data-grid";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { useState } from "react";
 
 import { useToast } from "@/components/ui/use-toast";
+import { Tooltip } from "@mui/material";
 import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { motion } from "framer-motion";
 import { FilePen, Plane } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getAllProducts } from "../_actions/get-all-products";
-import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
-import { getCart } from "../cart/_actions/get-cart";
 import ButtonAddToCart from "./ButtonAddToCart";
 import HoverCardActions from "./HoverCardActions";
 import StockStatus from "./StockStatus";
-import { Tooltip } from "@mui/material";
 
-export default function ProductFeaturedList() {
+export default function ProductFeaturedList({
+  dataGetProductsByPage,
+  cart,
+}: {
+  dataGetProductsByPage: ProductType[] | undefined;
+  cart: any;
+}) {
   const router = useRouter();
   const [rows, setRows] = useState<any>([]);
 
   const { toast } = useToast();
-
-  const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
-    useQuery({
-      queryKey: ["get-featured-products"],
-      queryFn: () => getFeaturedProductsByPage({ page: 1 }),
-    });
-
-  const {
-    isPending: isLoadingGetAllProducts,
-    data: dataGetAllProducts,
-    mutateAsync: server_getAllProducts,
-  } = useMutation({
-    mutationFn: () => getAllProducts(),
-  });
-
-  const {
-    mutateAsync: server_getCart,
-    isSuccess,
-    isPending,
-    data: dataCart,
-    isError,
-  } = useMutation({
-    mutationFn: getCart,
-  });
-
-  useEffect(() => {
-    server_getCart();
-  }, []);
 
   const columns: GridColDef[] = [
     {
@@ -172,58 +141,17 @@ export default function ProductFeaturedList() {
 
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
-        isPending ? (
+        !cart ? (
           <Spinner color="primary" />
         ) : (
-          <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
+          <ButtonAddToCart params={{ id: params.row.sku, cart }} />
         ),
     },
   ];
 
-  useEffect(() => {
-    if (dataGetProductsByPage) {
-      handleSetRows(dataGetProductsByPage);
-    }
-  }, [dataGetProductsByPage]);
-
-  const handleSetRows = (products: ProductType[]) => {
-    const newRows = products.map((product) => {
-      return {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        marca: product.marca,
-        stock: product.stock,
-        availability: product.availability,
-        guaranteeDays: product.guaranteeDays,
-        sku: product.sku,
-        partNumber: product.partNumber,
-      };
-    });
-    setRows(newRows);
-  };
-
-  const handleSetAllNewRows = (products: ProductType[]) => {
-    const newRows = products.map((product) => {
-      return {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        marca: product.marca,
-        stock: product.stock,
-        availability: product.availability,
-        guaranteeDays: product.guaranteeDays,
-        sku: product.sku,
-        partNumber: product.partNumber,
-      };
-    });
-    setRows(newRows);
-  };
-
   return (
     <div className="w-full h-full">
-      {isLoadingGetAllProducts ? "cargado todos los productos" : ""}
-      {isLoadingGetProductsByPage ? (
+      {!dataGetProductsByPage ? (
         <div className="flex justify-center items-center h-[200px]">
           <motion.div
             initial={{ opacity: 0 }}
@@ -240,7 +168,7 @@ export default function ProductFeaturedList() {
           transition={{ duration: 0.5 }}
         >
           <DataGrid
-            rows={rows}
+            rows={dataGetProductsByPage}
             columns={columns}
             disableColumnSelector
             disableRowSelectionOnClick

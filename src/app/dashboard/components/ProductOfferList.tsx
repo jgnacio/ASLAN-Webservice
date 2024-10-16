@@ -1,54 +1,28 @@
 "use client";
 import { ProductType } from "@/domain/product/entities/Product";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { Tooltip } from "@mui/material";
+import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { motion } from "framer-motion";
-import { getAllProducts } from "../_actions/get-all-products";
-import ButtonAddToCart from "./ButtonAddToCart";
-import { getOffersProductsByPage } from "../_actions/get-offer-products";
+import { FilePen, Plane } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getCart } from "../cart/_actions/get-cart";
-import { Button } from "@nextui-org/button";
-import { FilePen, Plane } from "lucide-react";
+import ButtonAddToCart from "./ButtonAddToCart";
 import HoverCardActions from "./HoverCardActions";
 import StockStatus from "./StockStatus";
-import { Tooltip } from "@mui/material";
 
-export default function ProductOfferList() {
+export default function ProductOfferList({
+  dataGetProductsByPage,
+  cart,
+}: {
+  dataGetProductsByPage: ProductType[] | undefined;
+  cart: any;
+}) {
   const [rows, setRows] = useState<any>([]);
   const router = useRouter();
-
-  const { data: dataGetProductsByPage, isLoading: isLoadingGetProductsByPage } =
-    useQuery({
-      queryKey: ["get-offer-products"],
-      queryFn: () => getOffersProductsByPage({ page: 1 }),
-    });
-
-  const {
-    isPending: isLoadingGetAllProducts,
-    data: dataGetAllProducts,
-    mutateAsync: server_getAllProducts,
-  } = useMutation({
-    mutationFn: () => getAllProducts(),
-  });
-
-  const {
-    mutateAsync: server_getCart,
-    isSuccess,
-    isPending,
-    data: dataCart,
-    isError,
-  } = useMutation({
-    mutationFn: getCart,
-  });
-
-  useEffect(() => {
-    server_getCart();
-  }, []);
 
   const columns: GridColDef[] = [
     {
@@ -162,10 +136,10 @@ export default function ProductOfferList() {
 
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
-        isPending ? (
+        !cart ? (
           <Spinner color="primary" />
         ) : (
-          <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
+          <ButtonAddToCart params={{ id: params.row.sku, cart: cart }} />
         ),
     },
   ];
@@ -214,7 +188,7 @@ export default function ProductOfferList() {
 
   return (
     <div className="w-full h-full">
-      {isLoadingGetProductsByPage ? (
+      {dataGetProductsByPage ? (
         <div className="flex justify-center items-center h-[200px]">
           <motion.div
             initial={{ opacity: 0 }}

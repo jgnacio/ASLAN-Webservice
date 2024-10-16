@@ -1,32 +1,9 @@
 "use client";
-import { Product, ProductType } from "@/domain/product/entities/Product";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  GridSlotsComponentsProps,
-} from "@mui/x-data-grid";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { ProductType } from "@/domain/product/entities/Product";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
-import Box from "@mui/material/Box";
-import { Spinner } from "@nextui-org/spinner";
-import { motion } from "framer-motion";
-import { getAllProducts } from "../_actions/get-all-products";
-import { getRelevantProducts } from "../_actions/get-relevant-products";
-import ButtonAddToCart from "./ButtonAddToCart";
-import { getCart } from "../cart/_actions/get-cart";
-import { useRouter } from "next/navigation";
-import { Button } from "@nextui-org/button";
-import { FilePen, Plane, PlaneLanding } from "lucide-react";
-import Link from "next/link";
-import HoverCardActions from "./HoverCardActions";
-import StockStatus from "./StockStatus";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip } from "@mui/material";
-import { Badge } from "@/components/ui/badge";
-import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
-import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
 import {
   Select,
   SelectContent,
@@ -36,16 +13,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
+import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
+import { Tooltip } from "@mui/material";
+import { Button } from "@nextui-org/button";
+import { Spinner } from "@nextui-org/spinner";
+import { motion } from "framer-motion";
+import { FilePen, Plane } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getRelevantProducts } from "../_actions/get-relevant-products";
+import ButtonAddToCart from "./ButtonAddToCart";
+import HoverCardActions from "./HoverCardActions";
+import StockStatus from "./StockStatus";
 
 import { useToast } from "@/components/ui/use-toast";
 
-export function CustomFooterStatusComponent(
-  props: NonNullable<GridSlotsComponentsProps["footer"]>
-) {
-  return <Box sx={{ p: 1, display: "flex" }}>test</Box>;
-}
-
-export default function ProductRelevantList() {
+export default function ProductRelevantList({ cart }: { cart: any }) {
   const router = useRouter();
   const [rows, setRows] = useState<any>([]);
   const [category, setCategory] = useState<UnicomAPICategory>(
@@ -56,7 +41,6 @@ export default function ProductRelevantList() {
 
   const {
     mutateAsync: server_getRelevantProducts,
-    data: dataGetProductsByPage,
     isPending: isLoadingGetProductsByPage,
   } = useMutation({
     mutationFn: ({
@@ -67,28 +51,6 @@ export default function ProductRelevantList() {
       category: UnicomAPICategory;
     }) => getRelevantProducts({ page, category }),
   });
-
-  const {
-    isPending: isLoadingGetAllProducts,
-    data: dataGetAllProducts,
-    mutateAsync: server_getAllProducts,
-  } = useMutation({
-    mutationFn: () => getAllProducts(),
-  });
-
-  const {
-    mutateAsync: server_getCart,
-    isSuccess,
-    isPending,
-    data: dataCart,
-    isError,
-  } = useMutation({
-    mutationFn: getCart,
-  });
-
-  useEffect(() => {
-    server_getCart();
-  }, []);
 
   const columns: GridColDef[] = [
     {
@@ -202,22 +164,15 @@ export default function ProductRelevantList() {
       resizable: false,
       sortable: false,
       renderCell: (params: GridRenderCellParams) =>
-        isPending ? (
+        !cart ? (
           <Spinner color="primary" />
         ) : (
-          <ButtonAddToCart params={{ id: params.row.sku, cart: dataCart }} />
+          <ButtonAddToCart params={{ id: params.row.sku, cart: cart }} />
         ),
     },
   ];
 
-  useEffect(() => {
-    if (dataGetProductsByPage) {
-      handleSetRows(dataGetProductsByPage);
-    }
-  }, [dataGetProductsByPage]);
-
   const handleSearchCategory = async () => {
-    console.log("category", category);
     const response = await server_getRelevantProducts({
       page: 1,
       category: category,
