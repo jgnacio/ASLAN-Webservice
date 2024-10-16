@@ -35,9 +35,6 @@ export default function CartComponent() {
     isError: isErrorGetCart,
   } = useMutation({
     mutationFn: () => getCart(),
-    onSuccess: (data) => {
-      handleSetRows(data.products);
-    },
   });
 
   const {

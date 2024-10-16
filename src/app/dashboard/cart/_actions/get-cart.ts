@@ -4,13 +4,15 @@ import { UnicomAPICartAdapter } from "@/Resources/API/Unicom/adapters/UnicomAPIC
 
 // const cart = Cart.getInstance();
 
-export const getCart = async (): Promise<CartType | {}> => {
+export const getCart = async (): Promise<CartType> => {
   try {
     const unicomApiCartAdapter = new UnicomAPICartAdapter();
 
     const cart = unicomApiCartAdapter.get();
     return cart;
   } catch {
-    return {};
+    return {
+      products: [],
+    };
   }
 };

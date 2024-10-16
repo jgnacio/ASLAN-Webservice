@@ -232,14 +232,14 @@ export interface ICart {
 }
 
 export type CartType = {
-  id: string;
-  userId: string;
-  lastUpdate: string;
-  total: number;
+  id?: string;
+  userId?: string;
+  lastUpdate?: string;
+  total?: number;
   products: CartProductType[];
-  delivery_options: [];
-  payment_options: [];
-  total_including_tax: number;
+  delivery_options?: [];
+  payment_options?: [];
+  total_including_tax?: number;
 };
 
 export type CartProductType = ProductType & {
