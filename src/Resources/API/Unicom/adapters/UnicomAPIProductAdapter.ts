@@ -7,6 +7,7 @@ import {
   ProductCategory,
   ProductPartNumber,
   ProductType,
+  Provider,
 } from "@/domain/product/entities/Product";
 import {
   defaultUnicomAPIProductRequest,
@@ -29,6 +30,12 @@ import axios from "axios";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
+
+const logoUnicom: Provider = {
+  name: "Unicom",
+  logoUrl:
+    "https://assets.apidog.com/app/project-icon/custom/20240326/d9d73462-4e88-42d7-ae58-e5b33d38c626.jpeg",
+};
 
 export class UnicomAPIProductAdapter implements IProductRepository {
   private readonly baseUrl = API_UNICOM_URL;
@@ -164,6 +171,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
           name: response.grupo_articulo?.descripcion || "",
         },
         marca: response.marca?.marca || "",
+        provider: logoUnicom,
         stock: response.inventario || 0,
         availability: mappedAvailability,
         submitDate: new Date(),
@@ -286,16 +294,8 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     return products;
   }
 
-  async save(product: Product): Promise<void> {
-    return;
-  }
-
-  async update(product: Product): Promise<void> {
-    return;
-  }
-
-  async delete(id: number): Promise<void> {
-    return;
+  getByCategory(category: string): Promise<Product[]> {
+    throw new Error("Method not implemented.");
   }
 
   private mapToUnicomRequest(
@@ -394,6 +394,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
               item.costo_bonificado,
             partNumber: mappedPartnumber,
             description: item.descripcion || "",
+            provider: logoUnicom,
             images: item.fotos || [],
             category:
               (item.grupo_articulo && item.grupo_articulo.descripcion) || "",

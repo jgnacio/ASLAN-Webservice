@@ -9,6 +9,14 @@ const nextConfig = {
           {
             protocol: "https",
             hostname: "assets.apidog.com/app/project-icon/custom/*",
+          },
+          {
+            protocol: "https",
+            hostname: "pcservice.com.uy*",
+          },
+          {
+            protocol: "https",
+            hostname: "res.cloudinary.com/*"
           }
         ],
       },

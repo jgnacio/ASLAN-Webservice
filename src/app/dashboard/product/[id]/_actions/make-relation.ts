@@ -1,7 +1,6 @@
 "use server";
 
 import { ProductType } from "@/domain/product/entities/Product";
-import { ProductTypeWithProvider } from "@/Resources/API/Unicom/entities/Product/UnicomProductInterfaces";
 import axios from "axios";
 
 const SKU_INTERNAL_SERVICE_URL = process.env.SKU_INTERNAL_SERVICE_URL;
@@ -11,7 +10,7 @@ export const makeProductRelation = async ({
   productList,
 }: {
   productToPublish: ProductType;
-  productList: ProductTypeWithProvider[];
+  productList: ProductType[];
 }) => {
   // console.log(productList);
   console.log(productToPublish);
@@ -66,8 +65,12 @@ export const makeProductRelation = async ({
 
     // si contiene una palabra del proveedore
 
+    const providerName = productOnList.provider
+      ? productOnList.provider.name
+      : "";
+
     const provider = providersOnSkuInternalService.find((provider: any) =>
-      productOnList.provider.includes(provider.name)
+      providerName.includes(provider.name)
     );
 
     if (!provider) {

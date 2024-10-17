@@ -3,6 +3,10 @@ import {
   ProductObjToClass,
 } from "@/lib/Utils/Functions/ClassToObject";
 import { v4 as uuid } from "uuid";
+export interface Provider {
+  name: string;
+  logoUrl: string;
+}
 
 /**
  * Representa una entidad de producto en el dominio de la aplicación.
@@ -18,6 +22,7 @@ export class Product {
   public category: ProductCategory;
   public marca: string;
   public stock: number;
+  public provider?: Provider;
   public availability: ProductAvailability;
   public submitDate: Date | null;
   public favorite?: boolean;
@@ -34,6 +39,7 @@ export class Product {
     category,
     marca,
     stock,
+    provider,
     availability,
     submitDate,
     favorite,
@@ -48,6 +54,7 @@ export class Product {
     description: string;
     images: string[];
     category: ProductCategory;
+    provider?: Provider;
     marca: string;
     stock: number;
     availability?: ProductAvailability;
@@ -71,6 +78,7 @@ export class Product {
     this.submitDate = submitDate;
     this.favorite = favorite;
     this.onSale = onSale;
+    this.provider = provider;
     this.guaranteeDays = guaranteeDays;
     this.estimatedArrivalDate = estimatedArrivalDate;
     this.validate();
@@ -155,6 +163,7 @@ export type ProductType = {
   title: string;
   description: string;
   images: any[];
+  provider?: Provider;
   category: ProductCategory;
   marca: string;
   stock: number;

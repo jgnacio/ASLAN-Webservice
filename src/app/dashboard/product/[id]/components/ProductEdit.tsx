@@ -51,7 +51,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { ProductType } from "@/domain/product/entities/Product";
+import { Product, ProductType } from "@/domain/product/entities/Product";
 import { useEffect, useState } from "react";
 
 import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
@@ -71,7 +71,6 @@ import { Separator } from "@/components/ui/separator";
 import ListProductModular from "@/app/dashboard/components/ListProductModular";
 import { makeProductRelation } from "../_actions/make-relation";
 import AddProductRelation from "./AddProductRelation";
-import { ProductTypeWithProvider } from "@/Resources/API/Unicom/entities/Product/UnicomProductInterfaces";
 import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
 import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
 import { v4 as uuidv4 } from "uuid";
@@ -86,29 +85,18 @@ export function ProductEdit({ product }: { product: ProductType }) {
   });
   const [file, setFile] = useState<imageListProps | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [productToAdd, setProductToAdd] =
-    useState<ProductTypeWithProvider | null>(null);
+  const [productToAdd, setProductToAdd] = useState<ProductType | null>(null);
   const [category, setCategory] = useState<UnicomAPICategory>();
   const [contentDescripcion, serContentDescripcion] = useState<string>(
     product.description
   );
 
-  const [findedProducts, setFindedProducts] = useState<
-    ProductTypeWithProvider[] | []
-  >([
-    {
-      ...product,
-      provider: "Unicom",
-    },
+  const [findedProducts, setFindedProducts] = useState<ProductType[] | []>([
+    product,
   ]);
 
-  const [productsSelected, setProductsSelected] = useState<
-    ProductTypeWithProvider[] | []
-  >([
-    {
-      ...product,
-      provider: "Unicom",
-    },
+  const [productsSelected, setProductsSelected] = useState<ProductType[] | []>([
+    product,
   ]);
 
   const [productState, setProductState] = useState<FormPublishProduct>({
@@ -171,7 +159,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
       productList,
     }: {
       productToPublish: ProductType;
-      productList: ProductTypeWithProvider[];
+      productList: ProductType[];
     }) => makeProductRelation({ productToPublish, productList }),
 
     onSuccess: () => {
@@ -707,7 +695,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                             />
                             <Input
                               id="provider"
-                              value={productToAdd?.provider}
+                              value={productToAdd?.provider?.name}
                               onChange={handleChangeProductToAdd}
                               type="text"
                               placeholder="Proveedor"
@@ -793,12 +781,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                     <DialogClose asChild>
                       <Button
                         onClick={() => {
-                          setProductsSelected([
-                            {
-                              ...product,
-                              provider: "Unicom",
-                            },
-                          ]);
+                          setProductsSelected([product]);
                         }}
                         variant="destructive"
                       >

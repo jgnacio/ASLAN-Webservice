@@ -8,13 +8,11 @@ export interface IProductRepository {
     page,
     category,
   }: {
-    request: UnicomAPIProductRequest;
+    request?: UnicomAPIProductRequest;
     page?: number;
     category?: string;
   }): Promise<Product[]>;
+  getByCategory(category: string): Promise<Product[]>;
   getFeatured(request?: UnicomAPIProductRequest): Promise<Product[]>;
   getOffers(request?: UnicomAPIProductRequest): Promise<Product[]>;
-  save(product: Product): Promise<void>;
-  update(product: Product): Promise<void>;
-  delete(id: number): Promise<void>;
 }
