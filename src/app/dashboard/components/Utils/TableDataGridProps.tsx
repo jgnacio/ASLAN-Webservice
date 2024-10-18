@@ -97,10 +97,31 @@ export const columnsDataGridProductList: GridColDef[] = [
     width: 90,
   },
   {
+    field: "provider",
+    headerName: "Proveedor",
+    minWidth: 80,
+    renderCell: (params: GridRenderCellParams) =>
+      params.row.provider ? (
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          className="flex items-center justify-center rounded-md w-full h-full "
+        >
+          <img
+            src={params.row.provider.logoUrl}
+            alt="provider logo"
+            className="  object-cover h-full aspect-square p-2"
+          />
+        </motion.div>
+      ) : (
+        <span className="text-muted-foreground">N/A</span>
+      ),
+    valueGetter: (value, row) => {
+      return `${row.provider.name || ""}`;
+    },
+  },
+  {
     field: "sku",
     headerName: "SKU",
-    minWidth: 120,
-    maxWidth: 150,
     flex: 1,
 
     resizable: false,
@@ -119,7 +140,7 @@ export const columnsDataGridProductList: GridColDef[] = [
     resizable: false,
 
     renderCell: (params: GridRenderCellParams) =>
-      params.row.partNumber ? (
+      params.row.partNumber[0].partNumber ? (
         <HoverCardActions content={params.row.partNumber[0].partNumber} />
       ) : (
         <span className="text-muted-foreground">N/A</span>

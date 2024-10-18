@@ -2,6 +2,7 @@ import { Product, Provider } from "@/domain/product/entities/Product";
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
 import axios from "axios";
 import {
+  PCServiceProductByDate,
   PCServiceProductDetails,
   PCServiceRootObject,
 } from "../entities/Product/PCServiceAPIProduct";
@@ -10,18 +11,33 @@ import {
   PCServiceCategoryCodeType,
 } from "../PCServiceAPIRequest";
 import { PCServiceAPITokenAdapter } from "./PCServiceAPITokenAdapter";
-
+import { getDateInYYYY } from "@/lib/functions/DateFunctions";
+type Request = {
+  body?: any;
+  route: string;
+  method: string;
+};
 type FetchProductsByCategory = {
   category: string;
   id?: never;
+  request?: Request;
 };
 
 type FetchProductsById = {
   id: number;
   category?: never;
+  request?: Request;
+};
+type FetchProductsRequest = {
+  id?: number;
+  category?: never;
+  request: Request;
 };
 
-type FetchProductsParams = FetchProductsByCategory | FetchProductsById;
+type FetchProductsParams =
+  | FetchProductsByCategory
+  | FetchProductsById
+  | FetchProductsRequest;
 
 const logoPCService: Provider = {
   name: "PC Service",
@@ -117,15 +133,57 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
 
       return productListMapped.flat();
     } else {
-      const response = await axios.get(
-        `${this.API_PCSERVICE_URL}/products/{id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token.token}`,
-          },
+      const { method, route, body } = params.request || {};
+
+      const response = await axios({
+        method: method,
+        url: `${this.API_PCSERVICE_URL}${route}`,
+        headers: {
+          Authorization: `Bearer ${token.token}`,
+        },
+      })
+        .then((response) => {
+          return response.data as PCServiceProductByDate[];
+        })
+        .catch((error) => {
+          throw new Error(error);
+        });
+
+      const productList = response.map((product) => {
+        let category: PCServiceCategoryCodeType = {
+          name: "Not Defined",
+          nameES: "Not Defined",
+          code: 0,
+          subCategories: [
+            {
+              name: "Not Defined",
+              nameES: "Not Defined",
+              code: 0,
+            },
+          ],
+        };
+
+        // Busca en las categorías de producto
+        const foundCategory = product.categories.find((cat) => {
+          return defaultPCServiceRelevantCategories.some(
+            (categoryCode) => categoryCode.code === cat.id
+          );
+        });
+
+        // Si se encuentra una categoría, mapea a PCServiceCategoryCodeType
+        if (foundCategory) {
+          const categoryCode = defaultPCServiceRelevantCategories.find(
+            (categoryCode) => categoryCode.code === foundCategory.id
+          );
+
+          if (categoryCode) {
+            category = categoryCode; // Asignar la categoría encontrada
+          }
         }
-      );
-      return response.data;
+
+        return this.productMapper(product, category);
+      });
+      return productList.flat();
     }
   }
 
@@ -143,7 +201,14 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
     throw new Error("Method not implemented.");
   }
   getFeatured(request?: any): Promise<Product[]> {
-    throw new Error("Method not implemented.");
+    const productsList = this.fetchProducts({
+      request: {
+        route: `/products/bydate/?from=${getDateInYYYY(-3 * 60 * 60 * 1000)}`,
+        method: "GET",
+      },
+    });
+
+    return productsList;
   }
   getOffers(request?: any): Promise<Product[]> {
     throw new Error("Method not implemented.");

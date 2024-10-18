@@ -166,7 +166,7 @@ export default function ResentSales() {
           ) {
             // Actualizar stock en Aslan
             // server_productBackToTheCatalog(resultAslan.id);
-            actualStatus = "publish";
+            // actualStatus = "publish";
           }
           setProductsUpdated((prev) => [
             ...prev,
