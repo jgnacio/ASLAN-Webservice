@@ -5,17 +5,25 @@ import { Spinner } from "@nextui-org/spinner";
 import { motion } from "framer-motion";
 import ListProductModular from "./ListProductModular";
 import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
-export function ProductFeaturedList({ cart }: { cart: any }) {
-  const { data: dataGetFeaturedProductsByPage } = useQuery({
-    queryKey: ["getFeaturedProducts"],
-    queryFn: () => getFeaturedProductsByPage({ page: 1 }),
+export function ProductFeaturedList({ cart }: { cart?: any }) {
+  const {
+    mutateAsync: server_getFeaturedProductsByPage,
+    data: dataGetFeaturedProductsByPage,
+    isPending,
+  } = useMutation({
+    mutationFn: () => getFeaturedProductsByPage({ page: 1 }),
   });
+
+  useEffect(() => {
+    server_getFeaturedProductsByPage();
+  }, []);
 
   return (
     <div className="w-full h-full">
-      {!dataGetFeaturedProductsByPage ? (
+      {isPending ? (
         <div className="flex justify-center items-center h-[200px]">
           <motion.div
             initial={{ opacity: 0 }}
@@ -33,6 +41,7 @@ export function ProductFeaturedList({ cart }: { cart: any }) {
         >
           <ListProductModular
             productsRows={dataGetFeaturedProductsByPage}
+            publish={false}
             // cart={cart}
           />
         </motion.div>

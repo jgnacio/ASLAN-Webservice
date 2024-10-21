@@ -39,8 +39,11 @@ type FetchProductsParams =
   | FetchProductsById
   | FetchProductsRequest;
 
-const logoPCService: Provider = {
+export const logoPCService: Provider = {
   name: "PC Service",
+  mainPageUrl: "https://www.pcservice.com.uy/",
+  searchPageUrl:
+    "https://www.pcservice.com.uy/others/PCsResults.jsp?queryref=17031901&reforderby=relev&querypage=1&searchstr=",
   logoUrl:
     "https://res.cloudinary.com/dhq5ewbyu/image/upload/v1729171066/ASLAN/hao6sciafwm5rqllsknh.png",
 };
@@ -61,6 +64,7 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
       .then((response) => {
         return response.data as PCServiceProductDetails;
       });
+    console.log(response);
     return response;
   }
 
@@ -187,8 +191,24 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
     }
   }
 
-  getBySKU(sku: string): Promise<Product | null> {
-    throw new Error("Method not implemented.");
+  async getBySKU(sku: string): Promise<Product | null> {
+    const skuNumber = parseInt(sku);
+    const product = await this.fetchProduct(skuNumber).then((product) => {
+      const categoryName = product.title.split(" ")[0];
+      return this.productMapper(product, {
+        name: categoryName,
+        nameES: categoryName,
+        code: 0,
+        subCategories: [
+          {
+            nameES: categoryName,
+            name: categoryName,
+            code: 0,
+          },
+        ],
+      });
+    });
+    return product;
   }
   async getByCategory(category: string): Promise<Product[]> {
     const productsByCategory = await this.fetchProducts({

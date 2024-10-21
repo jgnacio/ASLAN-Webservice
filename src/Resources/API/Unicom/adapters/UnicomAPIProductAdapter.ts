@@ -31,8 +31,10 @@ import axios from "axios";
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
 
-const logoUnicom: Provider = {
+export const logoUnicom: Provider = {
   name: "Unicom",
+  mainPageUrl: "https://www.unicom.com.uy/",
+  searchPageUrl: "https://www.unicom.com.uy/Busqueda?SearchQuery=",
   logoUrl:
     "https://assets.apidog.com/app/project-icon/custom/20240326/d9d73462-4e88-42d7-ae58-e5b33d38c626.jpeg",
 };

@@ -5,6 +5,8 @@ import {
 import { v4 as uuid } from "uuid";
 export interface Provider {
   name: string;
+  mainPageUrl: string;
+  searchPageUrl: string;
   logoUrl: string;
 }
 

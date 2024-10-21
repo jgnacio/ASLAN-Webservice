@@ -21,7 +21,7 @@ import { getRelevantProducts } from "../_actions/get-relevant-products";
 
 import ListProductModular from "./ListProductModular";
 
-export default function ProductRelevantList({ cart }: { cart: any }) {
+export default function ProductRelevantList({ cart }: { cart?: any }) {
   const [category, setCategory] = useState<UnicomAPICategory>(
     defaultUnicomAPIRelevantCategories[0]
   );

@@ -71,7 +71,8 @@ export default function ResentSales() {
     isError: isErrorUnicomProductBySku,
     data: dataUnicomProductBySku,
   } = useMutation({
-    mutationFn: (sku: string) => getProductBySku(sku),
+    mutationFn: ({ sku, provider }: { sku: string; provider: string }) =>
+      getProductBySku(sku, provider),
   });
 
   const {

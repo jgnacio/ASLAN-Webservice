@@ -51,7 +51,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { Product, ProductType } from "@/domain/product/entities/Product";
+import {
+  Product,
+  ProductType,
+  Provider,
+} from "@/domain/product/entities/Product";
 import { useEffect, useState } from "react";
 
 import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
@@ -74,6 +78,7 @@ import AddProductRelation from "./AddProductRelation";
 import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
 import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
 import { v4 as uuidv4 } from "uuid";
+import { ImplementProviders } from "@/Resources/API/config";
 
 export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
@@ -85,8 +90,22 @@ export function ProductEdit({ product }: { product: ProductType }) {
   });
   const [file, setFile] = useState<imageListProps | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [productToAdd, setProductToAdd] = useState<ProductType | null>(null);
+  const [productToAdd, setProductToAdd] = useState<any>({
+    title: product.title,
+    sku: product.sku,
+    partNumber: product.partNumber,
+    provider: product.provider,
+    marca: product.marca,
+    stock: product.stock,
+    price: product.price,
+    availability: product.availability,
+    category: product.category,
+    description: product.description,
+    images: product.images,
+    submitDate: product.submitDate,
+  });
   const [category, setCategory] = useState<UnicomAPICategory>();
+  const [provider, setprovider] = useState<Provider>();
   const [contentDescripcion, serContentDescripcion] = useState<string>(
     product.description
   );
@@ -330,7 +349,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
           src?: string;
         }[];
       }
-      console.log(productState);
 
       const newProductStateBufferForRelation = productState;
 
@@ -438,6 +456,16 @@ export function ProductEdit({ product }: { product: ProductType }) {
 
   const handleChangeProductToAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
+
+    if (id === "Provider") {
+      setProductToAdd((prevState: any) => {
+        return {
+          ...prevState,
+          provider: value,
+        };
+      });
+      return;
+    }
 
     if (id === "partNumber") {
       setProductToAdd((prevState: any) => {
@@ -628,6 +656,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                       <Spinner size="sm" color="primary" />
                     ) : (
                       <ListProductModular
+                        isSelectable={true}
                         productsRows={findedProducts}
                         setProductRows={setFindedProducts}
                         productsSelected={productsSelected}
@@ -638,7 +667,8 @@ export function ProductEdit({ product }: { product: ProductType }) {
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
-                        const id = uuidv4();
+                        uuidv4();
+                        let id = uuidv4();
                         setProductsSelected((prevState: any) => {
                           return [
                             ...prevState,
@@ -648,6 +678,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                             },
                           ];
                         });
+                        console.log(productToAdd);
                         setFindedProducts((prevState: any) => {
                           return [
                             ...prevState,
@@ -657,9 +688,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
                             },
                           ];
                         });
-
-                        // clear imputs
-                        setProductToAdd(null);
                       }}
                     >
                       <Card>
@@ -693,13 +721,42 @@ export function ProductEdit({ product }: { product: ProductType }) {
                               type="text"
                               placeholder="Part Number"
                             />
-                            <Input
-                              id="provider"
-                              value={productToAdd?.provider?.name}
-                              onChange={handleChangeProductToAdd}
-                              type="text"
-                              placeholder="Proveedor"
-                            />
+                            <Select
+                              onValueChange={(value) => {
+                                const provider = ImplementProviders.find(
+                                  (provider) => provider.name === value
+                                );
+                                if (provider) {
+                                  setprovider(provider);
+
+                                  if (productToAdd) {
+                                    setProductToAdd((prevState: any) => {
+                                      return {
+                                        ...prevState,
+                                        provider: provider,
+                                      };
+                                    });
+                                  }
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a Category" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-[20rem]">
+                                <SelectGroup>
+                                  <SelectLabel>Proveedores</SelectLabel>
+                                  {ImplementProviders.map((provider, index) => (
+                                    <SelectItem
+                                      value={provider.name}
+                                      key={index}
+                                    >
+                                      {provider.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
                             <Input
                               id="marca"
                               value={productToAdd?.marca}
@@ -782,6 +839,21 @@ export function ProductEdit({ product }: { product: ProductType }) {
                       <Button
                         onClick={() => {
                           setProductsSelected([product]);
+                          setFindedProducts([product]);
+                          setProductToAdd({
+                            title: product.title,
+                            sku: product.sku,
+                            partNumber: product.partNumber,
+                            provider: product.provider,
+                            marca: product.marca,
+                            stock: product.stock,
+                            price: product.price,
+                            availability: product.availability,
+                            category: product.category,
+                            description: product.description,
+                            images: product.images,
+                            submitDate: product.submitDate,
+                          });
                         }}
                         variant="destructive"
                       >

@@ -11,10 +11,8 @@ import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { FilePen } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import ButtonAddToCart from "./ButtonAddToCart";
 
-import { useToast } from "@/components/ui/use-toast";
 import { columnsDataGridProductList } from "./Utils/TableDataGridProps";
 export default function ListProductModular({
   productsRows = [],
@@ -33,8 +31,6 @@ export default function ListProductModular({
   setProductsSelected?: Function;
   isSelectable?: boolean;
 }) {
-  const router = useRouter();
-  const { toast } = useToast();
   // Memoriza las columnas para evitar recalcularlas en cada render
   const memoizedColumns = useMemo(() => {
     const columns = [...columnsDataGridProductList];
@@ -48,33 +44,14 @@ export default function ListProductModular({
         resizable: false,
 
         renderCell: (params: GridRenderCellParams) => (
-          <Link href={`/dashboard/product/${params.row.sku}/edit`}>
-            <Button
-              color="secondary"
-              isIconOnly
-              onClick={() => router.push(``)}
-            >
+          <Link
+            href={`/dashboard/product/${params.row.sku}/edit?provider=${params.row.provider.name}`}
+          >
+            <Button color="secondary" isIconOnly>
               <FilePen className="h-5 w-5 text-muted-foreground" />
             </Button>
           </Link>
         ),
-      });
-    }
-
-    if (cart) {
-      columns.push({
-        field: "add",
-        headerName: "Agregar",
-        type: "actions",
-        resizable: false,
-
-        sortable: false,
-        renderCell: (params: GridRenderCellParams) =>
-          !cart ? (
-            <Spinner color="primary" />
-          ) : (
-            <ButtonAddToCart params={{ id: params.row.sku, cart }} />
-          ),
       });
     }
 
@@ -99,13 +76,12 @@ export default function ListProductModular({
       disableRowSelectionOnClick
       checkboxSelection={isSelectable}
       onRowSelectionModelChange={handleSelectionChange}
-      rowHeight={45}
       initialState={{
         pagination: {
-          paginationModel: { page: 0, pageSize: 10 },
+          paginationModel: { pageSize: 10 },
         },
       }}
-      pageSizeOptions={[10, 20]}
+      pageSizeOptions={[10, 15, 20]}
     />
   );
 }

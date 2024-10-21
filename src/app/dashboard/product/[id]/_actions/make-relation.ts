@@ -12,6 +12,15 @@ export const makeProductRelation = async ({
   productToPublish: ProductType;
   productList: ProductType[];
 }) => {
+  const providersOnSkuInternalService = await axios
+    .get(`${SKU_INTERNAL_SERVICE_URL}/api/providers`)
+    .then((response) => response.data.data)
+    .catch((error) => {
+      console.log("Error:", error);
+    });
+
+  console.log(providersOnSkuInternalService);
+
   // console.log(productList);
   console.log(productToPublish);
   // Make all products if not exist
@@ -37,13 +46,6 @@ export const makeProductRelation = async ({
   if (!product) {
     throw new Error("Product not found");
   }
-
-  const providersOnSkuInternalService = await axios
-    .get(`${SKU_INTERNAL_SERVICE_URL}/api/providers`)
-    .then((response) => response.data.data)
-    .catch((error) => {
-      console.log("Error:", error);
-    });
 
   let bodyRelations: any[] = [];
 
@@ -74,6 +76,15 @@ export const makeProductRelation = async ({
     );
 
     if (!provider) {
+      // Eliminar producto creado
+      await axios
+        .delete(`${SKU_INTERNAL_SERVICE_URL}/api/products/${product.SKU}`, {
+          headers,
+        })
+        .then((response) => response.data)
+        .catch((error) => {
+          console.log("Error:", error);
+        });
       throw new Error("Provider not found");
     }
 

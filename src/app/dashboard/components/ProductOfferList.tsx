@@ -8,7 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import { useEffect } from "react";
 
-export default function ProductOfferList({ cart }: { cart: any }) {
+export default function ProductOfferList({ cart }: { cart?: any }) {
   const {
     mutateAsync: server_getOfferProducts,
     data: dataGetOfferProducts,

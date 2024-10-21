@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 
 import { useToast } from "@/components/ui/use-toast";
+import ToolsProductList from "../ToolsProductList";
 
 export const columnsDataGridProductList: GridColDef[] = [
   {
@@ -45,20 +46,20 @@ export const columnsDataGridProductList: GridColDef[] = [
     minWidth: 300,
     flex: 2,
     resizable: false,
-    renderCell: (params: GridRenderCellParams) => (
-      <div className="flex flex-col h-full w-full justify-center items-start">
-        <HoverCardActions content={params.row.title} />
-        {params.row.estimatedArrivalDate && (
-          <Tooltip
-            title={`Fecha estimada de Arribo ${params.row.estimatedArrivalDate?.getDate()}/${
-              params.row.estimatedArrivalDate?.getMonth() + 1
-            }/${params.row.estimatedArrivalDate?.getFullYear()}`}
-          >
-            <Plane className="text-blue-400" size={18} />
-          </Tooltip>
-        )}
-      </div>
-    ),
+    renderCell: (params: GridRenderCellParams) =>
+      params.row.partNumber[0].partNumber &&
+      params.row.title &&
+      params.row.sku ? (
+        <ToolsProductList
+          title={params.row.title}
+          partNumber={params.row.partNumber[0].partNumber}
+          sku={params.row.sku}
+          price={params.row.price}
+          provider={params.row.provider}
+        />
+      ) : (
+        <span className="text-muted-foreground">N/A</span>
+      ),
   },
   {
     field: "price",
@@ -67,7 +68,7 @@ export const columnsDataGridProductList: GridColDef[] = [
     width: 90,
     resizable: false,
   },
-  // { field: "availability", headerName: "Disponibilidad", width: 120 },
+
   {
     field: "marca",
     headerName: "Marca",
@@ -80,14 +81,21 @@ export const columnsDataGridProductList: GridColDef[] = [
     field: "availability",
     headerName: "Stock",
     type: "string",
-    width: 50,
+    width: 80,
     resizable: false,
-    renderCell: (params: GridRenderCellParams) => {
-      return (
-        <StockStatus
-          stock={params.row.availability as ProductType["availability"]}
-        />
-      );
+    valueFormatter: (value, row, column, apiRef) => {
+      switch (row.availability) {
+        case "in_stock":
+          return "En Stock";
+        case "out_stock":
+          return "Sin Stock";
+        default:
+          return "Sin Stock";
+      }
+    },
+    cellClassName: (params) => {
+      // Aplica la clase CSS basada en el valor formateado
+      return params.value ? "in-stock" : "out-of-stock";
     },
   },
   {
@@ -100,21 +108,21 @@ export const columnsDataGridProductList: GridColDef[] = [
     field: "provider",
     headerName: "Proveedor",
     minWidth: 80,
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.provider ? (
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          className="flex items-center justify-center rounded-md w-full h-full "
-        >
-          <img
-            src={params.row.provider.logoUrl}
-            alt="provider logo"
-            className="  object-cover h-full aspect-square p-2"
-          />
-        </motion.div>
-      ) : (
-        <span className="text-muted-foreground">N/A</span>
-      ),
+    // renderCell: (params: GridRenderCellParams) =>
+    //   params.row.provider ? (
+    //     <motion.div
+    //       whileHover={{ scale: 1.1 }}
+    //       className="flex items-center justify-center rounded-md w-full h-full "
+    //     >
+    //       <img
+    //         src={params.row.provider.logoUrl}
+    //         alt="provider logo"
+    //         className="  object-cover h-full aspect-square p-2"
+    //       />
+    //     </motion.div>
+    //   ) : (
+    //     <span className="text-muted-foreground">N/A</span>
+    //   ),
     valueGetter: (value, row) => {
       return `${row.provider.name || ""}`;
     },
@@ -123,14 +131,13 @@ export const columnsDataGridProductList: GridColDef[] = [
     field: "sku",
     headerName: "SKU",
     flex: 1,
-
     resizable: false,
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.sku ? (
-        <HoverCardActions content={params.row.sku} />
-      ) : (
-        <span className="text-muted-foreground">N/A</span>
-      ),
+    // renderCell: (params: GridRenderCellParams) =>
+    //   params.row.sku ? (
+    //     <HoverCardActions content={params.row.sku} />
+    //   ) : (
+    //     <span className="text-muted-foreground">N/A</span>
+    //   ),
   },
   {
     field: "partNumber",
@@ -138,13 +145,6 @@ export const columnsDataGridProductList: GridColDef[] = [
     minWidth: 120,
     flex: 1,
     resizable: false,
-
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.partNumber[0].partNumber ? (
-        <HoverCardActions content={params.row.partNumber[0].partNumber} />
-      ) : (
-        <span className="text-muted-foreground">N/A</span>
-      ),
     valueGetter: (value, row) => {
       return `${row.partNumber[0].partNumber || ""}`;
     },

@@ -29,6 +29,7 @@ export default function Products() {
 
   useEffect(() => {
     server_getCart();
+    console.log("dataCart update");
   }, []);
   return (
     <motion.div
@@ -50,7 +51,7 @@ export default function Products() {
               <CardDescription>Listado de productos relevantes</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProductRelevantList cart={dataCart} />
+              <ProductRelevantList />
             </CardContent>
           </TabsContent>
           <TabsContent value="offers">
@@ -59,7 +60,7 @@ export default function Products() {
               <CardDescription>Listado de productos en oferta</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProductOfferList cart={dataCart} />
+              <ProductOfferList />
             </CardContent>
           </TabsContent>
           <TabsContent value="featured">
@@ -68,7 +69,7 @@ export default function Products() {
               <CardDescription>Listado de productos destacados</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProductFeaturedList cart={dataCart} />
+              <ProductFeaturedList />
             </CardContent>
           </TabsContent>
         </Card>
