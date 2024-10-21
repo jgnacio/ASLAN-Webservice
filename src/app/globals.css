@@ -59,13 +59,7 @@
   }
 }
 
-.in-stock {
-  color: #379634;
-}
 
-.out-of-stock {
-  color: var(--destructive);
-}
 
 @layer base {
   * {

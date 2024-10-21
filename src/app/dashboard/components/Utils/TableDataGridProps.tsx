@@ -81,21 +81,27 @@ export const columnsDataGridProductList: GridColDef[] = [
     field: "availability",
     headerName: "Stock",
     type: "string",
-    width: 80,
+    width: 90,
     resizable: false,
     valueFormatter: (value, row, column, apiRef) => {
       switch (row.availability) {
         case "in_stock":
           return "En Stock";
-        case "out_stock":
+        case "out_of_stock":
           return "Sin Stock";
         default:
-          return "Sin Stock";
+          return "Consultar";
       }
     },
     cellClassName: (params) => {
       // Aplica la clase CSS basada en el valor formateado
-      return params.value ? "in-stock" : "out-of-stock";
+      if (params.value === "in_stock") {
+        return "text-green-500";
+      } else if (params.value === "out_of_stock") {
+        return "text-red-500";
+      } else {
+        return "text-yellow-500";
+      }
     },
   },
   {
