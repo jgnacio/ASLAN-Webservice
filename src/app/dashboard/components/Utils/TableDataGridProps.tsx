@@ -1,42 +1,5 @@
-import { Product, ProductType } from "@/domain/product/entities/Product";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  GridSlotsComponentsProps,
-} from "@mui/x-data-grid";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
-import Box from "@mui/material/Box";
-import { Spinner } from "@nextui-org/spinner";
-import { motion } from "framer-motion";
-import { getAllProducts } from "../../_actions/get-all-products";
-import { getRelevantProducts } from "../../_actions/get-relevant-products";
-import ButtonAddToCart from "../ButtonAddToCart";
-import { getCart } from "../../cart/_actions/get-cart";
-import { useRouter } from "next/navigation";
-import { Button } from "@nextui-org/button";
-import { FilePen, Plane, PlaneLanding } from "lucide-react";
-import Link from "next/link";
-import HoverCardActions from "../HoverCardActions";
-import StockStatus from "../StockStatus";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip } from "@mui/material";
-import { Badge } from "@/components/ui/badge";
-import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
-import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { useToast } from "@/components/ui/use-toast";
 import ToolsProductList from "../ToolsProductList";
 
 export const columnsDataGridProductList: GridColDef[] = [
@@ -58,7 +21,7 @@ export const columnsDataGridProductList: GridColDef[] = [
           provider={params.row.provider}
         />
       ) : (
-        <span className="text-muted-foreground">N/A</span>
+        <span className="text-muted-foreground">{params.row.title}</span>
       ),
   },
   {
@@ -78,8 +41,15 @@ export const columnsDataGridProductList: GridColDef[] = [
     resizable: false,
   },
   {
-    field: "availability",
+    field: "stock",
     headerName: "Stock",
+    type: "string",
+    width: 50,
+    resizable: false,
+  },
+  {
+    field: "availability",
+    headerName: "Disponibilidad",
     type: "string",
     width: 90,
     resizable: false,
@@ -93,6 +63,7 @@ export const columnsDataGridProductList: GridColDef[] = [
           return "Consultar";
       }
     },
+
     cellClassName: (params) => {
       // Aplica la clase CSS basada en el valor formateado
       if (params.value === "in_stock") {
@@ -104,6 +75,7 @@ export const columnsDataGridProductList: GridColDef[] = [
       }
     },
   },
+
   {
     field: "guaranteeDays",
     headerName: "Garantia",

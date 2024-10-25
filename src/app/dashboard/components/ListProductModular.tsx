@@ -42,7 +42,6 @@ export default function ListProductModular({
         type: "actions",
         sortable: false,
         resizable: false,
-
         renderCell: (params: GridRenderCellParams) => (
           <Link
             href={`/dashboard/product/${params.row.sku}/edit?provider=${params.row.provider.name}`}

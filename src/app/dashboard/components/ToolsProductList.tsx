@@ -25,7 +25,7 @@ export default function ToolsProductList({
       <Tooltip
         title={
           <div className="space-y-1">
-            <span>Part Number: {partNumber}</span>
+            <span>SKU: {sku}</span>
             <Separator />
             <div className="flex h-10 items-center space-x-2 text-sm">
               <Button isIconOnly variant="bordered" color="secondary">
@@ -45,7 +45,7 @@ export default function ToolsProductList({
               <Button isIconOnly variant="bordered" color="secondary">
                 <a
                   target="_blank"
-                  href={`https://www.google.com/search?q=${title}`}
+                  href={`https://www.google.com/search?q=${sku}`}
                 >
                   <SearchIcon />
                 </a>
@@ -65,7 +65,7 @@ export default function ToolsProductList({
               <Button isIconOnly variant="bordered" color="secondary">
                 <a
                   target="_blank"
-                  href={`${provider.searchPageUrl}${encodeURI(title)}`}
+                  href={`${provider.searchPageUrl}${encodeURI(sku)}`}
                 >
                   <Package />
                 </a>
