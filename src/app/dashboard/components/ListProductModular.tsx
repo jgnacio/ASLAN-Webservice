@@ -44,7 +44,9 @@ export default function ListProductModular({
         resizable: false,
         renderCell: (params: GridRenderCellParams) => (
           <Link
-            href={`/dashboard/product/${params.row.sku}/edit?provider=${params.row.provider.name}`}
+            href={`/dashboard/product/${encodeURI(
+              params.row.sku
+            )}/edit?provider=${params.row.provider.name}`}
           >
             <Button color="secondary" isIconOnly>
               <FilePen className="h-5 w-5 text-muted-foreground" />

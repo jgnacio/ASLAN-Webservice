@@ -192,6 +192,7 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
   }
 
   async getBySKU(sku: string): Promise<Product | null> {
+    console.log(sku);
     const skuNumber = parseInt(sku);
     const product = await this.fetchProduct(skuNumber).then((product) => {
       const categoryName = product.title.split(" ")[0];

@@ -2,6 +2,7 @@
 
 import { Product, ProductType } from "@/domain/product/entities/Product";
 import { PCServiceAPIProductAdapter } from "@/Resources/API/PC Service/adapters/PCServiceAPIProductAdapter";
+import { SolutionboxAPIProductAdapter } from "@/Resources/API/Solutionbox/adapters/SolutionboxAPIProductAdapter";
 import { UnicomAPIProductAdapter } from "@/Resources/API/Unicom/adapters/UnicomAPIProductAdapter";
 
 export const getProductBySku = async (
@@ -18,6 +19,13 @@ export const getProductBySku = async (
   } else if (provider === "PC Service") {
     const pcServiceAPIProductAdapter = new PCServiceAPIProductAdapter();
     const product = await pcServiceAPIProductAdapter.getBySKU(sku);
+    if (!product) {
+      return null;
+    }
+    return product.toPlainObject();
+  } else if (provider === "Solutionbox") {
+    const solutionboxAPIProductAdapter = new SolutionboxAPIProductAdapter();
+    const product = await solutionboxAPIProductAdapter.getBySKU(sku);
     if (!product) {
       return null;
     }

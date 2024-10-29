@@ -65,11 +65,11 @@ export default function ResentSales() {
   });
 
   const {
-    mutateAsync: server_getUnicomProductBySku,
-    isPending: isPendingUnicomProductBySku,
-    isSuccess: isSuccessUnicomProductBySku,
-    isError: isErrorUnicomProductBySku,
-    data: dataUnicomProductBySku,
+    mutateAsync: server_getProductBySku,
+    isPending: isPendingProductBySku,
+    isSuccess: isSuccessProductBySku,
+    isError: isErrorProductBySku,
+    data: dataProductBySku,
   } = useMutation({
     mutationFn: ({ sku, provider }: { sku: string; provider: string }) =>
       getProductBySku(sku, provider),
@@ -140,20 +140,39 @@ export default function ResentSales() {
     setProductsUpdated([]);
     for (const product of dataProductsAdminstrated) {
       setIsLoading(true);
+      console.log("product", product);
       const totalPercentage = 100 / dataProductsAdminstrated.length;
 
       for (const relation of product.relations) {
         const resultAslan = await server_getProductAslanBySku(
           relation.SKU_Relation
         );
-        const resultUnicom = await server_getUnicomProductBySku(
-          relation.sku_provider
-        );
 
-        if (resultAslan && resultUnicom) {
+        let providerName = "Unicom";
+
+        switch (relation.ID_Provider) {
+          case 1:
+            providerName = "Unicom";
+            break;
+          case 2:
+            providerName = "PC Service";
+            break;
+          case 3:
+            providerName = "Solutionbox";
+            break;
+          default:
+            break;
+        }
+        console.log("providerName", providerName);
+        const resultProduct = await server_getProductBySku({
+          sku: relation.sku_provider,
+          provider: providerName,
+        });
+
+        if (resultAslan && resultProduct) {
           let actualStatus = resultAslan.status;
           if (
-            resultUnicom.availability !== "in_stock" &&
+            resultProduct.availability !== "in_stock" &&
             resultAslan.status !== "draft"
           ) {
             // Actualizar stock en Aslan
@@ -162,7 +181,7 @@ export default function ResentSales() {
           }
 
           if (
-            resultUnicom.availability === "in_stock" &&
+            resultProduct.availability === "in_stock" &&
             resultAslan.status === "draft"
           ) {
             // Actualizar stock en Aslan
@@ -174,16 +193,16 @@ export default function ResentSales() {
             {
               id: resultAslan.id,
               title: resultAslan.name,
-              marca: resultUnicom.marca,
-              stock: resultUnicom.stock,
-              guaranteeDays: resultUnicom.guaranteeDays || 0,
+              marca: resultProduct.marca,
+              stock: resultProduct.stock,
+              guaranteeDays: resultProduct.guaranteeDays || 0,
               sku: resultAslan.sku,
-              priceProvider: resultUnicom.price,
+              priceProvider: resultProduct.price,
               price: resultAslan.price,
-              partNumber: resultUnicom.partNumber
-                ? resultUnicom.partNumber[0].partNumber
+              partNumber: resultProduct.partNumber
+                ? resultProduct.partNumber[0].partNumber
                 : "",
-              availability: resultUnicom.availability,
+              availability: resultProduct.availability,
               aslanPrevStatus: resultAslan.status,
               aslanActualStatus: actualStatus,
             },

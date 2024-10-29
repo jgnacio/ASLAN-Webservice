@@ -132,11 +132,13 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     },
   },
   {
-    field: "guaranteeDays",
-    headerName: "Garantia",
+    field: "stock",
+    headerName: "Stock",
     type: "number",
     width: 70,
+    resizable: false,
   },
+
   {
     field: "sku",
     headerName: "SKU Interno",

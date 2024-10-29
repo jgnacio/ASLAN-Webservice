@@ -112,7 +112,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
         return res.json();
       })
       .catch((error) => {
-        console.error("Error:", error);
+        // console.error("Error:", error);
         return null;
       });
 

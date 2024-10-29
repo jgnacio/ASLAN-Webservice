@@ -44,6 +44,7 @@ export class AslanWooAPI {
   public static async getProductBySku(sku: string): Promise<any> {
     try {
       const api = AslanWooAPI.getInstance();
+
       const response = await api.get("products", {
         sku, // Parámetro de búsqueda por SKU
       });
@@ -51,6 +52,8 @@ export class AslanWooAPI {
       const exactProduct = response.data.find(
         (product: any) => product.sku === sku
       );
+
+      console.log("exactProduct", exactProduct);
 
       if (!exactProduct) {
         throw new Error(`No product found with SKU: ${sku}`);

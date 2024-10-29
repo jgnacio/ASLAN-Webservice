@@ -145,7 +145,10 @@ export class SolutionboxAPIProductAdapter implements IProductRepository {
           units_x_box: 1,
         },
       ],
-      category: product.category,
+      category: {
+        id: "Solutionbox",
+        name: "Solutionbox",
+      },
       images: product.images,
       submitDate: product.submitDate,
       availability: product.availability,
