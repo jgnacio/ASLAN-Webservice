@@ -165,6 +165,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
         partNumber: mappedPartnumbers,
         sku: response.codigo || "",
         price: response.precio || 0,
+        priceHistory: [],
         title: response.producto || "",
         description: response.descripcion || "",
         images: [],
@@ -394,6 +395,7 @@ export class UnicomAPIProductAdapter implements IProductRepository {
               item.costo ||
               item.precio_bonificado ||
               item.costo_bonificado,
+            priceHistory: [],
             partNumber: mappedPartnumber,
             description: item.descripcion || "",
             provider: logoUnicom,

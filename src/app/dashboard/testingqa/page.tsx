@@ -3,6 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { getFeaturedProductsByPage } from "../_actions/get-featured-products";
 import { Button } from "@nextui-org/button";
 import { unicom_getToken } from "./_actions/unicom-get-token";
+import { getProductsByProvider } from "./_actions/get-products-by-provider";
+import ListProductModular from "../components/ListProductModular";
 
 export default function TestingQA() {
   const {
@@ -12,6 +14,16 @@ export default function TestingQA() {
     data: featuredProductsData,
   } = useMutation({
     mutationFn: getFeaturedProductsByPage,
+  });
+
+  const {
+    mutateAsync: server_getProductsByProvider,
+    isPending: isServer_getProductsByProviderPending,
+    isSuccess: isServer_getProductsByProviderSuccess,
+    data: productsByProviderData,
+  } = useMutation({
+    mutationFn: ({ provider }: { provider: string }) =>
+      getProductsByProvider(provider),
   });
 
   const {
@@ -31,6 +43,12 @@ export default function TestingQA() {
     console.log(await server_getToken());
   };
 
+  const handleGetProductsByProvider = async () => {
+    console.log(
+      await server_getProductsByProvider({ provider: "Solutionbox" })
+    );
+  };
+
   return (
     <div>
       <h1>Testing QA</h1>
@@ -46,6 +64,13 @@ export default function TestingQA() {
       {getTokenPending && <p>Loading...</p>}
       {getTokenSuccess && <p>Success</p>}
       {getTokenError && <p>Error</p>}
+
+      <br />
+      <Button onClick={handleGetProductsByProvider}>
+        Get Products By Provider PC Service
+      </Button>
+
+      <ListProductModular productsRows={productsByProviderData} />
     </div>
   );
 }

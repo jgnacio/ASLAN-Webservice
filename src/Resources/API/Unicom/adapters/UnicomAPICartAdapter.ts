@@ -146,6 +146,7 @@ export class UnicomAPICartAdapter implements ICartRepository {
     const newProduct = new CartProduct({
       sku: codigo_articulo || "",
       price: costo_unitario || 0,
+      priceHistory: [],
       quantity: cantidad,
       tax: iva_unitario,
       title: descripcion || "",

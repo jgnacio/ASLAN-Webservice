@@ -1,5 +1,6 @@
 import { Product, Provider } from "@/domain/product/entities/Product";
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
+import { getDateInYYYY } from "@/lib/functions/DateFunctions";
 import axios from "axios";
 import {
   PCServiceProductByDate,
@@ -11,7 +12,7 @@ import {
   PCServiceCategoryCodeType,
 } from "../PCServiceAPIRequest";
 import { PCServiceAPITokenAdapter } from "./PCServiceAPITokenAdapter";
-import { getDateInYYYY } from "@/lib/functions/DateFunctions";
+
 type Request = {
   body?: any;
   route: string;
@@ -251,6 +252,7 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
       title: product.title,
       description: product.body,
       price: product.price.price,
+      priceHistory: [],
       provider: logoPCService,
       category: {
         id: category.code.toString(),

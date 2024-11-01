@@ -7,10 +7,12 @@ export interface IProductRepository {
     request,
     page,
     category,
+    provider,
   }: {
     request?: UnicomAPIProductRequest;
     page?: number;
     category?: string;
+    provider?: string;
   }): Promise<Product[]>;
   getByCategory(category: string): Promise<Product[]>;
   getFeatured(request?: UnicomAPIProductRequest): Promise<Product[]>;

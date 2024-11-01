@@ -3,6 +3,7 @@ export function ProductObjToClass(product: ProductType): Product {
   return new Product({
     title: product.title,
     price: product.price,
+    priceHistory: product.priceHistory,
     partNumber: product.partNumber,
     sku: product.sku,
     description: product.description,
@@ -25,6 +26,7 @@ export function ProductClassToObj(product: Product): ProductType {
     id: product.id,
     title: product.title,
     price: product.price,
+    priceHistory: product.priceHistory,
     partNumber: product.partNumber,
     sku: product.getSku(),
     description: product.description,

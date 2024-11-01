@@ -134,6 +134,7 @@ export class SolutionboxAPIProductAdapter implements IProductRepository {
       title: product.title,
       description: product.description || "",
       price: product.price,
+      priceHistory: [],
       sku: product.sku,
       stock: product.stock,
       marca: product.marca,

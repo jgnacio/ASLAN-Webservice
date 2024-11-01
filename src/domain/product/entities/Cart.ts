@@ -1,4 +1,4 @@
-import { Product, ProductCategory, ProductType } from "./Product";
+import { PriceHistory, Product, ProductCategory, ProductType } from "./Product";
 import { v4 as uuid } from "uuid";
 export class Cart {
   private static instance: Cart;
@@ -265,6 +265,7 @@ export class CartProduct extends Product {
     quantity?: number;
     sku: string;
     price: number;
+    priceHistory: PriceHistory[];
     title: string;
     description: string;
     images: string[];

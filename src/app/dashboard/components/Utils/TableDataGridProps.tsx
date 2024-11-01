@@ -10,6 +10,7 @@ export const columnsDataGridProductList: GridColDef[] = [
     flex: 2,
     resizable: false,
     renderCell: (params: GridRenderCellParams) =>
+      params.row.partNumber[0] &&
       params.row.partNumber[0].partNumber &&
       params.row.title &&
       params.row.sku ? (
@@ -23,6 +24,44 @@ export const columnsDataGridProductList: GridColDef[] = [
       ) : (
         <span className="text-muted-foreground">{params.row.title}</span>
       ),
+  },
+  {
+    field: "priceHistory",
+    headerName: "▲▼",
+    type: "number",
+    width: 80,
+    resizable: false,
+    valueFormatter: (value, row, column, apiRef) => {
+      if (row.priceHistory.length > 0) {
+        const previousPrice = row.priceHistory[0].previousPrice;
+        const actualPrice = row.price;
+        if (previousPrice > actualPrice) {
+          // Porcentaje de cambio
+          return `▼${Math.round(
+            ((previousPrice - actualPrice) / previousPrice) * 100
+          )}%  ${previousPrice}U$D`;
+        } else {
+          return `▲${Math.round(
+            ((actualPrice - previousPrice) / previousPrice) * 100
+          )}%  ${previousPrice}U$D`;
+        }
+      } else {
+        return " - ";
+      }
+    },
+    cellClassName: (params) => {
+      // Aplica la clase CSS basada en el valor formateado
+      if (params.row.priceHistory.length > 0) {
+        const previousPrice = params.row.priceHistory[0].previousPrice;
+        const actualPrice = params.row.price;
+        if (previousPrice < actualPrice) {
+          return "text-red-500";
+        } else {
+          return "text-green-500";
+        }
+      }
+      return "text-muted-foreground";
+    },
   },
   {
     field: "price",
