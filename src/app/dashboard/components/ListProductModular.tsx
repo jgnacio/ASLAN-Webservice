@@ -81,6 +81,14 @@ export default function ListProductModular({
         pagination: {
           paginationModel: { pageSize: 10 },
         },
+        sorting: {
+          sortModel: [
+            {
+              field: "priceHistory",
+              sort: "desc",
+            },
+          ],
+        },
       }}
       pageSizeOptions={[10, 15, 20]}
     />

@@ -6,7 +6,7 @@ export const columnsDataGridProductList: GridColDef[] = [
   {
     field: "title",
     headerName: "Producto",
-    minWidth: 300,
+    minWidth: 290,
     flex: 2,
     resizable: false,
     renderCell: (params: GridRenderCellParams) =>
@@ -61,6 +61,18 @@ export const columnsDataGridProductList: GridColDef[] = [
         }
       }
       return "text-muted-foreground";
+    },
+    valueGetter: (value, row) => {
+      if (row.priceHistory.length > 0) {
+        const previousPrice = row.priceHistory[0].previousPrice;
+        const actualPrice = row.price;
+        const percentageChange =
+          previousPrice > actualPrice
+            ? -Math.round(((previousPrice - actualPrice) / previousPrice) * 100)
+            : Math.round(((actualPrice - previousPrice) / previousPrice) * 100);
+        return percentageChange;
+      }
+      return null;
     },
   },
   {
@@ -163,7 +175,7 @@ export const columnsDataGridProductList: GridColDef[] = [
     flex: 1,
     resizable: false,
     valueGetter: (value, row) => {
-      return `${row.partNumber[0].partNumber || ""}`;
+      return `${row.partNumber || ""}`;
     },
   },
 ];

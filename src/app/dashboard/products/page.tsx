@@ -15,6 +15,7 @@ import { getCart } from "../cart/_actions/get-cart";
 import { ProductFeaturedList } from "../components/ProductFeaturedList";
 import ProductOfferList from "../components/ProductOfferList";
 import ProductRelevantList from "../components/ProductRelevantList";
+import ProductSearchEngine from "../components/ProductSearchEngine";
 
 export default function Products() {
   const {
@@ -38,7 +39,7 @@ export default function Products() {
       exit={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.4 }}
     >
-      <Tabs defaultValue="featured">
+      <Tabs defaultValue="relevant">
         <TabsList>
           <TabsTrigger value="featured">Destacados</TabsTrigger>
           <TabsTrigger value="relevant">Relevantes</TabsTrigger>
@@ -51,7 +52,7 @@ export default function Products() {
               <CardDescription>Listado de productos relevantes</CardDescription>
             </CardHeader>
             <CardContent>
-              <ProductRelevantList />
+              <ProductSearchEngine />
             </CardContent>
           </TabsContent>
           <TabsContent value="offers">

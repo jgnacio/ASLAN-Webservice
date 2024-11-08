@@ -6,7 +6,9 @@ import { ProductCacheProductAdapter } from "@/Resources/API/ProductCache/adapter
 export const getProductsByProvider = async (
   provider: string
 ): Promise<ProductType[]> => {
-  const products = await new ProductCacheProductAdapter().getAll({ provider });
+  const products = await new ProductCacheProductAdapter().getByProvider(
+    provider
+  );
 
   const productObj: ProductType[] = products.map((product) => {
     return ProductClassToObj(product);
