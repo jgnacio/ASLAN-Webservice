@@ -27,6 +27,8 @@ export default function ToolsProductList({
           <div className="space-y-1">
             <span>SKU: {sku}</span>
             <Separator />
+            <span>Provider: {provider.name}</span>
+            <Separator />
             <div className="flex h-10 items-center space-x-2 text-sm">
               <Button isIconOnly variant="bordered" color="secondary">
                 <Clipboard

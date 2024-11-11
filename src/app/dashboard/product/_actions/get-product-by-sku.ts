@@ -16,7 +16,7 @@ export const getProductBySku = async (
       return null;
     }
     return product.toPlainObject();
-  } else if (provider === "PC Service") {
+  } else if (provider === "PCService") {
     const pcServiceAPIProductAdapter = new PCServiceAPIProductAdapter();
     const product = await pcServiceAPIProductAdapter.getBySKU(sku);
     if (!product) {

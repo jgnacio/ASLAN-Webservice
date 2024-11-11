@@ -30,7 +30,6 @@ export default function Products() {
 
   useEffect(() => {
     server_getCart();
-    console.log("dataCart update");
   }, []);
   return (
     <motion.div

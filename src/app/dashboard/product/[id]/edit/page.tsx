@@ -15,6 +15,7 @@ export default function EditProduct({ params }: { params: { id: string } }) {
     data: product,
     isPending,
     isError,
+    isSuccess,
   } = useQuery({
     queryKey: ["product", params.id],
     queryFn: () =>
@@ -22,14 +23,15 @@ export default function EditProduct({ params }: { params: { id: string } }) {
   });
 
   useEffect(() => {
-    if (product) {
-      console.log(product);
-    }
+    console.log(product);
   }, [product]);
+
   return (
     <Card className="bg-transparent border-0">
       <CardContent>
-        {product ? <ProductEdit product={product} /> : <Spinner />}
+        {isPending && <Spinner />}
+        {isError && <div>Error</div>}
+        {isSuccess && product && <ProductEdit product={product} />}
       </CardContent>
     </Card>
   );

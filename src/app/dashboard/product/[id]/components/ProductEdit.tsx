@@ -61,7 +61,7 @@ import { useEffect, useState } from "react";
 import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
 import { validateFormData } from "@/lib/Utils/validation";
 import { Spinner } from "@nextui-org/spinner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -79,6 +79,8 @@ import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/Unico
 import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
 import { v4 as uuidv4 } from "uuid";
 import { ImplementProviders } from "@/Resources/API/config";
+import { getAllProductCached } from "@/app/dashboard/_actions/get-all-product-cached";
+import { findSimilarProducts } from "@/lib/functions/ProductFunctions";
 
 export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
@@ -154,10 +156,8 @@ export function ProductEdit({ product }: { product: ProductType }) {
     isSuccess: isSuccessGetCachedProducts,
     isPending: isPendingGetCachedProducts,
   } = useMutation({
-    mutationFn: () => getCachedProducts(),
-    onSuccess: () => {
-      console.log("Productos Obtenidos");
-    },
+    mutationFn: () => getAllProductCached(),
+
     onError: (error) => {
       toast({
         title: "Error",
@@ -408,51 +408,19 @@ export function ProductEdit({ product }: { product: ProductType }) {
 
   const handleFindProduct = async () => {
     // Buscar el producto en la base de datos de ASLAN
-    // Buscar el producto en los proveedores
-    const cachedProducts = await server_getCachedProducts();
-    const allProductsList = cachedProducts.data;
+    const matchs = await findSimilarProducts(
+      productState,
+      server_getCachedProducts
+    );
 
-    let similarProducts = [] as ProductType[];
-    let identifiedProducts = [] as ProductType[];
+    setFindedProducts([
+      ...matchs.identifiedProducts,
+      ...matchs.similarProducts,
+    ]);
 
-    // Buscar productos similares
-    const titleSplit = product.title.split(" ");
-
-    for (const product of allProductsList) {
-      // Si el producto es el mismo, no lo añadas
-      if (
-        product.title === productState.title &&
-        product.sku === productState.sku &&
-        product.partNumber === productState.partNumber
-      ) {
-        continue;
-      }
-
-      if (product.sku === productState.sku) {
-        identifiedProducts.push(product);
-      } else if (product.title === productState.title) {
-        similarProducts.push(product);
-      } else {
-        const titleSplitProduct = product.title.split(" ");
-        const similar = titleSplit.filter((word) =>
-          titleSplitProduct.includes(word)
-        );
-        if (similar.length > 4) {
-          similarProducts.push(product);
-        }
-      }
-    }
-
-    // if (identifiedProducts.length > 0) {
-    //   setFindedProducts(identifiedProducts);
-    // }
+    console.log(typeof matchs);
+    console.log(matchs);
   };
-
-  useEffect(() => {
-    if (productsSelected) {
-      console.log(productsSelected);
-    }
-  }, [productsSelected]);
 
   const handleChangeProductToAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -494,12 +462,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
       });
     }
   };
-
-  useEffect(() => {
-    if (productToAdd) {
-      console.log(productToAdd);
-    }
-  }, [productToAdd]);
 
   return (
     <div className="mx-auto grid max-w-[70vw] flex-1 auto-rows-max gap-4">
@@ -591,43 +553,28 @@ export function ProductEdit({ product }: { product: ProductType }) {
           </Card>
         </div>
         <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
-          <Card x-chunk="dashboard-07-chunk-3">
+          <Card x-chunk="dashboard-07-chunk-1">
             <CardHeader>
-              <CardTitle>Estado del Producto</CardTitle>
+              <CardTitle>Precio</CardTitle>
+              <CardDescription>
+                Modifica el precio del producto antes de publicarlo en ASLAN.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="publishState">Estado</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      setProductState({
-                        ...productState,
-                        publishState: value,
-                      });
-                    }}
-                    value={productState.publishState}
-                    defaultValue="draft"
-                  >
-                    <SelectTrigger
-                      id="publishState"
-                      aria-label="Selecciona el estado"
-                    >
-                      <SelectValue placeholder="Selecciona el estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Borrador</SelectItem>
-                      <SelectItem disabled value="published">
-                        Publico
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+            <CardContent className="flex gap-4 items-center">
+              <Input
+                id="price"
+                type="number"
+                onChange={handleProductChange}
+                value={productState.price === 0 ? "" : productState.price}
+                className="w-full "
+              />
+              <span>U$D</span>
             </CardContent>
           </Card>
-
-          <Card x-chunk="dashboard-07-chunk-1">
+          <Card
+            x-chunk="dashboard-07-chunk-1"
+            className="border-3 border-blue-400"
+          >
             <CardHeader>
               <CardTitle>Relacionar Producto</CardTitle>
               <CardDescription>
@@ -661,6 +608,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                         setProductRows={setFindedProducts}
                         productsSelected={productsSelected}
                         setProductsSelected={setProductsSelected}
+                        pageSize={3}
                       />
                     )}
                     {/* <AddProductRelation /> */}
@@ -678,7 +626,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
                             },
                           ];
                         });
-                        console.log(productToAdd);
                         setFindedProducts((prevState: any) => {
                           return [
                             ...prevState,
@@ -773,7 +720,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
                                   );
                                 if (category) {
                                   setCategory(category);
-                                  console.log("category", category);
                                 }
                               }}
                             >
@@ -880,10 +826,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
           <Card x-chunk="dashboard-07-chunk-1">
             <CardHeader>
               <CardTitle>Identificadores</CardTitle>
-              <CardDescription>
-                Modifica los identificadores del producto antes de publicarlo en
-                ASLAN.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -1062,43 +1004,39 @@ export function ProductEdit({ product }: { product: ProductType }) {
               </div>
             </CardContent>
           </Card>
-
-          <Card x-chunk="dashboard-07-chunk-1">
+          <Card x-chunk="dashboard-07-chunk-3">
             <CardHeader>
-              <CardTitle>Precio</CardTitle>
-              <CardDescription>
-                Modifica el precio del producto antes de publicarlo en ASLAN.
-              </CardDescription>
+              <CardTitle>Estado del Producto</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[20rem]">
-                      Precio a Publicar
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="flex items-center gap-4 flex-1">
-                      <Label htmlFor="price" className="sr-only">
-                        Precio a Publicar
-                      </Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        onChange={handleProductChange}
-                        value={
-                          productState.price === 0 ? "" : productState.price
-                        }
-                        className="w-full "
-                      />
-                      U$D
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <div className="grid gap-6">
+                <div className="grid gap-3">
+                  <Label htmlFor="publishState">Estado</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      setProductState({
+                        ...productState,
+                        publishState: value,
+                      });
+                    }}
+                    value={productState.publishState}
+                    defaultValue="draft"
+                  >
+                    <SelectTrigger
+                      id="publishState"
+                      aria-label="Selecciona el estado"
+                    >
+                      <SelectValue placeholder="Selecciona el estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Borrador</SelectItem>
+                      <SelectItem disabled value="published">
+                        Publico
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

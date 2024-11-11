@@ -5,7 +5,7 @@ import {
   GridRenderCellParams,
   GridRowSelectionModel,
 } from "@mui/x-data-grid";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
@@ -22,6 +22,7 @@ export default function ListProductModular({
   productsSelected = [],
   setProductsSelected,
   isSelectable = false,
+  pageSize = 10,
 }: {
   productsRows: ProductType[] | undefined;
   cart?: any;
@@ -30,6 +31,7 @@ export default function ListProductModular({
   productsSelected?: ProductType[];
   setProductsSelected?: Function;
   isSelectable?: boolean;
+  pageSize?: number;
 }) {
   // Memoriza las columnas para evitar recalcularlas en cada render
   const memoizedColumns = useMemo(() => {
@@ -70,6 +72,10 @@ export default function ListProductModular({
     setProductsSelected(selectedItems); // Actualiza el estado con los productos seleccionados
   };
 
+  useEffect(() => {
+    console.log(productsRows);
+  }, []);
+
   return (
     <DataGrid
       rows={productsRows}
@@ -79,7 +85,7 @@ export default function ListProductModular({
       onRowSelectionModelChange={handleSelectionChange}
       initialState={{
         pagination: {
-          paginationModel: { pageSize: 10 },
+          paginationModel: { pageSize: pageSize },
         },
         sorting: {
           sortModel: [
@@ -90,7 +96,7 @@ export default function ListProductModular({
           ],
         },
       }}
-      pageSizeOptions={[10, 15, 20]}
+      pageSizeOptions={[pageSize, pageSize * 2, pageSize * 3]}
     />
   );
 }

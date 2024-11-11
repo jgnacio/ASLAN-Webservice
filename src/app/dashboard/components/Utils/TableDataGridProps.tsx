@@ -10,10 +10,7 @@ export const columnsDataGridProductList: GridColDef[] = [
     flex: 2,
     resizable: false,
     renderCell: (params: GridRenderCellParams) =>
-      params.row.partNumber[0] &&
-      params.row.partNumber[0].partNumber &&
-      params.row.title &&
-      params.row.sku ? (
+      params.row.partNumber && params.row.title && params.row.sku ? (
         <ToolsProductList
           title={params.row.title}
           partNumber={params.row.partNumber[0].partNumber}
@@ -46,7 +43,7 @@ export const columnsDataGridProductList: GridColDef[] = [
           )}%  ${previousPrice}U$D`;
         }
       } else {
-        return " - ";
+        return "";
       }
     },
     cellClassName: (params) => {
@@ -68,8 +65,10 @@ export const columnsDataGridProductList: GridColDef[] = [
         const actualPrice = row.price;
         const percentageChange =
           previousPrice > actualPrice
-            ? -Math.round(((previousPrice - actualPrice) / previousPrice) * 100)
-            : Math.round(((actualPrice - previousPrice) / previousPrice) * 100);
+            ? Math.round(((previousPrice - actualPrice) / previousPrice) * 100)
+            : -Math.round(
+                ((actualPrice - previousPrice) / previousPrice) * 100
+              );
         return percentageChange;
       }
       return null;
