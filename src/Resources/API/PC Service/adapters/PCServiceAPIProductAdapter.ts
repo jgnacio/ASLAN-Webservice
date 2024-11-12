@@ -41,7 +41,7 @@ type FetchProductsParams =
   | FetchProductsRequest;
 
 export const logoPCService: Provider = {
-  name: "PC Service",
+  name: "PCService",
   mainPageUrl: "https://www.pcservice.com.uy/",
   searchPageUrl:
     "https://www.pcservice.com.uy/others/PCsResults.jsp?queryref=17031901&reforderby=relev&querypage=1&searchstr=",

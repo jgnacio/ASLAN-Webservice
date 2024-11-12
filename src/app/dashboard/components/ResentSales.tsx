@@ -155,7 +155,7 @@ export default function ResentSales() {
             providerName = "Unicom";
             break;
           case 2:
-            providerName = "PC Service";
+            providerName = "PCService";
             break;
           case 3:
             providerName = "Solutionbox";
