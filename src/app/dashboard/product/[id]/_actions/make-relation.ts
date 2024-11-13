@@ -19,10 +19,6 @@ export const makeProductRelation = async ({
       console.log("Error:", error);
     });
 
-  console.log(providersOnSkuInternalService);
-
-  // console.log(productList);
-  console.log(productToPublish);
   // Make all products if not exist
   const body = {
     title: productToPublish.title,

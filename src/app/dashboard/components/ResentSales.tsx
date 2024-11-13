@@ -35,10 +35,12 @@ import { getProductBySku } from "../product/_actions/get-product-by-sku";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 import { getOrdersWoocomerce } from "../_actions/get-orders-woocomerce";
 import ListOrders from "./ListOrders";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ResentSales() {
+  const { toast } = useToast();
   const router = useRouter();
-  const [loadingPercentage, setLoadingPercentage] = useState(0);
+  const [loadingPercentage, setLoadingPercentage] = useState<number>(0);
   const [productsUpdated, setProductsUpdated] = useState<
     ProductsUpdatedDashboard[]
   >([]);
@@ -134,22 +136,25 @@ export default function ResentSales() {
       flex: 1,
     },
   ];
-
   const handleUpdateStock = async () => {
     setLoadingPercentage(0);
     setProductsUpdated([]);
-    for (const product of dataProductsAdminstrated) {
-      setIsLoading(true);
-      console.log("product", product);
-      const totalPercentage = 100 / dataProductsAdminstrated.length;
+    setIsLoading(true);
 
+    const totalRelations = dataProductsAdminstrated
+      .map((product: any) => product.relations.length)
+      .reduce((a: any, b: any) => a + b, 0);
+
+    // Calcula cuánto porcentaje representa cada relación individual
+    const incrementPerRelation = 100 / totalRelations;
+
+    for (const product of dataProductsAdminstrated) {
       for (const relation of product.relations) {
         const resultAslan = await server_getProductAslanBySku(
           relation.SKU_Relation
         );
 
         let providerName = "Unicom";
-
         switch (relation.ID_Provider) {
           case 1:
             providerName = "Unicom";
@@ -163,7 +168,7 @@ export default function ResentSales() {
           default:
             break;
         }
-        console.log("providerName", providerName);
+
         const resultProduct = await server_getProductBySku({
           sku: relation.sku_provider,
           provider: providerName,
@@ -171,12 +176,12 @@ export default function ResentSales() {
 
         if (resultAslan && resultProduct) {
           let actualStatus = resultAslan.status;
+
           if (
             resultProduct.availability !== "in_stock" &&
             resultAslan.status !== "draft"
           ) {
-            // Actualizar stock en Aslan
-            server_removeProductFromCatalog(resultAslan.id);
+            await server_removeProductFromCatalog(resultAslan.id);
             actualStatus = "draft";
           }
 
@@ -185,9 +190,10 @@ export default function ResentSales() {
             resultAslan.status === "draft"
           ) {
             // Actualizar stock en Aslan
-            // server_productBackToTheCatalog(resultAslan.id);
+            // await server_productBackToTheCatalog(resultAslan.id);
             // actualStatus = "publish";
           }
+
           setProductsUpdated((prev) => [
             ...prev,
             {
@@ -207,12 +213,22 @@ export default function ResentSales() {
               aslanActualStatus: actualStatus,
             },
           ]);
+        } else {
+          toast({
+            title: "Error",
+            description: `No se encontró el producto ${relation.sku_provider} en el proveedor ${providerName}`,
+            variant: "destructive",
+          });
         }
-        setLoadingPercentage((prev) => prev + totalPercentage);
-      }
 
-      setIsLoading(false);
+        // Incrementar el porcentaje de carga después de cada relación procesada
+        setLoadingPercentage((prev) =>
+          Math.min(prev + incrementPerRelation, 100)
+        );
+      }
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -235,7 +251,11 @@ export default function ResentSales() {
               </div>
               <div className="flex items-center space-x-4">
                 {loadingPercentage !== 0 ? (
-                  <p className="text-xs text-muted-foreground">{`${loadingPercentage}%  ${productsUpdated.length}/${dataProductsAdminstrated.length}
+                  <p className="text-xs text-muted-foreground">{`${loadingPercentage.toFixed(
+                    2
+                  )}%  ${productsUpdated.length}/${dataProductsAdminstrated
+                    .map((product: any) => product.relations.length)
+                    .reduce((a: any, b: any) => a + b, 0)}
                      `}</p>
                 ) : (
                   ""

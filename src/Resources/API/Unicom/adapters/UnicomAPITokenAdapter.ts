@@ -47,7 +47,6 @@ export class UnicomAPITokenAdapter implements IAPITokenRepository {
           },
         })
         .then((response) => response.data);
-      console.log(response);
       return {
         mensaje: response.mensaje,
         token: response.token,
@@ -55,30 +54,33 @@ export class UnicomAPITokenAdapter implements IAPITokenRepository {
       };
     } catch (error: any) {
       if (error.response) {
-        if (error.response.data.message.codigo === -2) {
-          const body = {
-            usuario: ASLAN_WEB_UNICOM_USERNAME,
-            password: ASLAN_WEB_UNICOM_PASSWORD2,
-            usuario_api: ASLAN_API_UNICOM_USERNAME,
-          };
-          try {
-            const response = await axios
-              .put(`${this.URL}/token`, body, {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
-              .then((response) => response.data);
-            return {
-              mensaje: response.mensaje,
-              token: response.token,
-              vencimiento: response.vencimiento,
+        if (error.response.data.message) {
+          if (error.response.data.message.codigo === -2) {
+            const body = {
+              usuario: ASLAN_WEB_UNICOM_USERNAME,
+              password: ASLAN_WEB_UNICOM_PASSWORD2,
+              usuario_api: ASLAN_API_UNICOM_USERNAME,
             };
-          } catch (error: any) {
-            console.error("Error al obtener el token", error);
-            return null;
+            try {
+              const response = await axios
+                .put(`${this.URL}/token`, body, {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                })
+                .then((response) => response.data);
+              return {
+                mensaje: response.mensaje,
+                token: response.token,
+                vencimiento: response.vencimiento,
+              };
+            } catch (error: any) {
+              console.error("Error al obtener el token", error);
+              return null;
+            }
           }
         }
+        console.error("Error al obtener el token", error);
       }
     }
     return { mensaje: "", token: "", vencimiento: 0 };
@@ -87,10 +89,10 @@ export class UnicomAPITokenAdapter implements IAPITokenRepository {
   async getToken(): Promise<IToken> {
     if (UnicomAPITokenAdapter.TOKEN.expiration < Date.now()) {
       const tokenData = await this.fetchToken();
+
       if (!tokenData) {
         throw new Error("Error al obtener el token");
       }
-      console.log(tokenData.vencimiento);
       this.setToken(tokenData.token, new Date(tokenData.vencimiento).getTime());
       return UnicomAPITokenAdapter.TOKEN;
     } else {

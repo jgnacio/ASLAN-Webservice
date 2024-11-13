@@ -27,9 +27,15 @@ import {
 import { UnicomAPIProductDetailResponse } from "../entities/Product/UnicomAPIProductDetailResponse";
 import { UnicomAPIProductDetailRequest } from "../entities/Product/UnicomAPIProductDetailRequest";
 import axios from "axios";
+import { UnicomAPITokenAdapter } from "./UnicomAPITokenAdapter";
 
 const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
+
+interface Token {
+  token: string;
+  expiration: number;
+}
 
 export const logoUnicom: Provider = {
   name: "Unicom",
@@ -60,12 +66,15 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     | UnicomAPIPreAssembledPC[]
     | null
   > {
+    const unicomTokenAPIAdapter = new UnicomAPITokenAdapter();
+
+    const token = await unicomTokenAPIAdapter.getToken();
     const response = await axios({
       method,
       url: this.baseUrl + route,
       headers: {
         "content-type": "application/json",
-        authorization: "Bearer " + this.token,
+        authorization: "Bearer " + token.token,
       },
       data: JSON.stringify(body),
     })
@@ -93,13 +102,17 @@ export class UnicomAPIProductAdapter implements IProductRepository {
     body?: UnicomAPIProductDetailRequest;
     method?: string;
   }): Promise<UnicomAPIProductDetailResponse | null> {
+    const unicomTokenAPIAdapter = new UnicomAPITokenAdapter();
+
+    const token = await unicomTokenAPIAdapter.getToken();
+
     const response: UnicomAPIProductDetailResponse = await fetch(
       this.baseUrl + route,
       {
         method,
         headers: {
           "content-type": "application/json",
-          authorization: "Bearer " + this.token,
+          authorization: "Bearer " + token.token,
         },
         body: JSON.stringify(body),
       }
