@@ -22,10 +22,6 @@ export default function EditProduct({ params }: { params: { id: string } }) {
       getProductBySku(params.id, searchParams?.get("provider") || ""),
   });
 
-  useEffect(() => {
-    console.log(product);
-  }, [product]);
-
   return (
     <Card className="bg-transparent border-0">
       <CardContent>

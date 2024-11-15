@@ -2,9 +2,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Tooltip } from "@mui/material";
-import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import { Button } from "@nextui-org/button";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect } from "react";
 import { getProductsAdministrated } from "./_actions/get-product-administrated";
@@ -12,6 +12,7 @@ import { Spinner } from "@nextui-org/spinner";
 import { columnsListProductsAdministrated } from "../components/Utils/columsListProductsAdministrated";
 import { useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { deleteProductRelation } from "./_actions/delete-product-relation";
 
 export default function Page() {
   const { toast } = useToast();
@@ -26,38 +27,8 @@ export default function Page() {
     queryFn: () => getProductsAdministrated(),
   });
 
-  // const {
-  //   data: dataAslanPublishedFromAdmin,
-  //   isError: isErrorAslanPublishedFromAdmin,
-  //   isSuccess: isSuccessAslanPublishedFromAdmin,
-  //   isLoading: isLoadingAslanPublishedFromAdmin,
-  // } = useQuery({
-  //   queryKey: ["product-aslan-published-relatons"],
-  //   queryFn: () => getRelations(),
-  // });
-
-  const unicomColumns = [
-    {
-      field: "title",
-      headerName: "Product",
-      flex: 1,
-
-      renderCell: (params: GridRenderCellParams) => (
-        <div>{params.row.title}</div>
-      ),
-    },
-    { field: "price", headerName: "Price" },
-    {
-      field: "partNumber",
-      headerName: "Part Number",
-
-      flex: 1,
-    },
-  ];
-
   useEffect(() => {
     if (dataAslanPublishedFromAdmin) {
-      console.log(dataAslanPublishedFromAdmin);
     }
   }, [dataAslanPublishedFromAdmin]);
 

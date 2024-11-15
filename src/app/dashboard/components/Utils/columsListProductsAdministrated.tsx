@@ -1,7 +1,9 @@
+"use client";
+import { Button } from "@/components/ui/button";
 import { Tooltip } from "@mui/material";
 import { GridRenderCellParams } from "@mui/x-data-grid";
-import { Button } from "@nextui-org/button";
 import { Search } from "lucide-react";
+import ProductRelationConfig from "../ProductRelationConfig";
 
 export const columnsListProductsAdministrated = [
   { field: "skuInterno", headerName: "SKU Interno", width: 150 },
@@ -18,13 +20,13 @@ export const columnsListProductsAdministrated = [
               {params.row.relations.map((relation: any, index: number) => (
                 <div
                   key={index}
-                  className="flex text-lg space-x-2 items-center w-full"
+                  className="flex text-lg space-x-2 items-center w-full text-foreground"
                 >
                   <a
                     target="_blank"
                     href={`https://www.unicom.com.uy/Producto?id=${relation.sku_provider}`}
                   >
-                    <Button variant="solid" color="secondary">
+                    <Button variant="outline" color="secondary">
                       <Search /> SKU
                     </Button>
                   </a>
@@ -32,7 +34,7 @@ export const columnsListProductsAdministrated = [
                     target="_blank"
                     href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${relation.PartNumber}`}
                   >
-                    <Button variant="solid" color="secondary">
+                    <Button variant="outline" color="secondary">
                       <Search /> PartNumber
                     </Button>{" "}
                   </a>
@@ -61,4 +63,13 @@ export const columnsListProductsAdministrated = [
     ),
   },
   { field: "price", headerName: "Price" },
+  {
+    field: "edit",
+    headerName: "Editar",
+    sortable: false,
+    resizable: false,
+    renderCell: (params: GridRenderCellParams) => (
+      <ProductRelationConfig SKU_Relation={params.row.skuInterno} />
+    ),
+  },
 ];
