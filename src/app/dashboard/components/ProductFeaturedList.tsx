@@ -9,17 +9,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 export function ProductFeaturedList({ cart }: { cart?: any }) {
-  const {
-    mutateAsync: server_getFeaturedProductsByPage,
-    data: dataGetFeaturedProductsByPage,
-    isPending,
-  } = useMutation({
-    mutationFn: () => getFeaturedProductsByPage({ page: 1 }),
+  const { data: dataGetFeaturedProductsByPage, isPending } = useQuery({
+    queryKey: ["getFeaturedProductsByPage"],
+    queryFn: () => getFeaturedProductsByPage({ page: 1 }),
   });
-
-  useEffect(() => {
-    server_getFeaturedProductsByPage();
-  }, []);
 
   return (
     <div className="w-full h-full">

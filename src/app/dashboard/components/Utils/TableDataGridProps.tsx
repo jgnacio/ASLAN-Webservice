@@ -13,7 +13,7 @@ export const columnsDataGridProductList: GridColDef[] = [
       params.row.partNumber && params.row.title && params.row.sku ? (
         <ToolsProductList
           title={params.row.title}
-          partNumber={params.row.partNumber[0].partNumber}
+          partNumber={params.row.partNumber}
           sku={params.row.sku}
           price={params.row.price}
           provider={params.row.provider}
@@ -174,7 +174,10 @@ export const columnsDataGridProductList: GridColDef[] = [
     flex: 1,
     resizable: false,
     valueGetter: (value, row) => {
-      return `${row.partNumber || ""}`;
+      if (row.partNumber[0].partNumber) {
+        return row.partNumber[0].partNumber;
+      }
+      return row.partNumber;
     },
   },
 ];

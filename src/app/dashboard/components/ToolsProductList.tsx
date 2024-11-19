@@ -20,6 +20,30 @@ export default function ToolsProductList({
   provider: Provider;
 }) {
   const { toast } = useToast();
+  const formatTitle = (title: string) => {
+    return title
+      .normalize("NFD") // Descompone caracteres con acentos
+      .replace(/[\u0300-\u036f]/g, "") // Elimina los diacríticos
+      .replace(/[^a-zA-Z0-9\s]/g, "") // Elimina caracteres no alfanuméricos
+      .replace(/\s+/g, " ") // Convierte múltiples espacios en uno solo
+      .trim(); // Elimina espacios al inicio y al final
+  };
+
+  const handleSearchByProvider = () => {
+    if (provider.name === "Unicom") {
+      return `${provider.searchPageUrl}${encodeURI(sku)}`;
+    }
+    if (provider.name === "PCService") {
+      const formattedTitle = formatTitle(title);
+      return `${provider.searchPageUrl}${encodeURIComponent(
+        formattedTitle
+      )}&querypage=1`;
+    }
+    if (provider.name === "Solutionbox") {
+      return `${provider.searchPageUrl}${encodeURI(title)}`;
+    }
+    return `${provider.searchPageUrl}${encodeURI(title)}`;
+  };
   return (
     <div className="flex w-full h-full">
       <Tooltip
@@ -33,7 +57,7 @@ export default function ToolsProductList({
               <Button isIconOnly variant="bordered" color="secondary">
                 <Clipboard
                   onClick={() => {
-                    navigator.clipboard.writeText(title);
+                    navigator.clipboard.writeText(partNumber);
                     toast({
                       title: "Part Number copiado",
                       description:
@@ -47,7 +71,7 @@ export default function ToolsProductList({
               <Button isIconOnly variant="bordered" color="secondary">
                 <a
                   target="_blank"
-                  href={`https://www.google.com/search?q=${sku}`}
+                  href={`https://www.google.com/search?q=${partNumber}`}
                 >
                   <SearchIcon />
                 </a>
@@ -65,10 +89,7 @@ export default function ToolsProductList({
               <Separator orientation="vertical" />
 
               <Button isIconOnly variant="bordered" color="secondary">
-                <a
-                  target="_blank"
-                  href={`${provider.searchPageUrl}${encodeURI(sku)}`}
-                >
+                <a target="_blank" href={handleSearchByProvider()}>
                   <Package />
                 </a>
               </Button>
