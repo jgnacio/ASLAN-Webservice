@@ -8,10 +8,8 @@ import {
 import { useEffect, useMemo } from "react";
 
 import { Button } from "@nextui-org/button";
-import { Spinner } from "@nextui-org/spinner";
 import { FilePen } from "lucide-react";
 import Link from "next/link";
-import ButtonAddToCart from "./ButtonAddToCart";
 
 import { columnsDataGridProductList } from "./Utils/TableDataGridProps";
 export default function ListProductModular({

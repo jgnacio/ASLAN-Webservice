@@ -1,43 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { CardDescription, CardTitle } from "@/components/ui/card";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CardContent } from "@mui/material";
 import { Card, CardHeader } from "@nextui-org/card";
-import {
-  Minus,
-  Plus,
-  Search,
-  Settings2,
-  SlidersHorizontal,
-} from "lucide-react";
-import { DefaultCategoriesAdapter } from "@/domain/categories/defaultCategories";
-import { ImplementProviders } from "@/Resources/API/config";
-import { ChangeEventHandler, useEffect, useState } from "react";
-import ListProductModular from "./ListProductModular";
-import { useQuery } from "@tanstack/react-query";
-import { getAllProductCached } from "../_actions/get-all-product-cached";
-import { getProductCachedByProvider } from "../_actions/get-products-cached-by-provider";
-import { ProductType } from "@/domain/product/entities/Product";
 import { Spinner } from "@nextui-org/spinner";
+import { useQuery } from "@tanstack/react-query";
+import { Search } from "lucide-react";
+import { useState } from "react";
+import { getAllProductCached } from "../_actions/get-all-product-cached";
+import ListProductModular from "./ListProductModular";
 
 export default function ProductSearchEngine() {
   const [search, setSearch] = useState("");

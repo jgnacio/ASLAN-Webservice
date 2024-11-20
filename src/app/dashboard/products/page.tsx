@@ -14,7 +14,6 @@ import { useEffect } from "react";
 import { getCart } from "../cart/_actions/get-cart";
 import { ProductFeaturedList } from "../components/ProductFeaturedList";
 import ProductOfferList from "../components/ProductOfferList";
-import ProductRelevantList from "../components/ProductRelevantList";
 import ProductSearchEngine from "../components/ProductSearchEngine";
 
 export default function Products() {

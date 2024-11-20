@@ -1,10 +1,10 @@
-import { Button } from "@nextui-org/button";
-import HoverCardActions from "./HoverCardActions";
-import { Building2, Clipboard, Package, SearchIcon } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { Provider } from "@/domain/product/entities/Product";
 import { Tooltip } from "@mui/material";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@nextui-org/button";
+import { Clipboard } from "lucide-react";
+import { FaGoogle } from "react-icons/fa";
 
 export default function ToolsProductList({
   title,
@@ -47,52 +47,74 @@ export default function ToolsProductList({
   return (
     <div className="flex w-full h-full">
       <Tooltip
+        className=""
         title={
-          <div className="space-y-1">
-            <span>SKU: {sku}</span>
+          <div className="space-y-2 max-w-[250px]">
+            <span>{title}</span>
             <Separator />
-            <span>Provider: {provider.name}</span>
+            <div className="flex justify-between">
+              <p>
+                SKU: <span className="text-yellow-400">{sku}</span>
+              </p>
+              <p className="text-yellow-400">{provider.name}</p>
+            </div>
             <Separator />
-            <div className="flex h-10 items-center space-x-2 text-sm">
-              <Button isIconOnly variant="bordered" color="secondary">
-                <Clipboard
-                  onClick={() => {
-                    navigator.clipboard.writeText(partNumber);
-                    toast({
-                      title: "Part Number copiado",
-                      description:
-                        "Se ha copiado el Part Number al portapapeles",
-                    });
-                  }}
-                />
-              </Button>
+            <div className="w-full flex h-10 justify-between items-center space-x-2 text-sm">
+              <Tooltip title="Copiar Part Number">
+                <Button isIconOnly color="secondary">
+                  <Clipboard
+                    onClick={() => {
+                      navigator.clipboard.writeText(partNumber);
+                      toast({
+                        title: "Part Number copiado",
+                        description:
+                          "Se ha copiado el Part Number al portapapeles",
+                      });
+                    }}
+                  />
+                </Button>
+              </Tooltip>
               <Separator orientation="vertical" />
 
-              <Button isIconOnly variant="bordered" color="secondary">
+              <Tooltip title="Buscar en Google">
                 <a
                   target="_blank"
                   href={`https://www.google.com/search?q=${partNumber}`}
                 >
-                  <SearchIcon />
+                  <Button isIconOnly color="secondary">
+                    <FaGoogle />
+                  </Button>
                 </a>
-              </Button>
+              </Tooltip>
+
+              <Separator orientation="vertical" />
+              <Tooltip title="Buscar en Aslan">
+                <a
+                  target="_blank"
+                  href={`https://www.aslanstoreuy.com/?s=${partNumber}&post_type=product`}
+                >
+                  <Button isIconOnly color="secondary">
+                    <img
+                      src="https://res.cloudinary.com/dhq5ewbyu/image/upload/v1732105162/ASLAN/Logo/spnndbjvue1wefgbsib1.png"
+                      alt="Aslan Logo"
+                      width={30}
+                    />
+                  </Button>
+                </a>
+              </Tooltip>
               <Separator orientation="vertical" />
 
-              <Button isIconOnly variant="bordered" color="secondary">
-                {/* <a
-                        target="_blank"
-                        href={`${url}/wp-admin/edit.php?s=${title}&post_status=all&post_type=product&action=-1&seo_filter&readability_filter&product_cat&product_type&stock_status&fb_sync_enabled&paged=1&action2=-1`}
-                      > */}
-                <Building2 />
-                {/* </a> */}
-              </Button>
-              <Separator orientation="vertical" />
-
-              <Button isIconOnly variant="bordered" color="secondary">
-                <a target="_blank" href={handleSearchByProvider()}>
-                  <Package />
-                </a>
-              </Button>
+              <a target="_blank" href={handleSearchByProvider()}>
+                <Tooltip title={`Buscar en ${provider.name}`}>
+                  <Button isIconOnly color="secondary">
+                    <img
+                      src={provider.logoUrl}
+                      alt={`${provider.name} Logo`}
+                      width={30}
+                    />
+                  </Button>
+                </Tooltip>
+              </a>
             </div>
           </div>
           // <div className="">
