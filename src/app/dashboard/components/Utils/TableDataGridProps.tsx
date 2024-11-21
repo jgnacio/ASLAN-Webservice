@@ -78,7 +78,7 @@ export const columnsDataGridProductList: GridColDef[] = [
     field: "price",
     headerName: "Precio",
     type: "number",
-    width: 90,
+    width: 100,
     resizable: false,
     valueFormatter: (value, row, column, apiRef) => {
       return `${row.price} U$D`;
