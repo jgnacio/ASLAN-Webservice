@@ -80,6 +80,9 @@ export const columnsDataGridProductList: GridColDef[] = [
     type: "number",
     width: 90,
     resizable: false,
+    valueFormatter: (value, row, column, apiRef) => {
+      return `${row.price} U$D`;
+    },
   },
 
   {
