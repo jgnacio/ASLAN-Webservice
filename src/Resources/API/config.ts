@@ -1,3 +1,4 @@
+"use server";
 import { CDRProvider } from "./CDRMedios/adapters/CDRMediosAPIProductAdapter";
 import { logoPCService } from "./PC Service/adapters/PCServiceAPIProductAdapter";
 import { solutionBoxProvider } from "./Solutionbox/adapters/SolutionboxAPIProductAdapter";

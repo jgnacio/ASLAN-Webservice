@@ -4,6 +4,7 @@ import { Product, ProductType } from "@/domain/product/entities/Product";
 import { PCServiceAPIProductAdapter } from "@/Resources/API/PC Service/adapters/PCServiceAPIProductAdapter";
 import { SolutionboxAPIProductAdapter } from "@/Resources/API/Solutionbox/adapters/SolutionboxAPIProductAdapter";
 import { UnicomAPIProductAdapter } from "@/Resources/API/Unicom/adapters/UnicomAPIProductAdapter";
+import { CDRMediosAPIProductAdapter } from "@/Resources/API/CDRMedios/adapters/CDRMediosAPIProductAdapter";
 
 export const getProductBySku = async (
   sku: string,
@@ -30,6 +31,12 @@ export const getProductBySku = async (
       return null;
     }
     return product.toPlainObject();
+  } else if (provider === "CDR") {
+    const cdrMediosAPIProductAdapter = new CDRMediosAPIProductAdapter();
+    const product = await cdrMediosAPIProductAdapter.getBySKU(sku);
+    if (!product) {
+      return null;
+    }
   }
 
   const unicomAPIProductAdapter = new UnicomAPIProductAdapter();
