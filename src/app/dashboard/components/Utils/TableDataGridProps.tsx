@@ -177,6 +177,9 @@ export const columnsDataGridProductList: GridColDef[] = [
     flex: 1,
     resizable: false,
     valueGetter: (value, row) => {
+      if (!row.partNumber) {
+        return "";
+      }
       if (row.partNumber[0].partNumber) {
         return row.partNumber[0].partNumber;
       }
