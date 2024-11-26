@@ -3,14 +3,6 @@ import { IProductRepository } from "@/domain/product/repositories/IProductReposi
 import { getFormattedDate } from "@/lib/functions/DateFunctions";
 const soap = require("soap");
 
-export const CDRProvider: Provider = {
-  name: "CDR",
-  mainPageUrl: "https://www.cdrmedios.com/",
-  searchPageUrl: "https://www.cdrmedios.com/productos/?secc=productos&buscar=",
-  logoUrl:
-    "https://www.cdrmedios.com/artworks/artworks_cdrmedios2020com/logo.svg",
-};
-
 export class CDRMediosAPIProductAdapter implements IProductRepository {
   private readonly API_URL = process.env.API_CDRMEDIOS_URL || "";
   private soapClient: any | null = null; // Variable para almacenar el cliente SOAP

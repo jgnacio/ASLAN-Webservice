@@ -66,8 +66,11 @@ export const getDateInYYYY = (diferencial: number = 0) => {
   return `${año}${mes}${dia}${horas}${minutos}${segundos}`;
 };
 
-export const getFormattedDate = (): string => {
+export const getFormattedDate = (dDias: number = 0): string => {
+  // Crear una fecha y restar el diferencial en dias
+
   const now = new Date();
+  now.setDate(now.getDate() - dDias);
 
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0"); // Meses empiezan desde 0

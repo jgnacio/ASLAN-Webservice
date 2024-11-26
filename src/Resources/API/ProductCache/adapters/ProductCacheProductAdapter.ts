@@ -65,7 +65,12 @@ export class ProductCacheProductAdapter implements IProductRepository {
   }
 
   async getBySKU(sku: string): Promise<Product> {
-    throw new Error("Method not implemented.");
+    const products = await this.fetchProducts();
+    const product = products.find((product) => product.getSku() === sku);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+    return product;
   }
 
   async getFeatured(): Promise<Product[]> {

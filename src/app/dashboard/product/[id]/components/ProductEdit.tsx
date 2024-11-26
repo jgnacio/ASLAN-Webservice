@@ -1,5 +1,5 @@
 "use client";
-import { Check, ImagePlus, PartyPopper, PlusIcon } from "lucide-react";
+import { Check, ImagePlus, PlusIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,9 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -51,36 +51,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Product,
-  ProductType,
-  Provider,
-} from "@/domain/product/entities/Product";
-import { useEffect, useState } from "react";
+import { ProductType, Provider } from "@/domain/product/entities/Product";
+import { useState } from "react";
 
-import { schemaPublishProduct } from "@/domain/schema/plublish-product.schema";
-import { validateFormData } from "@/lib/Utils/validation";
+import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
+import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
+import { ImplementProviders } from "@/Resources/API/config";
+import { getAllProductCached } from "@/app/dashboard/_actions/get-all-product-cached";
+import ListProductModular from "@/app/dashboard/components/ListProductModular";
+import { findSimilarProducts } from "@/lib/functions/ProductFunctions";
 import { Spinner } from "@nextui-org/spinner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
+import { makeProductRelation } from "../_actions/make-relation";
 import { publishProduct } from "../_actions/publish-product";
 import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 import { FormPublishProduct } from "./types/formTypes";
 import { imageListProps, imageProps } from "./types/imageTypes";
-import { getCachedProducts } from "../_actions/getCachedProducts";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import ListProductModular from "@/app/dashboard/components/ListProductModular";
-import { makeProductRelation } from "../_actions/make-relation";
-import AddProductRelation from "./AddProductRelation";
-import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
-import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
-import { v4 as uuidv4 } from "uuid";
-import { ImplementProviders } from "@/Resources/API/config";
-import { getAllProductCached } from "@/app/dashboard/_actions/get-all-product-cached";
-import { findSimilarProducts } from "@/lib/functions/ProductFunctions";
 
 export function ProductEdit({ product }: { product: ProductType }) {
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
