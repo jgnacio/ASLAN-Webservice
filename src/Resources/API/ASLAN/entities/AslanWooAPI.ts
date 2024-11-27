@@ -53,8 +53,6 @@ export class AslanWooAPI {
         (product: any) => product.sku === sku
       );
 
-      console.log("exactProduct", exactProduct);
-
       if (!exactProduct) {
         throw new Error(`No product found with SKU: ${sku}`);
       }

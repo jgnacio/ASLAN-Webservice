@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -18,24 +17,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { ProductsUpdatedDashboard } from "@/Resources/API/entitites/ProductsUpdated";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Layers, Package, Package2, SquareArrowUpRight } from "lucide-react";
+import { Layers, SquareArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getProductAslanBySku } from "../_actions/get-aslan-product-by-sku";
 import { getOffersProductsByPage } from "../_actions/get-offer-products";
+import { getOrdersWoocomerce } from "../_actions/get-orders-woocomerce";
+import { getProviderByID } from "../_actions/get-provider-by-id";
 import { productBackToTheCatalog } from "../_actions/product-back-to-the-catalog";
 import { removeFromTheCalalog } from "../_actions/remove-product-from-catalog";
 import { getProductsAdministrated } from "../identify/_actions/get-product-administrated";
 import { getProductBySku } from "../product/_actions/get-product-by-sku";
-import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
-import { getOrdersWoocomerce } from "../_actions/get-orders-woocomerce";
 import ListOrders from "./ListOrders";
-import { useToast } from "@/components/ui/use-toast";
+import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -54,6 +54,15 @@ export default function ResentSales() {
   } = useQuery({
     queryKey: ["product-administrated"],
     queryFn: () => getProductsAdministrated(),
+  });
+
+  const {
+    data: provider,
+    isPending: isLoadingProvider,
+    isSuccess: isSuccessProvider,
+    isError: isErrorProvider,
+  } = useMutation({
+    mutationFn: (id: number) => getProviderByID(id),
   });
 
   const {
@@ -154,20 +163,9 @@ export default function ResentSales() {
           relation.SKU_Relation
         );
 
-        let providerName = "Unicom";
-        switch (relation.ID_Provider) {
-          case 1:
-            providerName = "Unicom";
-            break;
-          case 2:
-            providerName = "PCService";
-            break;
-          case 3:
-            providerName = "Solutionbox";
-            break;
-          default:
-            break;
-        }
+        const provider = await getProviderByID(relation.ID_Provider);
+
+        const providerName = provider.data.name;
 
         const resultProduct = await server_getProductBySku({
           sku: relation.sku_provider,
@@ -213,10 +211,16 @@ export default function ResentSales() {
               aslanActualStatus: actualStatus,
             },
           ]);
-        } else {
+        } else if (resultAslan && !resultProduct) {
           toast({
             title: "Error",
-            description: `No se encontró el producto ${relation.sku_provider} en el proveedor ${providerName}`,
+            description: `El producto con SKU: ${relation.sku_provider} no se encuentra en el proveedor ${providerName}`,
+            variant: "destructive",
+          });
+        } else if (!resultAslan && resultProduct) {
+          toast({
+            title: "Error",
+            description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan`,
             variant: "destructive",
           });
         }

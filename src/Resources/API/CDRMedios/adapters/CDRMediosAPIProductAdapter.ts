@@ -1,6 +1,7 @@
 import { Product, Provider } from "@/domain/product/entities/Product";
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
 import { getFormattedDate } from "@/lib/functions/DateFunctions";
+import { CDRAPIProduct } from "../entities/CDRMediosAPIProductEntitie";
 const soap = require("soap");
 
 export class CDRMediosAPIProductAdapter implements IProductRepository {
@@ -29,7 +30,7 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
     const params = {
       email: process.env.API_CDRMEDIOS_USER,
       token: process.env.API_CDRMEDIOS_TOKEN,
-      fecha: getFormattedDate(),
+      fecha: getFormattedDate(30),
       formato: "",
     };
 
@@ -56,7 +57,18 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
   }
 
   async getBySKU(sku: string): Promise<Product | null> {
-    throw new Error("Method not implemented.");
+    const response = await this.fetchProducts();
+    if (!response) {
+      return null;
+    }
+    const product = response.find((p: any) => p.codigo === sku);
+
+    if (!product) {
+      return null;
+    }
+
+    const productMapped = this.mapToProduct(product);
+    return productMapped;
   }
   async getAll({
     request,
@@ -88,5 +100,43 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
 
     console.log("Funciones disponibles en el servicio:");
     console.log(client.describe());
+  }
+
+  mapToProduct(data: CDRAPIProduct): Product | null {
+    try {
+      const product = new Product({
+        sku: data.codigo,
+        title: data.nombre,
+        description: data.descripcion,
+        marca: data.marca || "",
+        price: parseFloat(data.precio),
+        availability: parseInt(data.stock) > 0 ? "in_stock" : "out_of_stock",
+        partNumber: [
+          {
+            partNumber: data.nro_parte,
+            ean: 0,
+            units_x_box: 1,
+          },
+        ],
+        stock: parseInt(data.stock),
+        images: [""],
+        submitDate: new Date(),
+        category: {
+          name: "N/A",
+          id: "N/A",
+        },
+        priceHistory: [],
+      });
+      return product;
+    } catch (error) {
+      console.error("Error mapping product:", error);
+      return null;
+    }
+  }
+  mapProducts(data: CDRAPIProduct[]): Product[] {
+    console.log("Mapping products:", data);
+    return data
+      .map((product) => this.mapToProduct(product))
+      .filter((p) => p !== null) as Product[];
   }
 }

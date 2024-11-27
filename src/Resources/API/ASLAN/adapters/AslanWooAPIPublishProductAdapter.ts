@@ -27,13 +27,12 @@ export class AslanWooAPIPublishProductAdapter {
   }
 
   public static async getProductBySku(sku: string): Promise<any> {
-    console.log("sku", sku);
     try {
       const product = await AslanWooAPI.getProductBySku(sku);
 
       return product;
     } catch (error: any) {
-      // console.error(error);
+      console.error(error);
     }
   }
 
