@@ -150,6 +150,11 @@ export default function ResentSales() {
     setProductsUpdated([]);
     setIsLoading(true);
 
+    if (!dataProductsAdminstrated) {
+      setIsLoading(false);
+      return;
+    }
+
     const totalRelations = dataProductsAdminstrated
       .map((product: any) => product.relations.length)
       .reduce((a: any, b: any) => a + b, 0);

@@ -2,7 +2,7 @@
 
 import { SKUInternalServiceAPIAdapter } from "@/Resources/API/SKUInternalService/adapters/SKUInternalServiceAPIAdapter";
 
-export const getProductsAdministrated = async () => {
+export const getProductsAdministrated = async (): Promise<any> => {
   const skuInternalServiceAPIAdapter = new SKUInternalServiceAPIAdapter();
-  return skuInternalServiceAPIAdapter.getProductsAdministrated();
+  return await skuInternalServiceAPIAdapter.getProductsAdministrated();
 };

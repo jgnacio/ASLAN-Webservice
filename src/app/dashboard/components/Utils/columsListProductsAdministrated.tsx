@@ -5,6 +5,7 @@ import { GridRenderCellParams } from "@mui/x-data-grid";
 import { Search } from "lucide-react";
 import ProductRelationConfig from "../ProductRelationConfig";
 import { Separator } from "@radix-ui/react-separator";
+import { ImplementProviders } from "@/Resources/API/config";
 
 export const columnsListProductsAdministrated = [
   { field: "skuInterno", headerName: "SKU Interno", width: 150 },
@@ -20,6 +21,8 @@ export const columnsListProductsAdministrated = [
             <div className="w-full">
               {params.row.relations.map((relation: any, index: number) => (
                 <div>
+                  <span className="text-medium">{relation.provider.name}</span>
+
                   <div
                     key={index}
                     className="flex flex-col text-lg space-x-2 items-center w-full"
@@ -28,7 +31,12 @@ export const columnsListProductsAdministrated = [
                       {relation.sku_provider}
                       <a
                         target="_blank"
-                        href={`https://www.unicom.com.uy/Producto?id=${relation.sku_provider}`}
+                        href={`${
+                          ImplementProviders.find(
+                            (provider) =>
+                              provider.name === relation.provider.name
+                          )?.searchPageUrl
+                        }${relation.sku_provider}`}
                       >
                         <Button
                           variant="outline"
@@ -45,7 +53,12 @@ export const columnsListProductsAdministrated = [
                       {relation.PartNumber}
                       <a
                         target="_blank"
-                        href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${relation.PartNumber}`}
+                        href={`${
+                          ImplementProviders.find(
+                            (provider) =>
+                              provider.name === relation.provider.name
+                          )?.searchPageUrl
+                        }${relation.PartNumber}`}
                       >
                         <Button
                           variant="outline"
