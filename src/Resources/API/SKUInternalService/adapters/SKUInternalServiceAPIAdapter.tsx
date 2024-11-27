@@ -1,3 +1,4 @@
+import { Product } from "@/domain/product/entities/Product";
 import axios from "axios";
 
 export class SKUInternalServiceAPIAdapter {
@@ -5,6 +6,36 @@ export class SKUInternalServiceAPIAdapter {
     process.env.SKU_INTERNAL_SERVICE_URL;
 
   constructor() {}
+
+  async getProductsAdministrated(): Promise<Product[]> {
+    const response = await axios
+      .get(`${this.SKU_INTERNAL_SERVICE_URL}/api/products`)
+      .then((response) => response.data)
+      .catch((error) => {
+        console.log(error.response.data);
+        throw new Error(error);
+      });
+
+    if (!response.data) {
+      return [];
+    }
+
+    const products = response.data.map((product: any) => {
+      return {
+        id: product.ID,
+        skuInterno: product.SKU,
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        stock: product.stock,
+        category: product.category,
+        brand: product.brand,
+        relations: product.relations,
+      };
+    });
+
+    return products;
+  }
 
   async getAllSKURelations(): Promise<any> {
     const response = await axios

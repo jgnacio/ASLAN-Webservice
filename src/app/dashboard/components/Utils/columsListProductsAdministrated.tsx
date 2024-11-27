@@ -4,6 +4,7 @@ import { Tooltip } from "@mui/material";
 import { GridRenderCellParams } from "@mui/x-data-grid";
 import { Search } from "lucide-react";
 import ProductRelationConfig from "../ProductRelationConfig";
+import { Separator } from "@radix-ui/react-separator";
 
 export const columnsListProductsAdministrated = [
   { field: "skuInterno", headerName: "SKU Interno", width: 150 },
@@ -16,35 +17,48 @@ export const columnsListProductsAdministrated = [
       <div>
         <Tooltip
           title={
-            <div>
+            <div className="w-full">
               {params.row.relations.map((relation: any, index: number) => (
-                <div
-                  key={index}
-                  className="flex text-lg space-x-2 items-center w-full text-foreground"
-                >
-                  <a
-                    target="_blank"
-                    href={`https://www.unicom.com.uy/Producto?id=${relation.sku_provider}`}
+                <div>
+                  <div
+                    key={index}
+                    className="flex flex-col text-lg space-x-2 items-center w-full"
                   >
-                    <Button variant="outline" color="secondary">
-                      <Search /> SKU
-                    </Button>
-                  </a>
-                  <a
-                    target="_blank"
-                    href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${relation.PartNumber}`}
-                  >
-                    <Button variant="outline" color="secondary">
-                      <Search /> PartNumber
-                    </Button>{" "}
-                  </a>
-                  {relation.name && (
-                    <span className="rounded-xl overflow-hidden">
-                      {relation.name === "Unicom" && (
-                        <img src="https://assets.apidog.com/app/project-icon/custom/20240326/d9d73462-4e88-42d7-ae58-e5b33d38c626.jpeg"></img>
-                      )}
-                    </span>
-                  )}
+                    <div className="flex w-full justify-between text-sm ">
+                      {relation.sku_provider}
+                      <a
+                        target="_blank"
+                        href={`https://www.unicom.com.uy/Producto?id=${relation.sku_provider}`}
+                      >
+                        <Button
+                          variant="outline"
+                          color="secondary"
+                          className="text-foreground"
+                          size={"sm"}
+                        >
+                          <Search /> SKU
+                        </Button>
+                      </a>
+                    </div>
+
+                    <div className="flex w-full justify-between text-sm ">
+                      {relation.PartNumber}
+                      <a
+                        target="_blank"
+                        href={`https://www.unicom.com.uy/Busqueda?SearchQuery=${relation.PartNumber}`}
+                      >
+                        <Button
+                          variant="outline"
+                          color="secondary"
+                          className="text-foreground"
+                          size={"sm"}
+                        >
+                          <Search /> PartNumber
+                        </Button>{" "}
+                      </a>
+                    </div>
+                  </div>
+                  <Separator />
                 </div>
               ))}
             </div>
