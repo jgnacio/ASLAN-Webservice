@@ -20,13 +20,10 @@ export const columnsListProductsAdministrated = [
           title={
             <div className="w-full">
               {params.row.relations.map((relation: any, index: number) => (
-                <div>
+                <div key={index}>
                   <span className="text-medium">{relation.provider.name}</span>
 
-                  <div
-                    key={index}
-                    className="flex flex-col text-lg space-x-2 items-center w-full"
-                  >
+                  <div className="flex flex-col text-lg space-x-2 items-center w-full">
                     <div className="flex w-full justify-between text-sm ">
                       {relation.sku_provider}
                       <a
