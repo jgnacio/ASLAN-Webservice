@@ -61,7 +61,6 @@ export default function Page() {
     }
 
     setProducts(updatedProducts);
-    console.log(updatedProducts);
   };
 
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function Page() {
       </CardHeader>
       <CardContent>
         <div>
-          {products ? (
+          {isSuccessAslanPublishedFromAdmin && products && (
             <DataGrid
               rows={products}
               columns={columnsListProductsAdministrated}
@@ -92,8 +91,12 @@ export default function Page() {
               }}
               pageSizeOptions={[10, 20]}
             />
-          ) : (
-            <Spinner className="h-12 w-12" />
+          )}
+          {isLoadingAslanPublishedFromAdmin && <Spinner />}
+          {isErrorAslanPublishedFromAdmin && (
+            <div>
+              <h3>Error</h3>
+            </div>
           )}
         </div>
       </CardContent>

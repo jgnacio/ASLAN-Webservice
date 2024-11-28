@@ -12,7 +12,7 @@ export class SKUInternalServiceAPIAdapter {
       .get(`${this.SKU_INTERNAL_SERVICE_URL}/api/products`)
       .then((response) => response.data)
       .catch((error) => {
-        console.log(error.response.data);
+        console.log(error);
         throw new Error(error);
       });
 
