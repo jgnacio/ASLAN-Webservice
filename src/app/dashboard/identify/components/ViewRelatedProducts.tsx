@@ -10,13 +10,15 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Clipboard } from "lucide-react";
+import { Clipboard, SquareArrowOutUpRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { getProductAslanBySku } from "../../_actions/get-aslan-product-by-sku";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Spinner } from "@nextui-org/spinner";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@mui/material";
+import { ImplementProviders } from "@/Resources/API/config";
 
 export default function ViewRelatedProducts({ row }: { row: any }) {
   const { toast } = useToast();
@@ -54,6 +56,7 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
             }
           })
         );
+        console.log("productsFullInfo", productsFullInfo);
         setProductsWithAslanInfo(productsFullInfo);
       } catch (error) {
         console.error("Error fetching full product info:", error);
@@ -87,7 +90,7 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
                   productsWithAslanInfo.map((relation: any) => (
                     <div
                       key={relation.ID}
-                      className="text-sm border rounded-md h-36"
+                      className="text-sm border rounded-md h-40"
                     >
                       <div className="grid grid-cols-3 gap-2 border-gray-200 h-full">
                         <img
@@ -100,7 +103,28 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
                           alt={row.title}
                         ></img>
                         <div className="flex flex-col w-full h-full col-span-2 space-y-1 justify-center">
-                          <span className="text-xs font-bold">{row.title}</span>
+                          <span className="text-xs font-bold flex justify-between items-center pr-2">
+                            {row.title}
+                            <Tooltip
+                              title={`Ver en ${relation.provider.name}`}
+                              placement="top"
+                            >
+                              <a
+                                target="_blank"
+                                href={`${
+                                  ImplementProviders.find(
+                                    (provider) =>
+                                      provider.name === relation.provider.name
+                                  )?.searchPageUrl + relation.PartNumber
+                                }`}
+                              >
+                                <SquareArrowOutUpRight
+                                  size={20}
+                                  className="text-primary-400 hover:text-primary-500 cursor-pointer"
+                                />
+                              </a>
+                            </Tooltip>
+                          </span>
                           <Separator />
                           <div className="flex flex-col relative">
                             <span className="text-xs flex items-center gap-1">
@@ -150,25 +174,49 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
                             </span>
                             <span className="text-xs flex items-center gap-1">
                               <span className="font-semibold">Stock:</span>{" "}
-                              <span className="text-primary-400">
+                              <span
+                                className={`${
+                                  relation.stock > 0 && relation.stock < 5
+                                    ? "text-warning-400"
+                                    : relation.stock === 0
+                                    ? "text-destructive-foreground"
+                                    : "text-success-400"
+                                }`}
+                              >
                                 {relation.stock}
                               </span>
                             </span>
                             <span className="text-xs flex items-center gap-1">
-                              <span className="font-semibold">Precio:</span>{" "}
+                              <span className="font-semibold">
+                                Precio Proveedor:
+                              </span>{" "}
                               {relation.price} U$D
                             </span>
+                            <span className="text-xs flex items-center gap-1">
+                              <span className="font-semibold">
+                                Precio Publicado:
+                              </span>{" "}
+                              {relation.aslanInfo.price} U$D
+                            </span>
                             <Badge
-                              className=" absolute right-2 bottom-0"
+                              className={` absolute right-2 bottom-0 ${
+                                relation.aslanInfo?.status
+                                  ? ""
+                                  : "text-muted-foreground"
+                              } `}
                               variant={
-                                relation.aslanInfo.status === "draft"
-                                  ? "outlineDestructive"
-                                  : "outlineSuccess"
+                                relation.aslanInfo?.status
+                                  ? relation.aslanInfo?.status === "draft"
+                                    ? "outlineDestructive"
+                                    : "outlineSuccess"
+                                  : "outline"
                               }
                             >
-                              {relation.aslanInfo.status === "draft"
-                                ? "Borrador"
-                                : "Publicado"}
+                              {relation.aslanInfo?.status
+                                ? relation.aslanInfo?.status === "draft"
+                                  ? "Borrador"
+                                  : "Publicado"
+                                : "Sin Info"}
                             </Badge>
                           </div>
                         </div>
