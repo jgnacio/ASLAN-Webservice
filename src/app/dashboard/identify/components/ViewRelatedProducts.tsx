@@ -196,7 +196,7 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
                               <span className="font-semibold">
                                 Precio Publicado:
                               </span>{" "}
-                              {relation.aslanInfo.price} U$D
+                              {relation.aslanInfo?.price} U$D
                             </span>
                             <Badge
                               className={` absolute right-2 bottom-0 ${
