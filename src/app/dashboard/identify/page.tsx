@@ -23,52 +23,6 @@ export default function Page() {
     queryFn: () => getProductsAdministrated(),
   });
 
-  const {
-    mutateAsync: server_getProviderByID,
-    data: provider,
-    isPending: isLoadingProvider,
-    isSuccess: isSuccessProvider,
-    isError: isErrorProvider,
-  } = useMutation({
-    mutationFn: (id: number) => getProviderByID(id),
-  });
-  const handleUpdateProducts = async (dataAslanPublishedFromAdmin: any) => {
-    const updatedProducts = await Promise.all(
-      dataAslanPublishedFromAdmin.map(async (product: any) => {
-        const relations = await Promise.all(
-          product.relations.map(async (relation: any) => {
-            const provider = await server_getProviderByID(relation.ID_Provider);
-
-            return {
-              ...relation,
-              provider: provider.data || {},
-            };
-          })
-        );
-        return {
-          ...product,
-          relations,
-        };
-      })
-    );
-    if (!updatedProducts) {
-      toast({
-        title: "Sin productos para mostrar",
-        description: "No se pudieron obtener los productos administrados",
-      });
-      setProducts([]);
-      return;
-    }
-
-    setProducts(updatedProducts);
-  };
-
-  // useEffect(() => {
-  //   if (dataAslanPublishedFromAdmin) {
-  //     handleUpdateProducts(dataAslanPublishedFromAdmin);
-  //   }
-  // }, [dataAslanPublishedFromAdmin]);
-
   return (
     <Card>
       <CardHeader>
