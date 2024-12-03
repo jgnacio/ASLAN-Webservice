@@ -63,11 +63,11 @@ export default function Page() {
     setProducts(updatedProducts);
   };
 
-  useEffect(() => {
-    if (dataAslanPublishedFromAdmin) {
-      handleUpdateProducts(dataAslanPublishedFromAdmin);
-    }
-  }, [dataAslanPublishedFromAdmin]);
+  // useEffect(() => {
+  //   if (dataAslanPublishedFromAdmin) {
+  //     handleUpdateProducts(dataAslanPublishedFromAdmin);
+  //   }
+  // }, [dataAslanPublishedFromAdmin]);
 
   return (
     <Card>
@@ -78,7 +78,7 @@ export default function Page() {
         <div>
           {isSuccessAslanPublishedFromAdmin && products && (
             <DataGrid
-              rows={products}
+              rows={dataAslanPublishedFromAdmin}
               columns={columnsListProductsAdministrated}
               disableRowSelectionOnClick
               // checkboxSelection

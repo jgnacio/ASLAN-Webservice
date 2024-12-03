@@ -35,14 +35,14 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
   });
 
   const handleSetFullProductInfo = async (sku: string) => {
+    const dataProductAslanBySku = await server_getProductAslanBySku(
+      row.skuInterno
+    );
     if (row.relations.length > 0) {
       try {
         const productsFullInfo = await Promise.all(
           row.relations.map(async (relation: any) => {
             try {
-              const dataProductAslanBySku = await server_getProductAslanBySku(
-                relation.SKU_Relation
-              );
               return {
                 ...relation,
                 aslanInfo: dataProductAslanBySku,
@@ -56,7 +56,6 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
             }
           })
         );
-        console.log("productsFullInfo", productsFullInfo);
         setProductsWithAslanInfo(productsFullInfo);
       } catch (error) {
         console.error("Error fetching full product info:", error);
@@ -93,15 +92,30 @@ export default function ViewRelatedProducts({ row }: { row: any }) {
                       className="text-sm border rounded-md h-40"
                     >
                       <div className="grid grid-cols-3 gap-2 border-gray-200 h-full">
-                        <img
-                          className="w-full h-full"
-                          src={
-                            (relation.aslanInfo?.images.length > 0 &&
-                              relation.aslanInfo?.images[0].src) ||
-                            "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png"
-                          }
-                          alt={row.title}
-                        ></img>
+                        <div className="relative flex justify-center items-center ">
+                          <a
+                            target="_blank"
+                            href={`${relation.aslanInfo?.permalink}`}
+                          >
+                            <img
+                              className="w-full h-full"
+                              src={
+                                (relation.aslanInfo?.images.length > 0 &&
+                                  relation.aslanInfo?.images[0].src) ||
+                                "https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png"
+                              }
+                              alt={row.title}
+                            ></img>
+                            <span className="flex absolute top-0 text-xs">
+                              Ver en Aslan{" "}
+                              <SquareArrowOutUpRight
+                                size={15}
+                                className="cursor-pointer"
+                              />
+                            </span>
+                          </a>
+                        </div>
+
                         <div className="flex flex-col w-full h-full col-span-2 space-y-1 justify-center">
                           <span className="text-xs font-bold flex justify-between items-center pr-2">
                             {row.title}
