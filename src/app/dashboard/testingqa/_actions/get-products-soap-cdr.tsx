@@ -4,8 +4,9 @@ import { CDRMediosAPIProductAdapter } from "@/Resources/API/CDRMedios/adapters/C
 export const getCDRProducts = async () => {
   const adapter = new CDRMediosAPIProductAdapter();
   try {
-    await adapter.getAll({});
+    return await adapter.getAll({});
   } catch (error) {
     console.error("Error fetching CDR products:", error);
+    return null;
   }
 };

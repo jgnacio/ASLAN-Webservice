@@ -1,8 +1,8 @@
 "use server";
-import { ProductType } from "@/domain/product/entities/Product";
 import { AslanWooAPIPublishProductAdapter } from "@/Resources/API/ASLAN/adapters/AslanWooAPIPublishProductAdapter";
+import { FormPublishProduct } from "../components/types/formTypes";
 
-export const publishProduct = async (product: ProductType) => {
+export const publishProduct = async (product: FormPublishProduct) => {
   try {
     await AslanWooAPIPublishProductAdapter.publishProduct(product);
   } catch (error) {

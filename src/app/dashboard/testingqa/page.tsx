@@ -31,7 +31,7 @@ export default function TestingQA() {
       console.error("Error fetching CDR products:", error);
     },
     onSuccess: (data) => {
-      console.log("CDR products fetched:", data);
+      // console.log("CDR products fetched:", data);
     },
   });
 

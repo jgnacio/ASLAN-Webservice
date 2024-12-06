@@ -36,6 +36,7 @@ import { getProductsAdministrated } from "../identify/_actions/get-product-admin
 import { getProductBySku } from "../product/_actions/get-product-by-sku";
 import ListOrders from "./ListOrders";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
+import ExcelExportButton from "./Export/SaveToExcel";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -180,21 +181,25 @@ export default function ResentSales() {
         if (resultAslan && resultProduct) {
           let actualStatus = resultAslan.status;
 
-          if (
-            resultProduct.availability !== "in_stock" &&
-            resultAslan.status !== "draft"
-          ) {
-            await server_removeProductFromCatalog(resultAslan.id);
-            actualStatus = "draft";
-          }
+          if (resultAslan.stock_status === "onbackorder") {
+            resultProduct.availability = "on_demand";
+          } else {
+            if (
+              resultProduct.availability !== "in_stock" &&
+              resultAslan.status !== "draft"
+            ) {
+              await server_removeProductFromCatalog(resultAslan.id);
+              actualStatus = "draft";
+            }
 
-          if (
-            resultProduct.availability === "in_stock" &&
-            resultAslan.status === "draft"
-          ) {
-            // Actualizar stock en Aslan
-            // await server_productBackToTheCatalog(resultAslan.id);
-            // actualStatus = "publish";
+            if (
+              resultProduct.availability === "in_stock" &&
+              resultAslan.status === "draft"
+            ) {
+              // Actualizar stock en Aslan
+              // await server_productBackToTheCatalog(resultAslan.id);
+              // actualStatus = "publish";
+            }
           }
 
           setProductsUpdated((prev) => [
@@ -270,28 +275,31 @@ export default function ResentSales() {
                   ""
                 )}
                 {productsUpdated.length > 0 ? (
-                  <Dialog>
-                    <DialogTrigger className="flex text-sm">
-                      Productos Actualizados
-                      <SquareArrowUpRight size={20} />
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[80vw] sm:max-h-[80vh]">
-                      <DialogHeader>
-                        <DialogTitle>Productos Actualizados</DialogTitle>
-                        <DialogDescription>
-                          Lista de los productos actualizados
-                        </DialogDescription>
-                      </DialogHeader>
-                      <ListProductUpdatedDashboard
-                        productsRows={productsUpdated}
-                      />
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button>Salir</Button>
-                        </DialogClose>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                  <>
+                    <Dialog>
+                      <DialogTrigger className="flex items-center justify-start text-sm">
+                        Ver estado
+                        <SquareArrowUpRight size={20} />
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[80vw] sm:max-h-[80vh]">
+                        <DialogHeader>
+                          <DialogTitle>Productos Actualizados</DialogTitle>
+                          <DialogDescription>
+                            Lista de los productos actualizados
+                          </DialogDescription>
+                        </DialogHeader>
+                        <ListProductUpdatedDashboard
+                          productsRows={productsUpdated}
+                        />
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button>Salir</Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    <ExcelExportButton data={productsUpdated} />
+                  </>
                 ) : (
                   <Button
                     isDisabled={isLoadingProductsAdminstrated || isLoading}

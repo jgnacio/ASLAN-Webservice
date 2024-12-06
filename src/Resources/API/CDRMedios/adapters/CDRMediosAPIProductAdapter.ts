@@ -48,7 +48,9 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
 
       // Convierte la cadena JSON en un objeto
       const data = JSON.parse(rawData);
-      console.log("Data:", data);
+
+      console.log(data.filter((p: any) => p.codigo === "NOT2906"));
+
       return data;
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -82,8 +84,7 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
     provider?: string;
   }): Promise<Product[]> {
     const response = await this.fetchProducts();
-    console.log("Response:", response);
-    return [];
+    return response;
   }
   async getByCategory(category: string): Promise<Product[]> {
     throw new Error("Method not implemented.");

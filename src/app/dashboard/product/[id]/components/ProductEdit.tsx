@@ -59,8 +59,10 @@ import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/Unic
 import { ImplementProviders } from "@/Resources/API/config";
 import { getAllProductCached } from "@/app/dashboard/_actions/get-all-product-cached";
 import ListProductModular from "@/app/dashboard/components/ListProductModular";
+import { Separator } from "@/components/ui/separator";
 import { findSimilarProducts } from "@/lib/functions/ProductFunctions";
 import { Spinner } from "@nextui-org/spinner";
+import { Switch } from "@nextui-org/switch";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -113,17 +115,19 @@ export function ProductEdit({ product }: { product: ProductType }) {
   const [productState, setProductState] = useState<FormPublishProduct>({
     ...product,
     publishState: "draft",
+    stock_status: "instock",
   });
 
   const router = useRouter();
   const { toast } = useToast();
+  const [onBackOrder, setOnBackOrder] = useState<boolean>(false);
 
   const {
     mutateAsync: server_publishProduct,
     isError: isErrorPublish,
     isSuccess: isSuccessPublish,
   } = useMutation({
-    mutationFn: (product: ProductType) => publishProduct(product),
+    mutationFn: (product: FormPublishProduct) => publishProduct(product),
     onSuccess: () => {
       toast({
         title: "Producto publicado",
@@ -353,6 +357,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
         ...productState,
         images: cleanImagesIds, // Aseguramos que solo se envían objetos válidos
         sku: productRelated.SKU,
+        stock_status: onBackOrder ? "onbackorder" : "instock",
       };
       // const { errors, data } = validateFormData(
       //   schemaPublishProduct,
@@ -453,6 +458,10 @@ export function ProductEdit({ product }: { product: ProductType }) {
     }
   };
 
+  const handleChangeOnBackOrder = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOnBackOrder(e.target.checked);
+  };
+
   return (
     <div className="mx-auto grid max-w-[70vw] flex-1 auto-rows-max gap-4">
       <div className="flex items-center gap-4">
@@ -484,7 +493,43 @@ export function ProductEdit({ product }: { product: ProductType }) {
             product.estimatedArrivalDate?.getMonth() + 1
           }/${product.estimatedArrivalDate?.getFullYear()}`}</Badge>
         )}
+        <Switch
+          color="warning"
+          id="onBackOrder"
+          size="sm"
+          onChange={handleChangeOnBackOrder}
+        >
+          <Label htmlFor="onBackOrder">En reserva?</Label>
+        </Switch>
         <div className="hidden items-center gap-2 md:ml-auto md:flex">
+          <div className="flex">
+            <Select
+              onValueChange={(value) => {
+                setProductState({
+                  ...productState,
+                  publishState: value,
+                });
+              }}
+              value={productState.publishState}
+              defaultValue="draft"
+            >
+              <SelectTrigger
+                id="publishState"
+                aria-label="Selecciona el estado"
+              >
+                <SelectValue placeholder="Selecciona el estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Borrador</SelectItem>
+                <SelectItem disabled value="published">
+                  Publico
+                </SelectItem>
+                <SelectItem disabled value="published">
+                  Publico
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             onClick={() => router.push("/dashboard/products")}
             variant="outline"
@@ -538,6 +583,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
                     setProductState={setProductState}
                   />
                 </div>
+                <Separator />
               </div>
             </CardContent>
           </Card>
@@ -989,42 +1035,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
                   )}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-
-          <Card x-chunk="dashboard-07-chunk-3">
-            <CardHeader>
-              <CardTitle>Estado del Producto</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="publishState">Estado</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      setProductState({
-                        ...productState,
-                        publishState: value,
-                      });
-                    }}
-                    value={productState.publishState}
-                    defaultValue="draft"
-                  >
-                    <SelectTrigger
-                      id="publishState"
-                      aria-label="Selecciona el estado"
-                    >
-                      <SelectValue placeholder="Selecciona el estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Borrador</SelectItem>
-                      <SelectItem disabled value="published">
-                        Publico
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
