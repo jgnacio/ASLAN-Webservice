@@ -37,6 +37,7 @@ import { getProductBySku } from "../product/_actions/get-product-by-sku";
 import ListOrders from "./ListOrders";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 import ExcelExportButton from "./Export/SaveToExcel";
+import { deleteProductRelation } from "../identify/_actions/delete-product-relation";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -127,6 +128,15 @@ export default function ResentSales() {
     queryFn: () => getOffersProductsByPage({ page: 1 }),
   });
 
+  const {
+    mutateAsync: server_deleteProductRelation,
+    isPending: isPendingDeleteProductRelation,
+    isSuccess: isSuccessDeleteProductRelation,
+    isError: isErrorDeleteProductRelation,
+  } = useMutation({
+    mutationFn: (SKU_RELATION: string) => deleteProductRelation(SKU_RELATION),
+  });
+
   const columns: GridColDef[] = [
     { field: "title", headerName: "Producto", flex: 1 },
     // { field: "availability", headerName: "Disponibilidad", width: 120 },
@@ -162,9 +172,10 @@ export default function ResentSales() {
 
     // Calcula cuánto porcentaje representa cada relación individual
     const incrementPerRelation = 100 / totalRelations;
-
+    let i = 0;
     for (const product of dataProductsAdminstrated) {
       for (const relation of product.relations) {
+        i++;
         const resultAslan = await server_getProductAslanBySku(
           relation.SKU_Relation
         );
@@ -177,6 +188,42 @@ export default function ResentSales() {
           sku: relation.sku_provider,
           provider: providerName,
         });
+
+        if (!resultAslan && resultProduct) {
+          // Eliminar del administrador de SKU
+          try {
+            server_deleteProductRelation(relation.SKU_Relation);
+            setProductsUpdated((prev) => [
+              ...prev,
+              {
+                id: i,
+                title: resultProduct.title,
+                marca: resultProduct.marca,
+                stock: resultProduct.stock,
+                guaranteeDays: resultProduct.guaranteeDays || 0,
+                sku: "N/A",
+                priceProvider: resultProduct.price,
+                price: resultProduct.price,
+                partNumber: resultProduct.partNumber
+                  ? resultProduct.partNumber[0].partNumber
+                  : "",
+                availability: resultProduct.availability,
+                aslanPrevStatus: "deleted",
+                aslanActualStatus: "deleted",
+              },
+            ]);
+            toast({
+              title: relation.SKU_Relation,
+              description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan. (Eliminar residuos)`,
+            });
+          } catch (e) {
+            console.error(e);
+          }
+          setLoadingPercentage((prev) =>
+            Math.min(prev + incrementPerRelation, 100)
+          );
+          continue;
+        }
 
         if (resultAslan && resultProduct) {
           let actualStatus = resultAslan.status;

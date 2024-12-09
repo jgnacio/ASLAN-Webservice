@@ -524,9 +524,6 @@ export function ProductEdit({ product }: { product: ProductType }) {
                 <SelectItem disabled value="published">
                   Publico
                 </SelectItem>
-                <SelectItem disabled value="published">
-                  Publico
-                </SelectItem>
               </SelectContent>
             </Select>
           </div>

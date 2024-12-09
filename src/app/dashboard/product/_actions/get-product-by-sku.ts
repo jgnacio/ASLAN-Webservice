@@ -37,6 +37,7 @@ export const getProductBySku = async (
     if (!product) {
       return null;
     }
+    return product.toPlainObject();
   }
 
   const unicomAPIProductAdapter = new UnicomAPIProductAdapter();

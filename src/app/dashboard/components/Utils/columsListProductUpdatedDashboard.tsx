@@ -82,8 +82,12 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     resizable: false,
     renderCell: (params: GridRenderCellParams) =>
       params.row.aslanPrevStatus === "draft" ? (
-        <Badge variant="outline" className="text-red-400">
+        <Badge variant="outline" className="text-muted-foreground">
           Borrador
+        </Badge>
+      ) : params.row.aslanPrevStatus === "deleted" ? (
+        <Badge variant="outline" className="text-red-400">
+          Eliminado
         </Badge>
       ) : (
         <Badge variant="outline" className="text-success-400">
@@ -99,8 +103,12 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     resizable: false,
     renderCell: (params: GridRenderCellParams) =>
       params.row.aslanActualStatus === "draft" ? (
-        <Badge variant="outline" className="text-red-400">
+        <Badge variant="outline" className="text-muted-foreground">
           Borrador
+        </Badge>
+      ) : params.row.aslanPrevStatus === "deleted" ? (
+        <Badge variant="outline" className="text-red-400">
+          Eliminado
         </Badge>
       ) : (
         <Badge variant="outline" className="text-success-400">

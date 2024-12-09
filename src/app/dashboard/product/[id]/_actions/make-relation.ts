@@ -23,7 +23,7 @@ export const makeProductRelation = async ({
   const body = {
     title: productToPublish.title,
     price: productToPublish.price,
-    description: productToPublish.description,
+    description: productToPublish.description || ".",
     stock: productToPublish.stock,
     category: productToPublish.category.name,
     brand: productToPublish.marca,

@@ -49,8 +49,6 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
       // Convierte la cadena JSON en un objeto
       const data = JSON.parse(rawData);
 
-      console.log(data.filter((p: any) => p.codigo === "NOT2906"));
-
       return data;
     } catch (error) {
       console.error("Error fetching products:", error);
