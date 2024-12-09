@@ -64,7 +64,7 @@ export default function ListProductUpdatedDashboard({
       rowHeight={45}
       initialState={{
         pagination: {
-          paginationModel: { page: 0, pageSize: 10 },
+          paginationModel: { page: 0, pageSize: 5 },
         },
       }}
       pageSizeOptions={[5, 8]}
