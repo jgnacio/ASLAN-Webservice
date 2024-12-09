@@ -67,7 +67,7 @@ export default function ListProductUpdatedDashboard({
           paginationModel: { page: 0, pageSize: 10 },
         },
       }}
-      pageSizeOptions={[10, 20]}
+      pageSizeOptions={[5, 8]}
     />
   );
 }
