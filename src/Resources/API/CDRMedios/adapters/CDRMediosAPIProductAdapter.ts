@@ -25,16 +25,16 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
   }
 
   private async fetchProducts(): Promise<any> {
-    const client = await this.getSoapClient();
-
-    const params = {
-      email: process.env.API_CDRMEDIOS_USER,
-      token: process.env.API_CDRMEDIOS_TOKEN,
-      fecha: getFormattedDate(30),
-      formato: "",
-    };
-
     try {
+      const client = await this.getSoapClient();
+
+      const params = {
+        email: process.env.API_CDRMEDIOS_USER,
+        token: process.env.API_CDRMEDIOS_TOKEN,
+        fecha: getFormattedDate(30),
+        formato: "",
+      };
+
       const response = await client.productos_con_galeriaAsync(params);
 
       // Accede al contenido de 'productos_con_galeriaReturn'
@@ -52,7 +52,7 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
       return data;
     } catch (error) {
       console.error("Error fetching products:", error);
-      throw error;
+      return null;
     }
   }
 
