@@ -5,6 +5,14 @@ export interface CategoriesProvider {
   providerCategoryCode: number | string;
 }
 
+export interface RelevantCategoriesType {
+  name: string;
+  nameES: string;
+  code: string;
+  provider: string;
+  providerCategories: CategoriesProvider[] | [];
+}
+
 export type RelevantCategoriesBASE = {
   provider: string;
   categories: [
@@ -115,81 +123,3 @@ export type RelevantCategoriesBASE = {
     }
   ];
 };
-
-export const DefaultCategoriesAdapter = [
-  {
-    name: "Notebooks Gamer",
-    nameES: "Laptops Gamer",
-    code: "notebooks-gamer",
-  },
-  {
-    name: "Notebooks Home/Office",
-    nameES: "Laptops Home/Office",
-    code: "notebooks-home-office",
-  },
-  {
-    name: "MacBooks",
-    nameES: "MacBooks",
-    code: "macbooks",
-  },
-  {
-    name: "Monitors",
-    nameES: "Monitores",
-    code: "monitors",
-  },
-  {
-    name: "Storage",
-    nameES: "Almacenamiento",
-    code: "storage",
-  },
-  {
-    name: "Power Supplies",
-    nameES: "Fuentes",
-    code: "power-supplies",
-  },
-  {
-    name: "Cases",
-    nameES: "Gabinetes",
-    code: "cases",
-  },
-  {
-    name: "GPU",
-    nameES: "GPU",
-    code: "gpu",
-  },
-  {
-    name: "CPU",
-    nameES: "CPU",
-    code: "cpu",
-  },
-  {
-    name: "RAM",
-    nameES: "RAM",
-    code: "ram",
-  },
-  {
-    name: "Motherboards",
-    nameES: "Motherboards",
-    code: "motherboards",
-  },
-  {
-    name: "Peripherals",
-    nameES: "Periféricos",
-    code: "peripherals",
-  },
-  {
-    name: "Cooling",
-    nameES: "Refrigeración",
-    code: "cooling",
-  },
-  {
-    name: "Chairs",
-    nameES: "Sillas",
-    code: "chairs",
-  },
-  {
-    name: "Other",
-    nameES: "Otros",
-    code: "other",
-  },
-];

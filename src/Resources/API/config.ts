@@ -10,10 +10,18 @@ export const CDRProvider: Provider = {
   logoUrl:
     "https://www.cdrmedios.com/artworks/artworks_cdrmedios2020com/logo.svg",
 };
+export const IntcomexProvider: Provider = {
+  name: "Intcomex",
+  mainPageUrl: "https://store.intcomex.com/es-xuy",
+  searchPageUrl:
+    "https://store.intcomex.com/es-xuy/Products/ByKeyword?typeSearch=&r=true&term=",
+  logoUrl: "https://store.intcomex.com/Content/Images/Layout/Logo.png",
+};
 
 export const ImplementProviders = [
   logoPCService,
   logoUnicom,
   solutionBoxProvider,
   CDRProvider,
+  IntcomexProvider,
 ];
