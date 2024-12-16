@@ -4,8 +4,8 @@ export default function Page() {
   return (
     <div className="flex justify-center items-center h-screen">
       <SignIn
-        forceRedirectUrl={"/dashboard"}
-        fallbackRedirectUrl={"/dashboard"}
+        forceRedirectUrl={"/icc-aslan-dashboard"}
+        fallbackRedirectUrl={"/icc-aslan-dashboard"}
       />
     </div>
   );

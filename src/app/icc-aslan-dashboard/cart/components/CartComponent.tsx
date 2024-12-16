@@ -144,7 +144,7 @@ export default function CartComponent() {
       field: "title",
       headerName: "Producto",
       renderCell: (params: GridRenderCellParams) => (
-        <Link href={`/dashboard/product/${params.row.sku}`}>
+        <Link href={`/icc-aslan-dashboard/product/${params.row.sku}`}>
           {params.row.title}
         </Link>
       ),
@@ -327,7 +327,7 @@ export default function CartComponent() {
             <h3 className="text-lg font-bold text-primary">
               No hay productos en el carrito
             </h3>
-            <Link href="/dashboard/products">
+            <Link href="/icc-aslan-dashboard/products">
               <Button color="primary">Ver Productos</Button>
             </Link>
           </div>
@@ -348,7 +348,7 @@ export default function CartComponent() {
             </div>
             {/* TODO: Crear una boton para el toast de agregar carrito que te lleve al carrito y ver el producto que agregaste */}
             <div>
-              <Link href="/dashboard/purchase_order">
+              <Link href="/icc-aslan-dashboard/purchase_order">
                 <Button color="primary">
                   Confirmar <PackageCheck />
                 </Button>

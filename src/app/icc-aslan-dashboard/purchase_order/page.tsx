@@ -107,7 +107,7 @@ export default function PurchaseOrder() {
         action: (
           <ToastAction
             onClick={() => {
-              router.push("/dashboard/cart");
+              router.push("/icc-aslan-dashboard/cart");
             }}
             altText="Ir al carrito"
           >

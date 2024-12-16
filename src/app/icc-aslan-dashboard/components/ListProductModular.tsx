@@ -44,7 +44,7 @@ export default function ListProductModular({
         resizable: false,
         renderCell: (params: GridRenderCellParams) => (
           <Link
-            href={`/dashboard/product/${encodeURI(
+            href={`/icc-aslan-dashboard/product/${encodeURI(
               params.row.sku
             )}/edit?provider=${params.row.provider.name}`}
           >

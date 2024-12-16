@@ -352,7 +352,7 @@ export default function ResentSales() {
                     isDisabled={isLoadingProductsAdminstrated || isLoading}
                     size="sm"
                     onClick={() => {
-                      router.push("/dashboard/identify");
+                      router.push("/icc-aslan-dashboard/identify");
                     }}
                     color="secondary"
                     isIconOnly

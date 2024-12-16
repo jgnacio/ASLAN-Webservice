@@ -52,7 +52,7 @@ export default function DashboardLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard"
+                  href="/icc-aslan-dashboard"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <LayoutDashboard className="h-5 w-5" />
@@ -67,7 +67,7 @@ export default function DashboardLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/products"
+                  href="/icc-aslan-dashboard/products"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Package className="h-5 w-5" />
@@ -81,7 +81,7 @@ export default function DashboardLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/cart"
+                  href="/icc-aslan-dashboard/cart"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <ShoppingCart className="h-5 w-5" />
@@ -95,7 +95,7 @@ export default function DashboardLayout({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/identify"
+                  href="/icc-aslan-dashboard/identify"
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <Layers className="h-5 w-5" />
@@ -159,7 +159,7 @@ export default function DashboardLayout({
                 <span className="sr-only">Cuenta</span> */}
                 <SheetClose asChild>
                   <Link
-                    href="/dashboard"
+                    href="/icc-aslan-dashboard"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
                   >
                     <LayoutDashboard className="h-5 w-5" />
@@ -168,7 +168,7 @@ export default function DashboardLayout({
                 </SheetClose>
                 <SheetClose asChild>
                   <Link
-                    href="/dashboard/products"
+                    href="/icc-aslan-dashboard/products"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
                   >
                     <Package className="h-5 w-5" />
@@ -177,7 +177,7 @@ export default function DashboardLayout({
                 </SheetClose>
                 <SheetClose asChild>
                   <Link
-                    href="/dashboard/cart"
+                    href="/icc-aslan-dashboard/cart"
                     className="flex items-center gap-4 px-2.5 text-muted-foreground Hover:text-foreground"
                   >
                     <ShoppingCart className="h-5 w-5" />
@@ -200,28 +200,32 @@ export default function DashboardLayout({
             <BreadcrumbList>
               <BreadcrumbItem className="select-none">
                 <BreadcrumbLink asChild>
-                  <Link href="/dashboard">Dashboard</Link>
+                  <Link href="/icc-aslan-dashboard">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
-              {pathname?.startsWith("/dashboard/products") && (
+              {pathname?.startsWith("/icc-aslan-dashboard/products") && (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="select-none">
                     <BreadcrumbLink asChild>
-                      <Link href="/dashboard/products">Productos</Link>
+                      <Link href="/icc-aslan-dashboard/products">
+                        Productos
+                      </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </>
               )}
 
-              {pathname?.startsWith("/dashboard/product") &&
+              {pathname?.startsWith("/icc-aslan-dashboard/product") &&
                 !pathname.endsWith("products") && (
                   <>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem className="select-none">
                       <BreadcrumbLink asChild>
-                        <Link href="/dashboard/products">Productos</Link>
+                        <Link href="/icc-aslan-dashboard/products">
+                          Productos
+                        </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -231,7 +235,7 @@ export default function DashboardLayout({
                   </>
                 )}
 
-              {pathname?.startsWith("/dashboard/cart") && (
+              {pathname?.startsWith("/icc-aslan-dashboard/cart") && (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="pointer-events-none select-none">
