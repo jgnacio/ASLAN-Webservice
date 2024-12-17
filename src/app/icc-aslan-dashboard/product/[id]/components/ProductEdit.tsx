@@ -272,7 +272,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
 
   async function SubmitImageToProduction(
     imgName: string
-  ): Promise<number | undefined> {
+  ): Promise<number | undefined | -999> {
     const img = file?.filter((i) => i.name === imgName);
     if (img && img[0]) {
       const { name: title, filename, content, type } = img[0];
@@ -290,7 +290,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
             variant: "destructive",
           });
           setIsSubmitting(false);
-          return;
+          return -999;
         }
 
         // Verificar que el usuario que intenta publicar tenga un correo verificado
@@ -301,12 +301,10 @@ export function ProductEdit({ product }: { product: ProductType }) {
             variant: "destructive",
           });
           setIsSubmitting(false);
+          return -999;
         }
 
-        const response = await axios.post("/api/upload", {
-          user: user,
-          formData: formData,
-        });
+        const response = await axios.post("/api/upload", formData);
 
         const id = response.data.result.id || undefined;
 
@@ -320,6 +318,7 @@ export function ProductEdit({ product }: { product: ProductType }) {
     | { src?: string; id: number | null }[]
     | { src: string; id?: number | null }[]
     | undefined
+    | null
   > {
     if (file) {
       const ids: { id: number | null }[] = [];
@@ -327,6 +326,9 @@ export function ProductEdit({ product }: { product: ProductType }) {
         const img = file[i];
         try {
           const id = await SubmitImageToProduction(img.name);
+          if (id === -999) {
+            return null;
+          }
           ids.push({ id: id || null });
         } catch (error) {
           toast({
@@ -368,9 +370,14 @@ export function ProductEdit({ product }: { product: ProductType }) {
         variant: "destructive",
       });
       setIsSubmitting(false);
+      return;
     }
     try {
       const imagesIds = await submitImagesToProduction();
+      if (imagesIds === null) {
+        setIsSubmitting(false);
+        return;
+      }
       let cleanImagesIds = [] as {
         id: number;
         src?: string;

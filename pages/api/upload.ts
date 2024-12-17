@@ -25,20 +25,13 @@ export default async function handler(
   }
 
   // Authenticate the user using Clerk before doing anything else
-  const { userId, orgRole } = getAuth(req);
+  const { userId } = getAuth(req);
 
   // Check if user is authenticated and has required role
   if (!userId) {
     return res.status(401).json({
       error: "Unauthorized",
       message: "No user session found",
-    });
-  }
-
-  if (orgRole !== "admin") {
-    return res.status(403).json({
-      error: "Forbidden",
-      message: "Insufficient permissions",
     });
   }
 
