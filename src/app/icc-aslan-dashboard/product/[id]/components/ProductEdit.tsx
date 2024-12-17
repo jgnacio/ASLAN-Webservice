@@ -73,8 +73,10 @@ import { publishProduct } from "../_actions/publish-product";
 import ProductDescriptionEditor from "../edit/components/ProductDescriptionEditor";
 import { FormPublishProduct } from "./types/formTypes";
 import { imageListProps, imageProps } from "./types/imageTypes";
+import { useUser } from "@clerk/nextjs";
 
 export function ProductEdit({ product }: { product: ProductType }) {
+  const { isSignedIn, user } = useUser();
   const [imageTemplate, setImageTemplate] = useState<imageProps>({
     name: "",
     src: "",
@@ -280,7 +282,31 @@ export function ProductEdit({ product }: { product: ProductType }) {
         formData.append("file", content, filename); // El archivo es añadido directamente a FormData
         formData.append("title", title); // Puedes añadir otros datos también
 
-        const response = await axios.post("/api/upload", formData);
+        // Verficar si esa logeado como usuario
+        if (!isSignedIn) {
+          toast({
+            title: "Error",
+            description: "Debes iniciar sesión para publicar un producto.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Verificar que el usuario que intenta publicar tenga un correo verificado
+        if (!user.hasVerifiedEmailAddress) {
+          toast({
+            title: "Error",
+            description: "Debes verificar tu correo para publicar un producto.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+        }
+
+        const response = await axios.post("/api/upload", {
+          user: user,
+          formData: formData,
+        });
 
         const id = response.data.result.id || undefined;
 
@@ -322,6 +348,27 @@ export function ProductEdit({ product }: { product: ProductType }) {
   }
   async function handleSubmmit() {
     setIsSubmitting(true);
+
+    // Verficar si esa logeado como usuario
+    if (!isSignedIn) {
+      toast({
+        title: "Error",
+        description: "Debes iniciar sesión para publicar un producto.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Verificar que el usuario que intenta publicar tenga un correo verificado
+    if (!user.hasVerifiedEmailAddress) {
+      toast({
+        title: "Error",
+        description: "Debes verificar tu correo para publicar un producto.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
     try {
       const imagesIds = await submitImagesToProduction();
       let cleanImagesIds = [] as {

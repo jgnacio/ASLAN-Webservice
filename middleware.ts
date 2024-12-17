@@ -1,6 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(["/icc-aslan-dashboard(.*)"]);
+const isProtectedRoute = createRouteMatcher([
+  "/icc-aslan-dashboard(.*)",
+  "/api(.*)",
+]);
 
 export default clerkMiddleware((auth, req) => {
   if (isProtectedRoute(req)) {
