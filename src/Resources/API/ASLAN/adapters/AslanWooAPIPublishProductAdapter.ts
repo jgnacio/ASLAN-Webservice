@@ -1,7 +1,6 @@
-import { AslanWooAPI } from "../entities/AslanWooAPI";
-import { AslanWooAPIProduct } from "../entities/AslanWooAPIProduct";
-import { AslanWooAPIProductRequest } from "../AslanAPIRequest";
 import { FormPublishProduct } from "@/app/icc-aslan-dashboard/product/[id]/components/types/formTypes";
+import { AslanWooAPIProductRequest } from "../AslanAPIRequest";
+import { AslanWooAPI } from "../entities/AslanWooAPI";
 
 export class AslanWooAPIPublishProductAdapter {
   public static async publishProduct(product: FormPublishProduct) {

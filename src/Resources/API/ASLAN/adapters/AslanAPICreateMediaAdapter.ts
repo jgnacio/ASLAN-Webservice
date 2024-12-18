@@ -1,7 +1,5 @@
-import wpRAPI, {
-  WordPressRestAPIMediaAttributes,
-} from "../entities/AslanWPAPI";
 import FormData from "form-data";
+import wpRAPI from "../entities/AslanWPAPI";
 
 export class AslanAPICreateMediaAdapter {
   constructor() {}

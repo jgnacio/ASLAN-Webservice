@@ -1,18 +1,10 @@
+import { Toaster } from "@/components/ui/toaster";
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
 import NextTopLoader from "nextjs-toploader";
+import "./globals.css";
 import { Providers } from "./Providers/Providers";
-import { RiShoppingCartFill } from "react-icons/ri";
-import Link from "next/link";
-import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
