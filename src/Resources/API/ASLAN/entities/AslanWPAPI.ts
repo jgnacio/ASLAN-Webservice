@@ -5,7 +5,6 @@ import FormData from "form-data";
 const WP_URL = process.env.WP_URL || "";
 const WP_REST_API_USER = process.env.WP_REST_API_USER || "";
 const WP_REST_API_PASSWORD = process.env.WP_REST_API_PASSWORD || "";
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 interface WPConfig {
   url: string;

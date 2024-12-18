@@ -3,8 +3,6 @@ import { AslanWooAPIProduct } from "../entities/AslanWooAPIProduct";
 import { AslanWooAPIProductRequest } from "../AslanAPIRequest";
 import { FormPublishProduct } from "@/app/icc-aslan-dashboard/product/[id]/components/types/formTypes";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 export class AslanWooAPIPublishProductAdapter {
   public static async publishProduct(product: FormPublishProduct) {
     const wooAPI = AslanWooAPI.getInstance();
