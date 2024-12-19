@@ -23,7 +23,7 @@ export default async function AslanTestWoocomerce() {
     responseData.products = response.data;
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to fetch data");
+    return responseData;
   }
 
   return responseData;

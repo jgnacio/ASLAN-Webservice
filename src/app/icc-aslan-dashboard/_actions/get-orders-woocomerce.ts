@@ -6,8 +6,13 @@ export const getOrdersWoocomerce = async (status?: string) => {
   try {
     const aslanAPIProductsAdapter = new AslanAPIProductsAdapter();
     const orders = await aslanAPIProductsAdapter.getOrders(status);
+    if (!orders) {
+      console.error("Error fetching orders");
+      return [];
+    }
     return orders;
   } catch (error: any) {
-    throw new Error("Error fetching orders");
+    console.error("Error fetching orders");
+    return [];
   }
 };
