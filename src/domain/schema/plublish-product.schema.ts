@@ -4,14 +4,16 @@ export const schemaPublishProduct = z.object({
   title: z.string(),
   price: z.number().gt(0),
   description: z.string(),
-  images: z.array(
-    z.object(
-      { src: z.string().optional(), id: z.number() } || {
-        src: z.string(),
-        id: z.number().optional(),
-      }
-    )
-  ),
+  images: z.union([
+    z.object({
+      src: z.string().optional(),
+      id: z.number(),
+    }),
+    z.object({
+      src: z.string(),
+      id: z.number().optional(),
+    }),
+  ]),
   //   category: z.object({
   //     id: z.string(),
   //     name: z.string(),

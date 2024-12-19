@@ -185,7 +185,8 @@ export default function PurchaseOrder() {
     }));
   };
 
-  const handleTimeChange = (value: Time) => {
+  const handleTimeChange = (value: Time | null) => {
+    if (!value) return;
     const dateCalendar = formData.fecha_hora_entrega;
 
     dateCalendar.setHours(value.hour);
