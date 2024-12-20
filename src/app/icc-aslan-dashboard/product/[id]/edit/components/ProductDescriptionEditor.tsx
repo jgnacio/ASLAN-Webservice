@@ -1,13 +1,7 @@
-import dynamic from "next/dynamic";
 import { CardContent } from "@mui/material";
 import { Card } from "@nextui-org/card";
 import { FormPublishProduct } from "../../components/types/formTypes";
-
-const ReactQuill = dynamic(() => import("react-quill"), {
-  ssr: false,
-});
-
-import "react-quill/dist/quill.snow.css";
+import Tiptap from "@/components/ui/TiptapTextEditor";
 
 function ProductDescriptionEditor({
   productState,
@@ -17,20 +11,12 @@ function ProductDescriptionEditor({
   setProductState: (product: FormPublishProduct) => void;
 }) {
   return (
-    <Card>
-      <CardContent>
-        <ReactQuill
-          theme="snow"
-          value={productState.description}
-          onChange={(value) => {
-            setProductState({
-              ...productState,
-              description: value,
-            });
-          }}
-        />
-      </CardContent>
-    </Card>
+    <Tiptap
+      content={productState.description}
+      onChange={(content) => {
+        setProductState({ ...productState, description: content });
+      }}
+    />
   );
 }
 

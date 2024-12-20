@@ -9,7 +9,9 @@ import { getProductBySku } from "../../_actions/get-product-by-sku";
 import { ProductEdit } from "../components/ProductEdit";
 import { getProductCachedBySkuProvider } from "../_actions/get-product-cached-by-sku-provider";
 
-export default function EditProduct(props: { params: Promise<{ id: string }> }) {
+export default function EditProduct(props: {
+  params: Promise<{ id: string }>;
+}) {
   const params = use(props.params);
   const searchParams = useSearchParams();
 
