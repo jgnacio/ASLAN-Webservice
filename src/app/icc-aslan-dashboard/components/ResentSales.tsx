@@ -38,6 +38,8 @@ import ListOrders from "./ListOrders";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 import ExcelExportButton from "./Export/SaveToExcel";
 import { deleteProductRelation } from "../identify/_actions/delete-product-relation";
+import { setAsInStock } from "../_actions/set-as-on-stock";
+import { setAsOutOfStock } from "../_actions/set-as-out-of-stock";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -109,6 +111,26 @@ export default function ResentSales() {
   });
 
   const {
+    mutateAsync: server_setAsInStock,
+    isPending: isPendingSetAsInStock,
+    isSuccess: isSuccessSetAsInStock,
+    isError: isErrorSetAsInStock,
+    data: dataSetAsInStock,
+  } = useMutation({
+    mutationFn: (productId: number) => setAsInStock(productId),
+  });
+
+  const {
+    mutateAsync: server_setAsOutOfStock,
+    isPending: isPendingSetAsOutOfStock,
+    isSuccess: isSuccessSetAsOutOfStock,
+    isError: isErrorSetAsOutOfStock,
+    data: dataSetAsOutOfStock,
+  } = useMutation({
+    mutationFn: (productId: number) => setAsOutOfStock(productId),
+  });
+
+  const {
     data: dataOrdersAslan,
     isLoading: isLoadingOrdersAslan,
     isSuccess: isSuccessOrdersAslan,
@@ -170,126 +192,168 @@ export default function ResentSales() {
       .map((product: any) => product.relations.length)
       .reduce((a: any, b: any) => a + b, 0);
 
-    // Calcula cuánto porcentaje representa cada relación individual
     const incrementPerRelation = 100 / totalRelations;
-    let i = 0;
-    for (const product of dataProductsAdminstrated) {
-      for (const relation of product.relations) {
-        i++;
-        const resultAslan = await server_getProductAslanBySku(
-          relation.SKU_Relation
-        );
+    let processedRelations = 0;
 
-        const provider = await getProviderByID(relation.ID_Provider);
+    const updateProgress = () => {
+      setLoadingPercentage((prev) =>
+        Math.min(prev + incrementPerRelation, 100)
+      );
+    };
 
-        const providerName = provider.data.name;
+    try {
+      for (const product of dataProductsAdminstrated) {
+        await Promise.all(
+          product.relations.map(async (relation: any) => {
+            try {
+              const resultAslan = await server_getProductAslanBySku(
+                relation.SKU_Relation
+              );
+              const provider = await getProviderByID(relation.ID_Provider);
+              const providerName = provider.data.name;
+              const resultProduct = await server_getProductBySku({
+                sku: relation.sku_provider,
+                provider: providerName,
+              });
 
-        const resultProduct = await server_getProductBySku({
-          sku: relation.sku_provider,
-          provider: providerName,
-        });
+              if (!resultAslan && resultProduct) {
+                await handleDeleteRelation(
+                  relation,
+                  resultProduct,
+                  processedRelations++
+                );
+                updateProgress();
+                return;
+              }
 
-        if (!resultAslan && resultProduct) {
-          // Eliminar del administrador de SKU
-          try {
-            server_deleteProductRelation(relation.SKU_Relation);
-            setProductsUpdated((prev) => [
-              ...prev,
-              {
-                id: i,
-                title: resultProduct.title,
-                marca: resultProduct.marca,
-                stock: resultProduct.stock,
-                guaranteeDays: resultProduct.guaranteeDays || 0,
-                sku: "N/A",
-                priceProvider: resultProduct.price,
-                price: resultProduct.price,
-                partNumber: resultProduct.partNumber
-                  ? resultProduct.partNumber[0].partNumber
-                  : "",
-                availability: resultProduct.availability,
-                aslanPrevStatus: "deleted",
-                aslanActualStatus: "deleted",
-              },
-            ]);
-            toast({
-              title: relation.SKU_Relation,
-              description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan. (Eliminar residuos)`,
-            });
-          } catch (e) {
-            console.error(e);
-          }
-          setLoadingPercentage((prev) =>
-            Math.min(prev + incrementPerRelation, 100)
-          );
-          continue;
-        }
+              if (resultAslan && resultProduct) {
+                await handleUpdateAslan(
+                  resultAslan,
+                  resultProduct,
+                  processedRelations++
+                );
+                updateProgress();
+                return;
+              }
 
-        if (resultAslan && resultProduct) {
-          let actualStatus = resultAslan.status;
+              if (!resultProduct) {
+                toast({
+                  title: "Error",
+                  description: `El producto con SKU: ${relation.sku_provider} no se encuentra en el proveedor ${providerName}`,
+                  variant: "destructive",
+                });
+              }
 
-          if (resultAslan.stock_status === "onbackorder") {
-            resultProduct.availability = "on_demand";
-          } else {
-            if (
-              resultProduct.availability !== "in_stock" &&
-              resultAslan.status !== "draft"
-            ) {
-              await server_removeProductFromCatalog(resultAslan.id);
-              actualStatus = "draft";
+              if (!resultAslan) {
+                toast({
+                  title: "Error",
+                  description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan`,
+                  variant: "destructive",
+                });
+              }
+            } catch (error) {
+              console.error(
+                `Error procesando relación: ${relation.SKU_Relation}`,
+                error
+              );
             }
-
-            if (
-              resultProduct.availability === "in_stock" &&
-              resultAslan.status === "draft"
-            ) {
-              // Actualizar stock en Aslan
-              // await server_productBackToTheCatalog(resultAslan.id);
-              // actualStatus = "publish";
-            }
-          }
-
-          setProductsUpdated((prev) => [
-            ...prev,
-            {
-              id: resultAslan.id,
-              title: resultAslan.name,
-              marca: resultProduct.marca,
-              stock: resultProduct.stock,
-              guaranteeDays: resultProduct.guaranteeDays || 0,
-              sku: resultAslan.sku,
-              priceProvider: resultProduct.price,
-              price: resultAslan.price,
-              partNumber: resultProduct.partNumber
-                ? resultProduct.partNumber[0].partNumber
-                : "",
-              availability: resultProduct.availability,
-              aslanPrevStatus: resultAslan.status,
-              aslanActualStatus: actualStatus,
-            },
-          ]);
-        } else if (resultAslan && !resultProduct) {
-          toast({
-            title: "Error",
-            description: `El producto con SKU: ${relation.sku_provider} no se encuentra en el proveedor ${providerName}`,
-            variant: "destructive",
-          });
-        } else if (!resultAslan && resultProduct) {
-          toast({
-            title: "Error",
-            description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan`,
-            variant: "destructive",
-          });
-        }
-
-        // Incrementar el porcentaje de carga después de cada relación procesada
-        setLoadingPercentage((prev) =>
-          Math.min(prev + incrementPerRelation, 100)
+          })
         );
       }
+    } catch (error) {
+      console.error("Error general en handleUpdateStock:", error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setIsLoading(false);
+  const handleDeleteRelation = async (
+    relation: any,
+    resultProduct: any,
+    id: number
+  ) => {
+    try {
+      await server_deleteProductRelation(relation.SKU_Relation);
+      setProductsUpdated((prev) => [
+        ...prev,
+        {
+          id,
+          title: resultProduct.title,
+          marca: resultProduct.marca,
+          stock: resultProduct.stock,
+          guaranteeDays: resultProduct.guaranteeDays || 0,
+          sku: "N/A",
+          priceProvider: resultProduct.price,
+          price: resultProduct.price,
+          partNumber: resultProduct.partNumber?.[0]?.partNumber || "",
+          availability: resultProduct.availability,
+          aslanPrevStatus: "deleted",
+          aslanActualStatus: "deleted",
+        },
+      ]);
+      toast({
+        title: relation.SKU_Relation,
+        description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan. (Eliminar residuos)`,
+      });
+    } catch (error) {
+      console.error(
+        `Error eliminando relación: ${relation.SKU_Relation}`,
+        error
+      );
+    }
+  };
+
+  const handleUpdateAslan = async (
+    resultAslan: any,
+    resultProduct: any,
+    id: number
+  ) => {
+    try {
+      let actualStatus = resultAslan.stock_status;
+
+      if (resultAslan.stock_status === "onbackorder") {
+        resultProduct.availability = "on_demand";
+      } else if (
+        resultProduct.availability === "in_stock" &&
+        resultAslan.stock_status !== "in_stock"
+      ) {
+        await server_setAsInStock(resultAslan.id);
+        actualStatus = "in_stock";
+      } else if (
+        resultProduct.availability === "out_of_stock" &&
+        resultAslan.stock_status !== "out_of_stock"
+      ) {
+        await server_setAsOutOfStock(resultAslan.id);
+        actualStatus = "out_of_stock";
+      }
+
+      setProductsUpdated((prev) => {
+        const updatedProducts = [
+          ...prev,
+          {
+            id: resultAslan.id,
+            title: resultAslan.name,
+            marca: resultProduct.marca,
+            stock: resultProduct.stock,
+            guaranteeDays: resultProduct.guaranteeDays || 0,
+            sku: resultAslan.sku,
+            priceProvider: resultProduct.price,
+            price: resultAslan.price,
+            partNumber: resultProduct.partNumber?.[0]?.partNumber || "",
+            availability: resultProduct.availability,
+            aslanPrevStatus: resultAslan.status,
+            aslanActualStatus: actualStatus,
+          },
+        ];
+        console.log("Updated Products:", updatedProducts);
+        return updatedProducts;
+      });
+    } catch (error) {
+      console.error(
+        `Error actualizando producto en Aslan: ${resultAslan.sku}`,
+        error
+      );
+    }
   };
 
   return (

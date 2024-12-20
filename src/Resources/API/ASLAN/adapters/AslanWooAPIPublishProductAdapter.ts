@@ -46,6 +46,28 @@ export class AslanWooAPIPublishProductAdapter {
     await wooAPI.put(`products/${productId}`, productMapped as any);
   }
 
+  public static async setAsOutOfStock(productId: number) {
+    const wooAPI = AslanWooAPI.getInstance() as any;
+
+    const productMapped = {
+      id: productId,
+      stock_status: "outofstock",
+    };
+
+    await wooAPI.put(`products/${productId}`, productMapped as any);
+  }
+
+  public static async setAsInStock(productId: number) {
+    const wooAPI = AslanWooAPI.getInstance() as any;
+
+    const productMapped = {
+      id: productId,
+      stock_status: "instock",
+    };
+
+    await wooAPI.put(`products/${productId}`, productMapped as any);
+  }
+
   public static async productBackToTheCatalog(productId: number) {
     const wooAPI = AslanWooAPI.getInstance() as any;
 
