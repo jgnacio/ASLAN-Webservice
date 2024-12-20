@@ -70,10 +70,6 @@ export default function ListProductModular({
     setProductsSelected(selectedItems); // Actualiza el estado con los productos seleccionados
   };
 
-  useEffect(() => {
-    console.log(productsRows);
-  }, []);
-
   return (
     <DataGrid
       rows={productsRows}

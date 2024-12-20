@@ -2,6 +2,10 @@ import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 import ToolsProductList from "../ToolsProductList";
 
+const hola = new Date();
+
+hola.getDate().toString();
+
 export const columnsDataGridProductList: GridColDef[] = [
   {
     field: "title",
