@@ -191,7 +191,7 @@ export default function CartComponent() {
             isIconOnly
             color="secondary"
             size="sm"
-            onClick={() => {
+            onPress={() => {
               if (params.row.quantity <= 1) return;
               handleAddQuantityToRow(params.row.id, -1);
             }}
@@ -203,7 +203,7 @@ export default function CartComponent() {
             isIconOnly
             color="secondary"
             size="sm"
-            onClick={() => {
+            onPress={() => {
               handleAddQuantityToRow(params.row.id, 1);
             }}
           >
@@ -221,7 +221,7 @@ export default function CartComponent() {
       renderCell: (params: GridRenderCellParams) => (
         <Button
           color="secondary"
-          onClick={() => {
+          onPress={() => {
             let actualQuantity = params.row.quantity;
             let previousQuantity = dataCart?.products.find(
               (product) => product.id === params.row.id
@@ -255,7 +255,7 @@ export default function CartComponent() {
         <Button
           isIconOnly
           color="danger"
-          onClick={() => {
+          onPress={() => {
             handleRemoveProduct(params.row.sku);
           }}
         >
@@ -314,7 +314,6 @@ export default function CartComponent() {
                   paginationModel: { page: 0, pageSize: 10 },
                 },
               }}
-              autoHeight
               pageSizeOptions={[10, 20]}
             />
             <Button size="sm" color="secondary" onClick={handleEraseCart}>

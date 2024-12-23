@@ -17,12 +17,17 @@ const Tiptap = ({
 }) => {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({}),
+      StarterKit.configure({
+        heading: false, // Deshabilitar heading
+        bulletList: false, // Deshabilitar bulletList
+        orderedList: false, // Deshabilitar orderedList
+        listItem: false, // Deshabilitar listItem
+      }),
       Heading.configure({
         HTMLAttributes: {
           class: "text-xl font-bold",
-          levels: [2],
         },
+        levels: [2], // Personalización de niveles
       }),
       BulletList.configure({
         HTMLAttributes: {
@@ -40,6 +45,7 @@ const Tiptap = ({
         },
       }),
     ],
+    immediatelyRender: false,
     content: content,
     editorProps: {
       attributes: {

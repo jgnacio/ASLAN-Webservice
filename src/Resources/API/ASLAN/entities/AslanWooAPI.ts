@@ -1,4 +1,5 @@
 import WooCommerceRestApi, { WooRestApiOptions } from "woocommerce-rest-ts-api";
+import { handleApiError } from "../error/errorHandling";
 
 export interface WooOrder {
   id: number;
@@ -60,7 +61,6 @@ export class AslanWooAPI {
       return exactProduct;
     } catch (error) {
       console.error(`Error fetching product with SKU ${sku}:`, error);
-      throw new Error("Error fetching product by SKU");
     }
   }
 
@@ -68,22 +68,18 @@ export class AslanWooAPI {
     try {
       const api = AslanWooAPI.getInstance();
 
-      // Parámetros opcionales, como el estado del pedido (por ejemplo, "completed")
+      // Optional parameters
       const params: { status?: string } = {};
       if (status) {
         params.status = status;
       }
 
-      // Petición para obtener los pedidos
+      // Fetch orders
       const response = await api.get("orders", params);
-
-      // Tipar correctamente la respuesta
-      const orders: WooOrder[] = response.data;
-
-      return orders;
+      return response.data as WooOrder[];
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      throw new Error("Error fetching orders");
+      handleApiError(error);
+      return [];
     }
   }
 }

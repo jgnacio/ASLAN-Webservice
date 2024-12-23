@@ -117,51 +117,6 @@ export default function ToolsProductList({
               </a>
             </div>
           </div>
-          // <div className="">
-          //   <div className="flex justify-between ">
-          //     <Button isIconOnly variant="solid" color="secondary">
-          //       <Clipboard
-          //         onClick={() => {
-          //           navigator.clipboard.writeText(title);
-          //           toast({
-          //             title: "Part Number copiado",
-          //             description:
-          //               "Se ha copiado el Part Number al portapapeles",
-          //           });
-          //         }}
-          //       />
-          //     </Button>
-          //     <Button isIconOnly variant="solid" color="secondary">
-          //       <a
-          //         target="_blank"
-          //         href={`https://www.google.com/search?q=${title}`}
-          //       >
-          //         <SearchIcon />
-          //       </a>
-          //     </Button>
-          //     <Button isIconOnly variant="solid" color="secondary">
-          //       {/* <a
-          //             target="_blank"
-          //             href={`${url}/wp-admin/edit.php?s=${title}&post_status=all&post_type=product&action=-1&seo_filter&readability_filter&product_cat&product_type&stock_status&fb_sync_enabled&paged=1&action2=-1`}
-          //           > */}
-          //       <Building2 />
-          //       {/* </a> */}
-          //     </Button>
-          //     <Button isIconOnly variant="solid" color="secondary">
-          //       <a
-          //         target="_blank"
-          //         href={`${provider.searchPageUrl}${encodeURI(title)}`}
-          //       >
-          //         <Package />
-          //       </a>
-          //     </Button>
-          //   </div>
-          //   <div className="flex items-center pt-2 text-white">
-          //     <span className="text-xs text-muted-foreground text-white ">
-          //       {title}
-          //     </span>
-          //   </div>
-          // </div>
         }
       >
         <span className=" w-full h-full">{title}</span>

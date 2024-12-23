@@ -77,7 +77,7 @@ export default function ProductRelevantList({ cart }: { cart?: any }) {
           </SelectContent>
         </Select>
         <Separator orientation="vertical" />
-        <Button color="primary" onClick={handleSearchCategory}>
+        <Button color="primary" onPress={handleSearchCategory}>
           Buscar
         </Button>
       </div>

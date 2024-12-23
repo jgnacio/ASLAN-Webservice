@@ -122,7 +122,7 @@ export default function ButtonAddToCart({
       disabled={
         isPendingRemoveProductOnCart || isPendingAddToCart || isPendingGetCart
       }
-      onClick={handleAddProductToCart}
+      onPress={handleAddProductToCart}
       size="sm"
     >
       {!onCart ? (

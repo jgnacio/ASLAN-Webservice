@@ -1,42 +1,11 @@
-import { Product, ProductType } from "@/domain/product/entities/Product";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  GridSlotsComponentsProps,
-} from "@mui/x-data-grid";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { ProductType } from "@/domain/product/entities/Product";
+import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
-import Box from "@mui/material/Box";
-import { Spinner } from "@nextui-org/spinner";
-import { motion } from "framer-motion";
-import { getAllProducts } from "../../_actions/get-all-products";
-import { getRelevantProducts } from "../../_actions/get-relevant-products";
-import ButtonAddToCart from "../ButtonAddToCart";
-import { getCart } from "../../cart/_actions/get-cart";
-import { useRouter } from "next/navigation";
-import { Button } from "@nextui-org/button";
-import { FilePen, Plane, PlaneLanding } from "lucide-react";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@mui/material";
+import { Plane } from "lucide-react";
 import HoverCardActions from "../HoverCardActions";
 import StockStatus from "../StockStatus";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip } from "@mui/material";
-import { Badge } from "@/components/ui/badge";
-import { UnicomAPICategory } from "@/Resources/API/Unicom/entities/Category/UnicomAPICategory";
-import { defaultUnicomAPIRelevantCategories } from "@/Resources/API/Unicom/UnicomAPIRequets";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { useToast } from "@/components/ui/use-toast";
 
 export const columsListProductUpdatedDashboard: GridColDef[] = [
   {

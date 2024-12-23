@@ -1,5 +1,4 @@
 "use client";
-import { Card } from "@/components/ui/card";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -21,7 +20,7 @@ export default function ProductDetails({ product }: { product: any }) {
         <CardContent className="flex flex-col">
           <div className="self-end absolute">
             <Button
-              onClick={handleIsFloating}
+              onPress={handleIsFloating}
               color="secondary"
               className="opacity-50"
               isIconOnly
@@ -46,7 +45,7 @@ export default function ProductDetails({ product }: { product: any }) {
         <div className="flex flex-col">
           <div className="self-end absolute">
             <Button
-              onClick={handleIsFloating}
+              onPress={handleIsFloating}
               color="secondary"
               className="opacity-50"
               isIconOnly

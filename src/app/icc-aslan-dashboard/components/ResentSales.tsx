@@ -351,7 +351,7 @@ export default function ResentSales() {
                   <Button
                     isDisabled={isLoadingProductsAdminstrated || isLoading}
                     size="sm"
-                    onClick={() => {
+                    onPress={() => {
                       router.push("/icc-aslan-dashboard/identify");
                     }}
                     color="secondary"
@@ -364,7 +364,7 @@ export default function ResentSales() {
             </div>
             <Button
               color="primary"
-              onClick={handleUpdateStock}
+              onPress={handleUpdateStock}
               isDisabled={isLoadingProductsAdminstrated || isLoading}
             >
               {isLoadingProductsAdminstrated || isLoading ? (
@@ -424,9 +424,6 @@ export default function ResentSales() {
                 Lista de las ultimas compras realizadas
               </CardDescription>
             </div>
-            {/* <Button size="sm" className="ml-auto gap-1">
-              <Link href="#">Ver Todas</Link>
-            </Button> */}
           </CardHeader>
           <CardContent>
             <DataGrid rows={[]} columns={columns} />

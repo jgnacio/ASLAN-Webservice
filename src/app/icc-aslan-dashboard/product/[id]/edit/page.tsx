@@ -2,12 +2,11 @@
 import { Card } from "@/components/ui/card";
 import { CardContent } from "@mui/material";
 import { Spinner } from "@nextui-org/spinner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useEffect, use } from "react";
-import { getProductBySku } from "../../_actions/get-product-by-sku";
-import { ProductEdit } from "../components/ProductEdit";
+import { use } from "react";
 import { getProductCachedBySkuProvider } from "../_actions/get-product-cached-by-sku-provider";
+import { ProductEdit } from "../components/ProductEdit";
 
 export default function EditProduct(props: {
   params: Promise<{ id: string }>;
