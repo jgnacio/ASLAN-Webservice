@@ -42,27 +42,41 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     width: 90,
     resizable: false,
   },
-
   {
     field: "aslanPrevStatus",
     headerName: "est. Anterior",
     minWidth: 90,
     flex: 1,
     resizable: false,
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.aslanPrevStatus === "draft" ? (
-        <Badge variant="outline" className="text-muted-foreground">
-          Borrador
+    renderCell: (params: GridRenderCellParams) => {
+      const status = params.row.aslanPrevStatus;
+      return (
+        <Badge
+          variant="outline"
+          className={
+            status === "instock"
+              ? "text-success-400"
+              : status === "outofstock"
+              ? "text-yellow-400"
+              : status === "on_demand"
+              ? "text-blue-400"
+              : status === "deleted"
+              ? "text-red-400"
+              : "text-muted-foreground"
+          }
+        >
+          {status === "instock"
+            ? "En Stock"
+            : status === "outofstock"
+            ? "Sin Stock"
+            : status === "on_demand"
+            ? "Bajo Pedido"
+            : status === "deleted"
+            ? "Eliminado"
+            : "Desconocido"}
         </Badge>
-      ) : params.row.aslanPrevStatus === "deleted" ? (
-        <Badge variant="outline" className="text-red-400">
-          Eliminado
-        </Badge>
-      ) : (
-        <Badge variant="outline" className="text-success-400">
-          Publicado
-        </Badge>
-      ),
+      );
+    },
   },
   {
     field: "aslanActualStatus",
@@ -70,20 +84,35 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     minWidth: 90,
     flex: 1,
     resizable: false,
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.aslanActualStatus === "draft" ? (
-        <Badge variant="outline" className="text-muted-foreground">
-          Borrador
+    renderCell: (params: GridRenderCellParams) => {
+      const status = params.row.aslanActualStatus;
+      return (
+        <Badge
+          variant="outline"
+          className={
+            status === "instock"
+              ? "text-success-400"
+              : status === "outofstock"
+              ? "text-yellow-400"
+              : status === "on_demand"
+              ? "text-blue-400"
+              : status === "deleted"
+              ? "text-red-400"
+              : "text-muted-foreground"
+          }
+        >
+          {status === "instock"
+            ? "En Stock"
+            : status === "outofstock"
+            ? "Sin Stock"
+            : status === "on_demand"
+            ? "Bajo Pedido"
+            : status === "deleted"
+            ? "Eliminado"
+            : "Desconocido"}
         </Badge>
-      ) : params.row.aslanPrevStatus === "deleted" ? (
-        <Badge variant="outline" className="text-red-400">
-          Eliminado
-        </Badge>
-      ) : (
-        <Badge variant="outline" className="text-success-400">
-          Publicado
-        </Badge>
-      ),
+      );
+    },
   },
   // { field: "availability", headerName: "Disponibilidad", width: 120 },
   {

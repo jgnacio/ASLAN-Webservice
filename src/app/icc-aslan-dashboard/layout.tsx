@@ -1,4 +1,6 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import {
   Home,
   Layers,
@@ -13,6 +15,8 @@ import {
   Users2,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 import {
   Breadcrumb,
@@ -35,8 +39,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePathname } from "next/navigation";
-import { SignedIn, UserButton } from "@clerk/nextjs";
 
 export default function DashboardLayout({
   children,
@@ -44,6 +46,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null; // O un loader/skeleton mientras carga
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-gray-50">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
