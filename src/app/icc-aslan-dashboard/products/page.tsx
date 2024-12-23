@@ -15,9 +15,6 @@ import { getCart } from "../cart/_actions/get-cart";
 import { ProductFeaturedList } from "../components/ProductFeaturedList";
 import ProductOfferList from "../components/ProductOfferList";
 import ProductSearchEngine from "../components/ProductSearchEngine";
-import { ChartLine, Search } from "lucide-react";
-import { ImplementProviders } from "@/Resources/API/config";
-import { logoUnicom } from "@/Resources/API/Unicom/adapters/UnicomAPIProductAdapter";
 
 export default function Products() {
   const {
@@ -40,52 +37,17 @@ export default function Products() {
       exit={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.4 }}
     >
-      <Tabs defaultValue="products">
+      <Tabs defaultValue="relevant">
         <TabsList>
-          <TabsTrigger value="products">
-            <span className="space-x-2 flex gap-1 items-center">
-              Productos <Search size={15} />
-            </span>
-          </TabsTrigger>
-
-          <TabsTrigger value="offers">
-            <span className="space-x-2 flex gap-1 items-center">
-              Ofertas
-              <img
-                src={logoUnicom.logoUrl}
-                alt="Ofertas"
-                width="20"
-                height="20"
-                className="rounded-full"
-              ></img>
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="modified" disabled={true}>
-            <span className="space-x-2 flex gap-1 items-center">
-              Modificados <ChartLine size={15} />
-            </span>
-          </TabsTrigger>
+          <TabsTrigger value="featured">Destacados</TabsTrigger>
+          <TabsTrigger value="relevant">Relevantes</TabsTrigger>
+          <TabsTrigger value="offers">Ofertas</TabsTrigger>
         </TabsList>
         <Card>
-          <TabsContent value="products">
+          <TabsContent value="relevant">
             <CardHeader>
-              <CardTitle>Productos</CardTitle>
-              <CardDescription className="flex flex-col space-y-2">
-                <span>
-                  Listado de productos de la base de datos en Aslan. Los
-                  proveedores vinculados son:{" "}
-                  {ImplementProviders.map((provider) => provider.name).join(
-                    ", "
-                  )}
-                  .
-                </span>
-                <span className=" text-xs ">
-                  En el cuadro de búsqueda puedes buscar productos por:{" "}
-                  <span className="font-bold">
-                    Nombre, SKU, PartNumber o Proveedor.
-                  </span>
-                </span>
-              </CardDescription>
+              <CardTitle>Productos relevantes</CardTitle>
+              <CardDescription>Listado de productos relevantes</CardDescription>
             </CardHeader>
             <CardContent>
               <ProductSearchEngine />
@@ -100,7 +62,7 @@ export default function Products() {
               <ProductOfferList />
             </CardContent>
           </TabsContent>
-          <TabsContent value="modified">
+          <TabsContent value="featured">
             <CardHeader>
               <CardTitle>Productos Destacados</CardTitle>
               <CardDescription>Listado de productos destacados</CardDescription>
