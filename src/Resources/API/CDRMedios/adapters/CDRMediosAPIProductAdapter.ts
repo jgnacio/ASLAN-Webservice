@@ -1,14 +1,46 @@
-import { Product, Provider } from "@/domain/product/entities/Product";
+import { Product } from "@/domain/product/entities/Product";
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
 import { getFormattedDate } from "@/lib/functions/DateFunctions";
 import { CDRAPIProduct } from "../entities/CDRMediosAPIProductEntitie";
+import { RelevantCategoriesType } from "@/domain/categories/defaultCategories";
+
 const soap = require("soap");
 
 export class CDRMediosAPIProductAdapter implements IProductRepository {
   private readonly API_URL = process.env.API_CDRMEDIOS_URL || "";
   private soapClient: any | null = null; // Variable para almacenar el cliente SOAP
+  private static lastFetched: Date | null = null;
+  private static readonly CACHE_DURATION = 1.5 * 60 * 60 * 1000; // 1.5 hours in milliseconds
+  private static products: Product[];
 
   constructor() {}
+
+  async getInstance(): Promise<Product[]> {
+    const now = Date.now();
+
+    console.log(
+      `Is Ready to fetch products?: ${
+        !CDRMediosAPIProductAdapter.lastFetched ||
+        now - CDRMediosAPIProductAdapter.lastFetched.getTime() >=
+          CDRMediosAPIProductAdapter.CACHE_DURATION
+          ? "YYYYYYYYYY"
+          : "NNNNNNNNNN"
+      }`
+    );
+
+    if (
+      !CDRMediosAPIProductAdapter.lastFetched ||
+      now - CDRMediosAPIProductAdapter.lastFetched.getTime() >=
+        CDRMediosAPIProductAdapter.CACHE_DURATION
+    ) {
+      CDRMediosAPIProductAdapter.lastFetched = new Date();
+      CDRMediosAPIProductAdapter.products = await this.fetchProducts();
+    }
+
+    console.log("Products fetched from CDRMedios API");
+
+    return CDRMediosAPIProductAdapter.products;
+  }
 
   private async getSoapClient(): Promise<any> {
     if (!this.soapClient) {
@@ -24,17 +56,17 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
     return this.soapClient;
   }
 
-  private async fetchProducts(): Promise<any> {
+  private async fetchProducts(): Promise<Product[]> {
+    const client = await this.getSoapClient();
+
+    const params = {
+      email: process.env.API_CDRMEDIOS_USER,
+      token: process.env.API_CDRMEDIOS_TOKEN,
+      fecha: getFormattedDate(30),
+      formato: "",
+    };
+
     try {
-      const client = await this.getSoapClient();
-
-      const params = {
-        email: process.env.API_CDRMEDIOS_USER,
-        token: process.env.API_CDRMEDIOS_TOKEN,
-        fecha: getFormattedDate(30),
-        formato: "",
-      };
-
       const response = await client.productos_con_galeriaAsync(params);
 
       // Accede al contenido de 'productos_con_galeriaReturn'
@@ -47,39 +79,25 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
       }
 
       // Convierte la cadena JSON en un objeto
-      const data = JSON.parse(rawData);
+      const data: CDRAPIProduct[] = JSON.parse(rawData);
 
-      return data;
+      if (!data) {
+        throw new Error("No se pudo parsear la respuesta JSON.");
+      }
+
+      return this.mapProducts(data);
     } catch (error) {
       console.error("Error fetching products:", error);
-      return null;
+      throw error;
     }
-  }
-  private normalizeString(value: string): string {
-    return value
-      .trim()
-      .normalize("NFD") // Normaliza caracteres especiales
-      .replace(/[\u0300-\u036f]/g, "") // Elimina diacríticos
-      .toLowerCase();
   }
 
   async getBySKU(sku: string): Promise<Product | null> {
-    const response = await this.fetchProducts();
-    if (!response) {
-      return null;
-    }
+    const products = await this.getInstance();
 
-    const product = response.find(
-      (p: CDRAPIProduct) =>
-        this.normalizeString(p.codigo) === this.normalizeString(sku)
-    );
+    const product = products.find((product) => product.getSku() === sku);
 
-    if (!product) {
-      return null;
-    }
-
-    const productMapped = this.mapToProduct(product);
-    return productMapped;
+    return product || null;
   }
   async getAll({
     request,
@@ -93,10 +111,59 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
     provider?: string;
   }): Promise<Product[]> {
     const response = await this.fetchProducts();
-    return response;
+
+    if (response) {
+      return response;
+    }
+
+    return [];
   }
-  async getByCategory(category: string): Promise<Product[]> {
-    throw new Error("Method not implemented.");
+
+  async getByCategory(category: any): Promise<Product[]> {
+    let productsFiltered: Product[] = [];
+
+    for (const cat of category.providerCategories) {
+      const keywords = [
+        cat.providerMainCategoryCode !== undefined
+          ? cat.providerMainCategoryCode.toString()
+          : undefined,
+        cat.providerMainCategoryName !== undefined
+          ? cat.providerMainCategoryName.toString()
+          : undefined,
+        cat.providerCategoryCode !== undefined
+          ? cat.providerCategoryCode.toString()
+          : undefined,
+        cat.providerCategoryName !== undefined
+          ? cat.providerCategoryName
+          : undefined,
+      ].filter(
+        (word): word is string => typeof word === "string" && word.trim() !== ""
+      );
+
+      if (keywords.length > 0) {
+        const normalizedKeywords = keywords.map((keyword) =>
+          keyword.toLowerCase()
+        ); // Normalizamos las palabras clave
+
+        console.log("Keywords:", normalizedKeywords);
+
+        const products = await this.getInstance();
+
+        productsFiltered = products.filter((product) => {
+          if (!product.title) return false;
+          const productTitle = product.title.toLowerCase(); // Normalizamos el título del producto
+          return normalizedKeywords.some((keyword) =>
+            productTitle.includes(keyword)
+          );
+        });
+
+        // Eliminamos duplicados
+        let deleteDuplicates = new Set(productsFiltered);
+        productsFiltered = [...deleteDuplicates];
+      }
+    }
+
+    return productsFiltered;
   }
   async getFeatured(request?: any): Promise<Product[]> {
     throw new Error("Method not implemented.");
@@ -119,11 +186,11 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
         title: data.nombre,
         description: data.descripcion,
         marca: data.marca || "",
-        price: parseFloat(data.precio),
+        price: parseFloat(data.precio) > 0 ? parseFloat(data.precio) : 0.123,
         availability: parseInt(data.stock) > 0 ? "in_stock" : "out_of_stock",
         partNumber: [
           {
-            partNumber: data.nro_parte,
+            partNumber: data.nro_parte || data.codigo,
             ean: 0,
             units_x_box: 1,
           },
@@ -144,7 +211,6 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
     }
   }
   mapProducts(data: CDRAPIProduct[]): Product[] {
-    console.log("Mapping products:", data);
     return data
       .map((product) => this.mapToProduct(product))
       .filter((p) => p !== null) as Product[];
