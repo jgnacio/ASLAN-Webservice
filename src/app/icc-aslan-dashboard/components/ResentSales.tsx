@@ -218,40 +218,42 @@ export default function ResentSales() {
                   resultProduct,
                   processedRelations++
                 );
-                updateProgress();
-                return;
-              }
-
-              if (resultAslan && resultProduct) {
+              } else if (resultAslan && resultProduct) {
                 await handleUpdateAslan(
                   resultAslan,
                   resultProduct,
                   processedRelations++
                 );
-                updateProgress();
-                return;
-              }
+              } else {
+                if (!resultProduct) {
+                  toast({
+                    title: "Error",
+                    description: `El producto con SKU: ${relation.sku_provider} no se encuentra en el proveedor ${providerName}`,
+                    variant: "destructive",
+                  });
+                }
 
-              if (!resultProduct) {
-                toast({
-                  title: "Error",
-                  description: `El producto con SKU: ${relation.sku_provider} no se encuentra en el proveedor ${providerName}`,
-                  variant: "destructive",
-                });
-              }
+                if (!resultAslan) {
+                  toast({
+                    title: "Error",
+                    description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan`,
+                    variant: "destructive",
+                  });
+                }
 
-              if (!resultAslan) {
-                toast({
-                  title: "Error",
-                  description: `El producto con SKU: ${relation.SKU_Relation} no se encuentra en Aslan`,
-                  variant: "destructive",
-                });
+                // Incrementa el contador incluso si no se encuentra algún producto
+                processedRelations++;
               }
+              updateProgress();
             } catch (error) {
               console.error(
                 `Error procesando relación: ${relation.SKU_Relation}`,
                 error
               );
+
+              // Incrementa el contador también en caso de error
+              processedRelations++;
+              updateProgress();
             }
           })
         );
