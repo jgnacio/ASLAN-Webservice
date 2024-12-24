@@ -42,7 +42,7 @@ export class IntcomexAPIProductAdapter implements IProductRepository {
       IntcomexAPIProductAdapter.products = await this.fetchProducts();
     }
 
-    console.log("Products fetched from CDR API");
+    console.log("Products fetched from Intcomex API");
     console.log(IntcomexAPIProductAdapter.products.length);
 
     return IntcomexAPIProductAdapter.products;
