@@ -55,13 +55,24 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
       return null;
     }
   }
+  private normalizeString(value: string): string {
+    return value
+      .trim()
+      .normalize("NFD") // Normaliza caracteres especiales
+      .replace(/[\u0300-\u036f]/g, "") // Elimina diacríticos
+      .toLowerCase();
+  }
 
   async getBySKU(sku: string): Promise<Product | null> {
     const response = await this.fetchProducts();
     if (!response) {
       return null;
     }
-    const product = response.find((p: any) => p.codigo === sku);
+
+    const product = response.find(
+      (p: CDRAPIProduct) =>
+        this.normalizeString(p.codigo) === this.normalizeString(sku)
+    );
 
     if (!product) {
       return null;
