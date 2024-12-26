@@ -24,7 +24,7 @@ export default function ListOrders({ wooOrders }: { wooOrders: WooOrder[] }) {
       <CardContent className="grid gap-8">
         {wooOrders ? (
           <ScrollArea className="h-72 rounded-xl border">
-            <div className="p-4">
+            <div className="py-4 px-1">
               {wooOrders.map((order) => (
                 <div key={order.id} className="flex items-center gap-4 mb-2">
                   <Avatar className="hidden h-9 w-9 sm:flex">

@@ -394,12 +394,9 @@ export default function ResentSales() {
               </div>
               <div className="flex items-center space-x-4">
                 {loadingPercentage !== 0 ? (
-                  <p className="text-xs text-muted-foreground">{`${loadingPercentage.toFixed(
-                    2
-                  )}%  ${productsUpdated.length}/${dataProductsAdminstrated
-                    .map((product: any) => product.relations.length)
-                    .reduce((a: any, b: any) => a + b, 0)}
-                     `}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {`${loadingPercentage.toFixed(2)}%`}
+                  </p>
                 ) : (
                   ""
                 )}
