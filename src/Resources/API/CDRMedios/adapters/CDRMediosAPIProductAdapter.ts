@@ -94,12 +94,15 @@ export class CDRMediosAPIProductAdapter implements IProductRepository {
 
   async getBySKU(sku: string): Promise<Product | null> {
     const products = await this.getInstance();
+    console.log("Products:", products ? products.length : 0);
 
     if (!products) {
       return null;
     }
+    console.log("sku:", sku);
 
     const product = products.find((product) => product.getSku() === sku);
+    console.log("Product identified:", product ? product.getSku() : "N/A");
 
     return product || null;
   }

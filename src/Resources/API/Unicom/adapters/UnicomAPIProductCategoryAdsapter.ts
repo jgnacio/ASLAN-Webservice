@@ -86,12 +86,6 @@ export class UnicomAPIProductCategoryAdapter
       body: defaultCategoryRequest,
     });
 
-    categories?.forEach((category) => {
-      console.log("Category", category.descripcion);
-      console.log("Subcategories", category.codigo_grupo);
-      console.log("Subcategories", category.grupos_hijos);
-    });
-
     if (!categories) {
       console.error("Error fetching categories");
       return [];

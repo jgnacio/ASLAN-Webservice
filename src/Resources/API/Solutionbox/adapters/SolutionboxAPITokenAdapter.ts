@@ -24,7 +24,6 @@ export class SolutionboxAPITokenAdapter implements IAPITokenRepository {
     expira_en: number;
   } | null> {
     const auth = btoa(`${API_SOLUTIONBOX_USER}:${API_SOLUTIONBOX_PASS}`);
-    console.log(auth);
     try {
       const response = await axios.post(
         `${this.URL}/usuario/createToken`,

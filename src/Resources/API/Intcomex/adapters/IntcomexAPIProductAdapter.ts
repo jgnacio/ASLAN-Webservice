@@ -1,16 +1,15 @@
+import axios from "axios";
+import { RelevantCategoriesType } from "@/domain/categories/defaultCategories";
 import { Product } from "@/domain/product/entities/Product";
 import { IProductRepository } from "@/domain/product/repositories/IProductRepository";
 import { getUTCTimestamp } from "@/lib/functions/DateFunctions";
 import { hashSHA256 } from "@/lib/functions/hashes";
-import axios from "axios";
+import { IntcomexAPIPriceType } from "../entities/IntcomexAPIPrice";
 import {
   IntcomexAPIProductsTypeExtended,
   IntcomexAPIProductType,
 } from "../entities/IntcomexAPIProducts";
-import { IntcomexAPIPriceType } from "../entities/IntcomexAPIPrice";
 import { IntcomexAPIStockType } from "../entities/IntcomexAPIStock";
-import { RelevantCategoriesType } from "@/domain/categories/defaultCategories";
-import { IntcomextAPICategoryType } from "../entities/IntcomextAPICategory";
 
 export class IntcomexAPIProductAdapter implements IProductRepository {
   private readonly API_URL = process.env.API_INTCOMEX_URL || "";
@@ -169,21 +168,20 @@ export class IntcomexAPIProductAdapter implements IProductRepository {
       const signature = `${apikey},${apiaccess},${timeStampNow}`;
       const signahashed = hashSHA256(signature);
 
-      const response = await axios.get(
-        `${this.API_URL}/getproduct?sku=${sku}&locale=es`,
-        {
+      const response = await axios
+        .get(`${this.API_URL}/getproduct?sku=${sku}&locale=es`, {
           headers: {
             "content-type": "application/json",
             authorization:
               "Bearer " +
               `apiKey=${apikey}&utcTimeStamp=${timeStampNow}&signature=${signahashed}`,
           },
-        }
-      );
+        })
+        .then((response) => {
+          return response.data;
+        });
 
-      console.log(response);
-
-      return null;
+      return this.mapToProduct(response);
     } catch (error) {
       console.error("Error fetching products:", error);
       return null;
@@ -211,10 +209,31 @@ export class IntcomexAPIProductAdapter implements IProductRepository {
     return [];
   }
   async getByCategory(category: any): Promise<Product[]> {
-    const formatCategory = category as RelevantCategoriesType;
-    console.log("Category", formatCategory);
+    const formatCategory: RelevantCategoriesType = category;
+    const response = await this.getInstance();
 
-    return [];
+    if (response.length === 0) return [];
+
+    const filteredResponse = response.filter(
+      (product) => product.price > 0 && product.stock > 0
+    );
+
+    let productsByCategory: any[] = [];
+
+    for (const cat of formatCategory.providerCategories) {
+      productsByCategory = productsByCategory.concat(
+        filteredResponse.filter(
+          (product) => product.Category.Description === cat.providerCategoryName
+        )
+      );
+    }
+
+    try {
+      return this.mapToProducts(productsByCategory);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return [];
+    }
   }
   async getFeatured(request?: any): Promise<Product[]> {
     throw new Error("Method not implemented.");
@@ -226,6 +245,13 @@ export class IntcomexAPIProductAdapter implements IProductRepository {
   mapToProduct(product: IntcomexAPIProductsTypeExtended): Product {
     const newProduct = new Product({
       sku: product.Sku,
+      partNumber: [
+        {
+          partNumber: product.Sku,
+          ean: 12345,
+          units_x_box: 1,
+        },
+      ],
       description: product.Description,
       marca: product.Brand.Description,
       category: {
@@ -236,7 +262,7 @@ export class IntcomexAPIProductAdapter implements IProductRepository {
       priceHistory: [],
       stock: product.stock,
       availability: product.stock > 0 ? "in_stock" : "out_of_stock",
-      title: product.Description.slice(0, 20),
+      title: product.Description.slice(0, 50),
       submitDate: new Date(),
       images: [],
     });

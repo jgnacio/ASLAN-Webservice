@@ -65,7 +65,7 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
       .then((response) => {
         return response.data as PCServiceProductDetails;
       });
-    console.log(response);
+    // console.log(response);
     return response;
   }
 
@@ -84,8 +84,6 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
           },
         ],
       };
-
-      console.log(params.category);
 
       category = defaultPCServiceRelevantCategories.find(
         (category) => category.nameES === params.category
@@ -193,7 +191,6 @@ export class PCServiceAPIProductAdapter implements IProductRepository {
   }
 
   async getBySKU(sku: string): Promise<Product | null> {
-    console.log(sku);
     const skuNumber = parseInt(sku);
     const product = await this.fetchProduct(skuNumber).then((product) => {
       const categoryName = product.title.split(" ")[0];

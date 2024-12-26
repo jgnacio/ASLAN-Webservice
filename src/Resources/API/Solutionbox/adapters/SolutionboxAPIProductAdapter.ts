@@ -59,8 +59,6 @@ export class SolutionboxAPIProductAdapter implements IProductRepository {
 
   async getByCategory(category: string): Promise<Product[]> {
     const products = await this.fetchProducts({});
-    console.log("category:", category);
-    console.log("products:", products);
 
     switch (category) {
       case "Notebooks":
@@ -70,7 +68,6 @@ export class SolutionboxAPIProductAdapter implements IProductRepository {
             product.title.toLowerCase().includes("laptop") ||
             product.marca.includes("apple")
         );
-        console.log("Filtered Notebooks:", notebooks);
         return notebooks;
       case "Motherboards":
         return products.filter((product) =>
@@ -120,7 +117,6 @@ export class SolutionboxAPIProductAdapter implements IProductRepository {
   async getFeatured(request?: any): Promise<Product[]> {
     const products = await this.fetchProducts({});
     const featuredProducts = products.filter((product) => product.stock <= 5);
-    console.log("featuredProducts", featuredProducts.slice(0, 5));
     return featuredProducts;
   }
 

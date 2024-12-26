@@ -227,10 +227,34 @@ export default function ResentSales() {
               } else {
                 if (!resultProduct) {
                   toast({
-                    title: "Error",
-                    description: `El producto con SKU: ${relation.sku_provider} no se encuentra en el proveedor ${providerName}`,
-                    variant: "destructive",
+                    title: "No disponible",
+                    description: `El producto con SKU: ${relation.sku_provider} no se encuentra disponible en ${providerName}`,
+                    variant: "outline-warning",
                   });
+
+                  // Set out of stock in Aslan
+                  if (resultAslan) {
+                    await server_setAsOutOfStock(resultAslan.id);
+                    setProductsUpdated((prev) => [
+                      ...prev,
+                      {
+                        id: resultAslan.id,
+                        title:
+                          resultAslan.name + " (No disponible en proveedor)",
+                        marca: "N/A",
+                        stock: 0,
+                        guaranteeDays: 0,
+                        sku: resultAslan.sku,
+                        priceProvider: 0,
+                        price: resultAslan.price,
+                        partNumber: "",
+                        availability: "out_of_stock",
+                        aslanPrevStatus: resultAslan.stock_status,
+                        aslanActualStatus: "outofstock",
+                      },
+                    ]);
+                    processedRelations++;
+                  }
                 }
 
                 if (!resultAslan) {

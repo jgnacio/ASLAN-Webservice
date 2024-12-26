@@ -17,8 +17,6 @@ export class UnicomAPIPurchaseOrderAdapter implements IPurchaseOrderRepository {
 
     purchaseOrder.modo = EntryModes.ModoPrueba;
 
-    console.log(purchaseOrder);
-
     const body = {
       purchaseOrder,
     };
@@ -37,9 +35,6 @@ export class UnicomAPIPurchaseOrderAdapter implements IPurchaseOrderRepository {
         }
       });
 
-    console.log(response);
-
-    console.log("Orden de compra registrada correctamente");
     return;
   }
 

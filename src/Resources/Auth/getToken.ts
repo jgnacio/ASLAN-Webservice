@@ -20,21 +20,6 @@ export async function getToken() {
       headers,
     });
 
-    // TODO Crear un hook para manejar el estado de la peticion y devolver el token en caso de exito con el estado.
-
-    // const {
-    //   data,
-    //   isIdle,
-    //   mutate: server_getToken,
-    // } = useMutation({
-    //   mutationFn: getToken,
-    //   onSuccess: (data) => {
-    //     console.log(data);
-    //   },
-    //   onError: (error) => {
-    //     console.error(error);
-    //   },
-    // });
     return response.data;
   } catch (error) {
     console.error(error);
