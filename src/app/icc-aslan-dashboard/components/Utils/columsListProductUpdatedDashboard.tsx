@@ -31,7 +31,6 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     field: "provider",
     headerName: "Proveedor",
     width: 100,
-    resizable: true,
     valueGetter: (value, row) => {
       return row.provider.name;
     },
