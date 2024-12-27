@@ -501,8 +501,9 @@ export default function ResentSales() {
               </>
             ) : (
               <span className="text-muted-foreground">
-                Haga click en el botón "Actualizar" para empezar a actualizar
-                los productos
+                Haga click en el botón{" "}
+                <span className="font-bold">Actualizar</span> para empezar a
+                actualizar los productos
               </span>
             )}
           </CardContent>
