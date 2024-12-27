@@ -25,7 +25,7 @@ import { Spinner } from "@nextui-org/spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Layers, SquareArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getProductAslanBySku } from "../_actions/get-aslan-product-by-sku";
 import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import { getOrdersWoocomerce } from "../_actions/get-orders-woocomerce";
@@ -38,6 +38,7 @@ import ListOrders from "./ListOrders";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 import ExcelExportButton from "./Export/SaveToExcel";
 import { deleteProductRelation } from "../identify/_actions/delete-product-relation";
+import { v4 as uuidv4 } from "uuid";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -238,7 +239,7 @@ export default function ResentSales() {
                     setProductsUpdated((prev) => [
                       ...prev,
                       {
-                        id: resultAslan.id,
+                        id: uuidv4(),
                         title:
                           resultAslan.name + " (No disponible en proveedor)",
                         marca: "N/A",
@@ -248,6 +249,7 @@ export default function ResentSales() {
                         priceProvider: 0,
                         price: resultAslan.price,
                         partNumber: "",
+                        provider: providerName,
                         availability: "out_of_stock",
                         aslanPrevStatus: resultAslan.stock_status,
                         aslanActualStatus: "outofstock",
@@ -299,7 +301,7 @@ export default function ResentSales() {
       setProductsUpdated((prev) => [
         ...prev,
         {
-          id,
+          id: uuidv4(),
           title: resultProduct.title,
           marca: resultProduct.marca,
           stock: resultProduct.stock,
@@ -352,7 +354,7 @@ export default function ResentSales() {
       setProductsUpdated((prev) => [
         ...prev,
         {
-          id: resultAslan.id,
+          id: uuidv4(),
           title: resultAslan.name,
           marca: resultProduct.marca,
           stock: resultProduct.stock,
@@ -360,6 +362,7 @@ export default function ResentSales() {
           sku: resultAslan.sku,
           priceProvider: resultProduct.price,
           price: resultAslan.price,
+          provider: resultProduct.provider,
           partNumber: resultProduct.partNumber?.[0]?.partNumber || "",
           availability: resultProduct.availability,
           aslanPrevStatus: resultAslan.stock_status,
@@ -374,9 +377,15 @@ export default function ResentSales() {
     }
   };
 
+  useEffect(() => {
+    if (dataProductsAdminstrated) {
+      console.log(dataProductsAdminstrated);
+    }
+  }, [dataProductsAdminstrated]);
+
   return (
     <div className="space-y-8">
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-2 lg:grid-cols-3">
         <Card x-chunk="dashboard-01-chunk-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -400,45 +409,18 @@ export default function ResentSales() {
                 ) : (
                   ""
                 )}
-                {productsUpdated.length > 0 ? (
-                  <>
-                    <Dialog>
-                      <DialogTrigger className="flex items-center justify-start text-sm">
-                        Ver estado
-                        <SquareArrowUpRight size={20} />
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[80vw] sm:max-h-[80vh]">
-                        <DialogHeader>
-                          <DialogTitle>Productos Actualizados</DialogTitle>
-                          <DialogDescription>
-                            Lista de los productos actualizados
-                          </DialogDescription>
-                        </DialogHeader>
-                        <ListProductUpdatedDashboard
-                          productsRows={productsUpdated}
-                        />
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button>Salir</Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                    <ExcelExportButton data={productsUpdated} />
-                  </>
-                ) : (
-                  <Button
-                    isDisabled={isLoadingProductsAdminstrated || isLoading}
-                    size="sm"
-                    onPress={() => {
-                      router.push("/icc-aslan-dashboard/identify");
-                    }}
-                    color="secondary"
-                    isIconOnly
-                  >
-                    <Layers />
-                  </Button>
-                )}
+
+                <Button
+                  isDisabled={isLoading}
+                  size="sm"
+                  onPress={() => {
+                    router.push("/icc-aslan-dashboard/identify");
+                  }}
+                  color="secondary"
+                  isIconOnly
+                >
+                  <Layers />
+                </Button>
               </div>
             </div>
             <Button
@@ -496,16 +478,33 @@ export default function ResentSales() {
       </div>
       <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
         <Card className="xl:col-span-2" x-chunk="dashboard-01-chunk-4">
-          <CardHeader className="flex flex-row items-center">
-            <div className="grid gap-2">
-              <CardTitle>Ultimas Compras</CardTitle>
-              <CardDescription>
-                Lista de las ultimas compras realizadas
+          <CardHeader className="flex flex-row items-center w-full">
+            <div className="grid gap-2 w-full items-center">
+              <CardTitle>Productos Actualizados</CardTitle>
+              <CardDescription className="w-full">
+                <span className="flex justify-between items-center w-full">
+                  <span>Lista de los productos actualizados</span>
+                  {productsUpdated.length > 0 && (
+                    <span className="flex items-center gap-2">
+                      <span>Descargar datos en Excel </span>
+                      <ExcelExportButton data={productsUpdated} />
+                    </span>
+                  )}
+                </span>
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
-            <DataGrid rows={[]} columns={columns} />
+            {productsUpdated.length > 0 ? (
+              <>
+                <ListProductUpdatedDashboard productsRows={productsUpdated} />
+              </>
+            ) : (
+              <span className="text-muted-foreground">
+                Haga click en el botón "Actualizar" para empezar a actualizar
+                los productos
+              </span>
+            )}
           </CardContent>
         </Card>
         <ListOrders wooOrders={dataOrdersAslan} />

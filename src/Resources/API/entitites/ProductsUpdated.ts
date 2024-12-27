@@ -1,5 +1,5 @@
 export interface ProductsUpdatedDashboard {
-  id: number;
+  id: string;
   title: string;
   marca: string;
   stock: number;

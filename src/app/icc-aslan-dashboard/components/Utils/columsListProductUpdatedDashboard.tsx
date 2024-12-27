@@ -6,6 +6,7 @@ import { Tooltip } from "@mui/material";
 import { Plane } from "lucide-react";
 import HoverCardActions from "../HoverCardActions";
 import StockStatus from "../StockStatus";
+import ToolsProductList from "../ToolsProductList";
 
 export const columsListProductUpdatedDashboard: GridColDef[] = [
   {
@@ -13,33 +14,40 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     headerName: "Producto",
     width: 250,
     resizable: false,
-    renderCell: (params: GridRenderCellParams) => (
-      <div className="flex flex-col h-full w-full justify-center items-start">
-        <HoverCardActions content={params.row.title} />
-        {params.row.estimatedArrivalDate && (
-          <Tooltip
-            title={`Fecha estimada de Arribo ${params.row.estimatedArrivalDate?.getDate()}/${
-              params.row.estimatedArrivalDate?.getMonth() + 1
-            }/${params.row.estimatedArrivalDate?.getFullYear()}`}
-          >
-            <Plane className="text-blue-400" size={18} />
-          </Tooltip>
-        )}
-      </div>
-    ),
+    renderCell: (params: GridRenderCellParams) =>
+      params.row.title && params.row.sku ? (
+        <ToolsProductList
+          title={params.row.title}
+          partNumber={params.row.partNumber || params.row.sku}
+          sku={params.row.sku}
+          price={params.row.priceProvider}
+          provider={params.row.provider}
+        />
+      ) : (
+        <span className="text-muted-foreground">{params.row.title}</span>
+      ),
+  },
+  {
+    field: "provider",
+    headerName: "Proveedor",
+    width: 100,
+    resizable: true,
+    valueGetter: (value, row) => {
+      return row.provider.name;
+    },
   },
   {
     field: "priceProvider",
     headerName: "U$D Proveedor",
     type: "number",
-    width: 120,
+    width: 70,
     resizable: false,
   },
   {
     field: "price",
     headerName: "U$D Publicado",
     type: "number",
-    width: 90,
+    width: 70,
     resizable: false,
   },
   {
@@ -114,7 +122,6 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
       );
     },
   },
-  // { field: "availability", headerName: "Disponibilidad", width: 120 },
   {
     field: "marca",
     headerName: "Marca",
@@ -125,23 +132,36 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
   },
   {
     field: "availability",
-    headerName: "Stock",
+    headerName: "Disponibilidad",
     type: "string",
-    width: 50,
+    width: 90,
     resizable: false,
-    renderCell: (params: GridRenderCellParams) => {
-      return (
-        <StockStatus
-          stock={params.row.availability as ProductType["availability"]}
-        />
-      );
+    valueFormatter: (value, row, column, apiRef) => {
+      switch (row.availability) {
+        case "in_stock":
+          return "En Stock";
+        case "out_of_stock":
+          return "Sin Stock";
+        default:
+          return "Consultar";
+      }
+    },
+    cellClassName: (params) => {
+      // Aplica la clase CSS basada en el valor formateado
+      if (params.value === "in_stock") {
+        return "text-green-500";
+      } else if (params.value === "out_of_stock") {
+        return "text-red-500";
+      } else {
+        return "text-yellow-500";
+      }
     },
   },
   {
     field: "stock",
     headerName: "Stock",
     type: "number",
-    width: 70,
+    width: 60,
     resizable: false,
   },
 
@@ -151,14 +171,7 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     minWidth: 120,
     maxWidth: 150,
     flex: 1,
-
     resizable: false,
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.sku ? (
-        <HoverCardActions content={params.row.sku} />
-      ) : (
-        <span className="text-muted-foreground">N/A</span>
-      ),
   },
   {
     field: "partNumber",
@@ -166,12 +179,14 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
     minWidth: 120,
     flex: 1,
     resizable: false,
-
-    renderCell: (params: GridRenderCellParams) =>
-      params.row.partNumber ? (
-        <HoverCardActions content={params.row.partNumber} />
-      ) : (
-        <span className="text-muted-foreground">N/A</span>
-      ),
+    valueGetter: (value, row) => {
+      if (!row.partNumber) {
+        return "";
+      }
+      if (row.partNumber[0].partNumber) {
+        return row.partNumber[0].partNumber;
+      }
+      return row.partNumber;
+    },
   },
 ];
