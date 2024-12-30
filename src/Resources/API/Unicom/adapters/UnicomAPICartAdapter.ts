@@ -9,10 +9,13 @@ import {
   TtiposArticulos,
   UnicomAPICart,
 } from "../entities/Cart/Cart";
+import { UnicomAPITokenAdapter } from "./UnicomAPITokenAdapter";
 
 const cart = Cart.getInstance();
 
-const API_UNICOM_TOKEN = process.env.API_UNICOM_TOKEN;
+const unicomAPITokenAdapter = new UnicomAPITokenAdapter();
+
+const API_UNICOM_TOKEN = unicomAPITokenAdapter.getToken();
 const API_UNICOM_URL = process.env.API_UNICOM_URL;
 
 export class UnicomAPICartAdapter implements ICartRepository {

@@ -23,10 +23,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export default function Page() {
   const { toast } = useToast();
   const [products, setProducts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
 
   const {
     data: dataAslanPublishedFromAdmin,
@@ -46,13 +53,38 @@ export default function Page() {
           <span>
             Listado de productos administrados en la base de datos de Aslan.
           </span>
+          <br />
+          <span className="flex">
+            <Input
+              placeholder="Buscar"
+              className="px-14 w-[255px] placeholder:text-primary bg-background"
+              value={search}
+              onChange={handleSearch}
+            />
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 ">
         <div>
           {isSuccessAslanPublishedFromAdmin && products && (
             <DataGrid
-              rows={dataAslanPublishedFromAdmin}
+              rows={
+                dataAslanPublishedFromAdmin?.filter((product: any) => {
+                  const partNumber = (product.partNumber as any) || "";
+                  const provider = product.provider || null;
+                  const sku = product.skuInterno || "";
+                  const category = product.category || "";
+                  return (
+                    product.title
+                      .toLowerCase()
+                      .includes(search.toLowerCase()) ||
+                    category.toLowerCase().includes(search.toLowerCase()) ||
+                    sku.toLowerCase().includes(search.toLowerCase()) ||
+                    partNumber.includes(search) ||
+                    provider?.name.toLowerCase().includes(search.toLowerCase())
+                  );
+                }) || []
+              }
               columns={columnsListProductsAdministrated}
               disableRowSelectionOnClick
               // checkboxSelection

@@ -39,6 +39,12 @@ import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
 import ExcelExportButton from "./Export/SaveToExcel";
 import { deleteProductRelation } from "../identify/_actions/delete-product-relation";
 import { v4 as uuidv4 } from "uuid";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -476,7 +482,7 @@ export default function ResentSales() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4 md:gap-2 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:gap-2 lg:grid-cols-2 ">
         <Card className="xl:col-span-2" x-chunk="dashboard-01-chunk-4">
           <CardHeader className="flex flex-row items-center w-full">
             <div className="grid gap-2 w-full items-center">
@@ -508,8 +514,16 @@ export default function ResentSales() {
             )}
           </CardContent>
         </Card>
-        <ListOrders wooOrders={dataOrdersAslan} />
       </div>
+
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>Ultimos Pedidos</AccordionTrigger>
+          <AccordionContent>
+            <ListOrders wooOrders={dataOrdersAslan} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
