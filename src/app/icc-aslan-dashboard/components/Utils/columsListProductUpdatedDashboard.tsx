@@ -150,9 +150,9 @@ export const columsListProductUpdatedDashboard: GridColDef[] = [
       if (params.value === "in_stock") {
         return "text-green-500";
       } else if (params.value === "out_of_stock") {
-        return "text-red-500";
-      } else {
         return "text-yellow-500";
+      } else {
+        return "text-blue-500";
       }
     },
   },

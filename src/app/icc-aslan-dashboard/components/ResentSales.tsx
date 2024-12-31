@@ -37,6 +37,9 @@ import { getProductBySku } from "../product/_actions/get-product-by-sku";
 import ExcelExportButton from "./Export/SaveToExcel";
 import ListOrders from "./ListOrders";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
+import { getAllProductCached } from "../_actions/get-all-product-cached";
+import { ImplementProviders } from "@/Resources/API/config";
+import ProductSearchEngine from "./ProductSearchEngine";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -46,6 +49,16 @@ export default function ResentSales() {
     ProductsUpdatedDashboard[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    data: cachedProducts,
+    isLoading: isLoadingCachedProducts,
+    isError: isErrorCachedProducts,
+    error: errorCachedProducts,
+  } = useQuery({
+    queryKey: ["cachedProducts-by-provider"],
+    queryFn: () => getAllProductCached(),
+  });
 
   const {
     isLoading: isLoadingProductsAdminstrated,
@@ -206,10 +219,9 @@ export default function ResentSales() {
               );
               const provider = await getProviderByID(relation.ID_Provider);
               const providerName = provider.data.name;
-              const resultProduct = await server_getProductBySku({
-                sku: relation.sku_provider,
-                provider: providerName,
-              });
+              const resultProduct = cachedProducts?.find(
+                (product) => product.sku === relation.sku_provider
+              );
 
               if (!resultAslan && resultProduct) {
                 await handleDeleteRelation(
@@ -332,7 +344,6 @@ export default function ResentSales() {
   ) => {
     try {
       let actualStatus = resultAslan.stock_status;
-
       if (resultAslan.stock_status === "onbackorder") {
         resultProduct.availability = "on_demand";
       } else if (
@@ -342,8 +353,8 @@ export default function ResentSales() {
         await server_setAsInStock(resultAslan.id);
         actualStatus = "instock";
       } else if (
-        resultProduct.availability !== "out_of_stock" &&
-        resultAslan.stock_status !== "instock"
+        resultProduct.availability == "out_of_stock" &&
+        resultAslan.stock_status !== "outofstock"
       ) {
         await server_setAsOutOfStock(resultAslan.id);
         actualStatus = "outofstock";
@@ -507,6 +518,37 @@ export default function ResentSales() {
           </CardContent>
         </Card>
       </div>
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>Busqueda de Productos</AccordionTrigger>
+          <AccordionContent>
+            <Card>
+              <CardHeader>
+                <CardTitle>Productos</CardTitle>
+                <CardDescription className="flex flex-col space-y-2">
+                  <span>
+                    Listado de productos de la base de datos en Aslan. Los
+                    proveedores vinculados son:{" "}
+                    {ImplementProviders.map((provider) => provider.name).join(
+                      ", "
+                    )}
+                    .
+                  </span>
+                  <span className=" text-xs ">
+                    En el cuadro de búsqueda puedes buscar productos por:{" "}
+                    <span className="font-bold">
+                      Nombre, SKU, PartNumber o Proveedor.
+                    </span>
+                  </span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProductSearchEngine />
+              </CardContent>
+            </Card>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
