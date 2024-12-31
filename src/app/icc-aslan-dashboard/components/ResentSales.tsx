@@ -1,50 +1,42 @@
 "use client";
 
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { ProductsUpdatedDashboard } from "@/Resources/API/entitites/ProductsUpdated";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@mui/x-data-grid";
 import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Layers, SquareArrowUpRight } from "lucide-react";
+import { Layers } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { getProductAslanBySku } from "../_actions/get-aslan-product-by-sku";
 import { getOffersProductsByPage } from "../_actions/get-offer-products";
 import { getOrdersWoocomerce } from "../_actions/get-orders-woocomerce";
 import { getProviderByID } from "../_actions/get-provider-by-id";
 import { productBackToTheCatalog } from "../_actions/product-back-to-the-catalog";
 import { removeFromTheCalalog } from "../_actions/remove-product-from-catalog";
+import { setInStock } from "../_actions/set-in-stock-aslan";
+import { setOutOfStock } from "../_actions/set-out-of-stock-aslan";
+import { deleteProductRelation } from "../identify/_actions/delete-product-relation";
 import { getProductsAdministrated } from "../identify/_actions/get-product-administrated";
 import { getProductBySku } from "../product/_actions/get-product-by-sku";
+import ExcelExportButton from "./Export/SaveToExcel";
 import ListOrders from "./ListOrders";
 import ListProductUpdatedDashboard from "./ListProductUpdatedDashboard";
-import ExcelExportButton from "./Export/SaveToExcel";
-import { deleteProductRelation } from "../identify/_actions/delete-product-relation";
-import { v4 as uuidv4 } from "uuid";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 export default function ResentSales() {
   const { toast } = useToast();
@@ -150,7 +142,7 @@ export default function ResentSales() {
     isSuccess: isSuccessSetAsInStock,
     isError: isErrorSetAsInStock,
   } = useMutation({
-    mutationFn: (productId: number) => productBackToTheCatalog(productId),
+    mutationFn: (productId: number) => setInStock(productId),
   });
 
   const {
@@ -159,7 +151,7 @@ export default function ResentSales() {
     isSuccess: isSuccessSetAsOutOfStock,
     isError: isErrorSetAsOutOfStock,
   } = useMutation({
-    mutationFn: (productId: number) => productBackToTheCatalog(productId),
+    mutationFn: (productId: number) => setOutOfStock(productId),
   });
 
   const columns: GridColDef[] = [
